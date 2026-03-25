@@ -1,6 +1,14 @@
+export { batchIngestWithDeduplicationSkill } from './batch-ingest-with-deduplication.ts';
 export { captureBeliefsWellSkill } from './capture-beliefs-well.ts';
 export { correctBeliefLineageHonestlySkill } from './correct-belief-lineage-honestly.ts';
+export { deferBeliefsPendingOutcomesSkill } from './defer-beliefs-pending-outcomes.ts';
+export { diagnoseDecliningIntegritySkill } from './diagnose-declining-integrity.ts';
+export { directSupersessionBetweenBeliefsSkill } from './direct-supersession-between-beliefs.ts';
+export { dismissFalseProximityPairsSkill } from './dismiss-false-proximity-pairs.ts';
+export { eraseBeliefsForPrivacySkill } from './erase-beliefs-for-privacy.ts';
 export { handleAmbiguousBeliefUpdatesSkill } from './handle-ambiguous-belief-updates.ts';
+export { monitorPortfolioHealthSkill } from './monitor-portfolio-health.ts';
+export { preRegisterBeliefsBeforeDecisionsSkill } from './pre-register-beliefs-before-decisions.ts';
 export { processStaleBeliefsSkill } from './process-stale-beliefs.ts';
 export { resolveNearDuplicateBeliefsSkill } from './resolve-near-duplicate-beliefs.ts';
 export { reviewFlagsBatchSkill } from './review-flags-batch.ts';
@@ -9,3 +17,4 @@ export { searchAndRetrieveBeliefsSkill } from './search-and-retrieve-beliefs.ts'
 export { codexSkills, getCodexSkillByName, listCodexSkills } from './skill_registry.ts';
 export type { CodexSkill, CodexSkillRegistry } from './skill_types.ts';
 export { defineCodexSkill } from './skill_types.ts';
+export { upgradeSourceEvidenceSkill } from './upgrade-source-evidence.ts';

@@ -11,22 +11,40 @@ export interface JsonSchema {
 	required?: string[] | undefined;
 	items?: JsonSchema | undefined;
 	enum?: readonly (string | number | boolean)[] | undefined;
+	oneOf?: readonly JsonSchema[] | undefined;
 }
 
-export type ToolSideEffects = 'none' | 'read' | 'write';
+export type ToolSideEffects = 'none' | 'writes_state';
+export type ToolInputDescriptions = Record<string, string>;
+export type ToolOutputDescription = string;
+
+export type ToolEntityKindSet = readonly ('belief' | 'dismissal')[];
 
 export interface CodexToolDefinition<TInput = Record<string, unknown>, TOutput = unknown> {
 	name: string;
 	description: string;
-	inputSchema: JsonSchema;
-	outputDescription: string;
+	whenToUse: string;
+	whenNotToUse: string;
 	sideEffects: ToolSideEffects;
+	readOnly: boolean;
+	supportsClarification: boolean;
+	targetKinds: ToolEntityKindSet;
+	inputDescriptions: ToolInputDescriptions;
+	outputDescription: ToolOutputDescription;
+	inputSchema: JsonSchema;
 	handler: {
 		bivarianceHack(db: CodexDb, input: TInput): ToolResult<TOutput>;
 	}['bivarianceHack'];
 }
 
-export type ToolDefinitionRegistry = readonly CodexToolDefinition[];
+// biome-ignore lint/suspicious/noExplicitAny: registry needs to hold heterogeneous tool definitions
+export type ToolDefinitionRegistry = readonly CodexToolDefinition<any, any>[];
+
+export function defineCodexTool<TInput, TOutput>(
+	tool: CodexToolDefinition<TInput, TOutput>,
+): CodexToolDefinition<TInput, TOutput> {
+	return tool;
+}
 
 export function stringSchema(description: string): JsonSchema {
 	return { type: 'string', description };
@@ -53,8 +71,12 @@ export function objectSchema(
 export function enumSchema(values: readonly string[], description: string): JsonSchema {
 	return { type: 'string', enum: values, description };
 }
-export function defineCodexTool<TInput, TOutput>(
-	tool: CodexToolDefinition<TInput, TOutput>,
-): CodexToolDefinition<TInput, TOutput> {
-	return tool;
+export function oneOfSchema(schemas: readonly JsonSchema[], description: string): JsonSchema {
+	return { oneOf: schemas, description };
+}
+export function literalSchema(value: string, description: string): JsonSchema {
+	return { type: 'string', enum: [value], description };
+}
+export function nullableStringSchema(description: string): JsonSchema {
+	return { type: 'string', description };
 }
