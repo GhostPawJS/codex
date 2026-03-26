@@ -1,97 +1,87 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
+import type { CodexDb } from '../database.ts';
 import { initCodexTables } from '../init_codex_tables.ts';
 import * as read from '../read.ts';
 import { openBrowserCodexDb } from './browser_codex_db.ts';
-import { DemoContext } from './context.ts';
+import { CodexContext, type CodexContextValue } from './context.ts';
 import { seedDemoSession } from './demo_session.ts';
-import { Card } from './ui.tsx';
+import { PageRouter } from './page_router.tsx';
+import { ToastStack, useToastState } from './result_toast.tsx';
+import { Sidebar } from './sidebar.tsx';
 
 export function App() {
-	const [db, setDb] = useState<Awaited<ReturnType<typeof openBrowserCodexDb>> | null>(null);
+	const [db, setDb] = useState<CodexDb | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [query, setQuery] = useState('api');
+	const [revision, setRevision] = useState(0);
+	const [sidebarOpen, setSidebarOpen] = useState(false);
+	const { toasts, push } = useToastState();
 
-	useEffect(() => {
-		void (async () => {
-			try {
-				const nextDb = await openBrowserCodexDb();
-				initCodexTables(nextDb);
-				seedDemoSession(nextDb);
-				setDb(nextDb);
-			} catch (caught) {
-				setError(caught instanceof Error ? caught.message : 'Failed to start Codex demo.');
-			} finally {
-				setLoading(false);
-			}
-		})();
+	const boot = useCallback(async (mode: 'seeded' | 'blank') => {
+		try {
+			setLoading(true);
+			const nextDb = await openBrowserCodexDb();
+			initCodexTables(nextDb);
+			if (mode === 'seeded') seedDemoSession(nextDb);
+			setDb(nextDb);
+			setRevision(0);
+		} catch (caught) {
+			setError(caught instanceof Error ? caught.message : 'Failed to start Codex demo.');
+		} finally {
+			setLoading(false);
+		}
 	}, []);
 
-	const status = useMemo(() => (db ? read.getStatus(db) : null), [db]);
-	const flags = useMemo(() => (db ? read.listFlags(db) : []), [db]);
-	const recallResults = useMemo(
-		() => (db ? read.recall(db, query, { minScore: 0 }) : []),
-		[db, query],
+	useEffect(() => {
+		void boot('seeded');
+	}, [boot]);
+
+	const mutate = useCallback((fn: () => void) => {
+		fn();
+		setRevision((r) => r + 1);
+	}, []);
+
+	const toast = useCallback((message: string, ok = true) => push(message, ok), [push]);
+
+	const ctx = useMemo<CodexContextValue | null>(
+		() => (db ? { db, revision, mutate, toast } : null),
+		[db, revision, mutate, toast],
 	);
 
-	return (
-		<DemoContext.Provider value={{ db, error, loading }}>
-			<div class="shell">
-				<section class="hero">
-					<div class="row">
-						<span class="pill">local-first belief engine</span>
-						<span class="pill">fts + vector reranking</span>
-					</div>
-					<h1>Codex Demo</h1>
-					<p class="muted">
-						A compact belief console stub showing status, flags, and recall over an in-browser Codex
-						database.
-					</p>
-					{loading ? <p>Loading...</p> : null}
-					{error ? <p>{error}</p> : null}
-				</section>
-				<div class="grid">
-					<Card title="Status">
-						<div class="item">
-							<strong>Integrity</strong>
-							<span class="stat">{status ? `${status.integrity.toFixed(0)}%` : '0%'}</span>
-						</div>
-						<div class="item">
-							<strong>Active beliefs</strong>
-							<span class="stat">{status?.activeBeliefCount ?? 0}</span>
-						</div>
-					</Card>
-					<Card title="Flags">
-						{flags.length === 0 ? (
-							<div class="item">No flags yet.</div>
-						) : (
-							flags.slice(0, 5).map((flag) => (
-								<div class="item" key={flag.id}>
-									<strong>{flag.claim}</strong>
-									<span class="muted">{flag.reasonCodes.join(', ')}</span>
-								</div>
-							))
-						)}
-					</Card>
-					<Card title="Recall">
-						<input
-							value={query}
-							onInput={(event) => setQuery((event.target as HTMLInputElement).value)}
-							placeholder="search beliefs"
-						/>
-						{recallResults.length === 0 ? (
-							<div class="item">No recall results.</div>
-						) : (
-							recallResults.slice(0, 5).map((result) => (
-								<div class="item" key={result.id}>
-									<strong>{result.claim}</strong>
-									<span class="muted">score {result.recallScore.toFixed(4)}</span>
-								</div>
-							))
-						)}
-					</Card>
-				</div>
+	const status = useMemo(() => (db ? read.getStatus(db) : null), [db, revision]);
+	const flagCount = useMemo(() => (db ? read.listFlags(db).length : 0), [db, revision]);
+
+	if (loading) {
+		return (
+			<div class="boot-screen">
+				<p>Initializing Codex…</p>
 			</div>
-		</DemoContext.Provider>
+		);
+	}
+	if (error || !ctx) {
+		return (
+			<div class="boot-screen">
+				<p class="boot-error">{error ?? 'Unknown error.'}</p>
+			</div>
+		);
+	}
+
+	return (
+		<CodexContext.Provider value={ctx}>
+			<Sidebar
+				open={sidebarOpen}
+				onToggle={() => setSidebarOpen((o) => !o)}
+				onReset={(mode) => {
+					void boot(mode);
+					push(mode === 'seeded' ? 'Session reset with seed data.' : 'Session reset (blank).');
+				}}
+				flagCount={flagCount}
+				integrity={status?.integrity ?? 0}
+			/>
+			<main class="main-content">
+				<PageRouter />
+			</main>
+			<ToastStack toasts={toasts} />
+		</CodexContext.Provider>
 	);
 }
