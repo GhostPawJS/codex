@@ -14,7 +14,7 @@ describe('codex soul', () => {
 		strictEqual(codexSoul.name, 'Epistemic Warden');
 		strictEqual(codexSoul.essence, codexSoulEssence);
 		strictEqual(codexSoul.traits, codexSoulTraits);
-		strictEqual(codexSoul.traits.length, 5);
+		strictEqual(codexSoul.traits.length, 6);
 
 		for (const trait of codexSoulTraits) {
 			strictEqual(trait.principle.trim().length > 0, true);

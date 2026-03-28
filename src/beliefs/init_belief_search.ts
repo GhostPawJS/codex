@@ -5,7 +5,8 @@ export function initBeliefSearch(db: CodexDb): void {
 		CREATE VIRTUAL TABLE IF NOT EXISTS beliefs_fts USING fts5(
 			claim,
 			content='beliefs',
-			content_rowid='id'
+			content_rowid='id',
+			tokenize='porter unicode61'
 		)
 	`);
 
@@ -27,4 +28,6 @@ export function initBeliefSearch(db: CodexDb): void {
 			INSERT INTO beliefs_fts(rowid, claim) VALUES (new.id, new.claim);
 		END
 	`);
+
+	db.exec(`INSERT INTO beliefs_fts(beliefs_fts) VALUES('rebuild')`);
 }

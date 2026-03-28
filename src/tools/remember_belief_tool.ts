@@ -82,7 +82,8 @@ export const rememberBeliefTool = defineCodexTool<
 	supportsClarification: false,
 	targetKinds: ['belief'],
 	inputDescriptions: {
-		claim: 'The proposition being asserted. One claim per belief — split compound statements.',
+		claim:
+			'The proposition being asserted. One claim per belief — split compound statements. When storing beliefs about a person whose name is known, use their actual name as the claim subject rather than generic labels like "User" or "The user" so that name-based recall works in future sessions.',
 		source:
 			'Where the belief came from: explicit (stated), observed (behavior), distilled (extracted), or inferred (concluded).',
 		category: 'What kind of claim: preference, fact, procedure, capability, or custom.',
