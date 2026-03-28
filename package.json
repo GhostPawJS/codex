@@ -1,6 +1,6 @@
 {
 	"name": "@ghostpaw/codex",
-	"version": "0.2.2",
+	"version": "0.2.3",
 	"description": "Standalone belief and memory engine for Node.js — SQLite, zero dependencies, with a built-in LLM tool facade",
 	"type": "module",
 	"exports": {
