@@ -87,7 +87,7 @@ export const searchCodexTool = defineCodexTool<
 	inputDescriptions: {
 		query: 'Free-form natural language query describing what to recall.',
 		limit: 'Maximum number of results. Defaults to 20.',
-		minScore: 'Minimum recall score threshold. Defaults to 0.1.',
+		minScore: 'Minimum recall score threshold. Defaults to 0.01.',
 		category: 'Optional filter: preference, fact, procedure, capability, or custom.',
 		source: 'Optional filter: explicit, observed, distilled, or inferred.',
 	},

@@ -25,7 +25,7 @@ export function hybridRecall<TValue>(
 	queryVector: Float32Array | null,
 	candidates: readonly HybridRecallCandidate<TValue>[],
 	limit = 20,
-	minScore = 0.1,
+	minScore = 0.01,
 ): HybridRecallResult<TValue>[] {
 	const semanticRanks = [...candidates]
 		.map((candidate) => ({

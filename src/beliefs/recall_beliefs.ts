@@ -75,7 +75,7 @@ export function recall(
 ): RecallResultItem[] {
 	const now = resolveNow(options.now);
 	const limit = options.limit ?? 20;
-	const minScore = options.minScore ?? 0.1;
+	const minScore = options.minScore ?? 0.01;
 
 	const tokens = tokenizeQuery(query);
 	if (tokens.length === 0) {

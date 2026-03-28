@@ -13,7 +13,7 @@ function rankToRrf(rank: number | null | undefined, rrfK: number): number {
 }
 
 export function computeFusionScore(input: FusionScoreInput) {
-	const rrfK = input.rrfK ?? 60;
+	const rrfK = input.rrfK ?? 10;
 	const lexical = rankToRrf(input.lexicalRank, rrfK);
 	const semantic = rankToRrf(input.semanticRank, rrfK);
 	return {
