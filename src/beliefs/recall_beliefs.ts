@@ -91,10 +91,7 @@ export function recall(
 	}
 
 	const candidateCap = 300;
-	const lexicalRanks =
-		totalActive <= 50
-			? new Map<number, number>()
-			: fetchLexicalCandidateIds(db, query, candidateCap);
+	const lexicalRanks = fetchLexicalCandidateIds(db, query, candidateCap);
 	let rows =
 		lexicalRanks.size === 0
 			? loadActiveBeliefRows(db)
