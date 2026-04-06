@@ -48,7 +48,6 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --provenance --access public
-        env:
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
