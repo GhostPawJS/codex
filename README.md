@@ -17,7 +17,7 @@ they remember, confirm or correct instead of appending, and see which beliefs
 are stale, fading or weakly evidenced. It runs as a TypeScript library, an MCP
 server, a CLI and an Agent Skill, all generated from the same seven tools.
 
-Website: [ghostpaw.anonyfox.com/codex](https://ghostpaw.anonyfox.com/codex/)
+Website: [ghostpaw.dev/agent-memory](https://ghostpaw.dev/agent-memory/)
 
 Requires **Node.js 24+** (uses the built-in `node:sqlite`).
 

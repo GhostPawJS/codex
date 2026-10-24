@@ -8,7 +8,7 @@
     "url": "https://github.com/GhostPawJS/codex.git",
     "source": "github"
   },
-  "websiteUrl": "https://ghostpaw.anonyfox.com/codex/",
+  "websiteUrl": "https://ghostpaw.dev/agent-memory/",
   "packages": [
     {
       "registryType": "npm",

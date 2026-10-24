@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The homepage and MCP Registry website URL now point to ghostpaw.dev.
+
 ## [0.3.1] - 2026-10-24
 
 ### Changed
