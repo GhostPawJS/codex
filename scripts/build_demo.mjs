@@ -2,6 +2,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import * as esbuild from 'esbuild';
+import { addDocsChrome, minifyCss } from './docs_chrome.mjs';
 
 const OUT_DIR = 'demo';
 const ENTRY = 'src/demo/main.tsx';
@@ -17,6 +18,7 @@ const buildOptions = {
 	platform: 'browser',
 	target: ['es2022'],
 	sourcemap: true,
+	minify: !WATCH,
 	jsx: 'automatic',
 	jsxImportSource: 'preact',
 	loader: { '.wasm': 'file' },
@@ -872,6 +874,18 @@ h3 { font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; line-he
 }
 `;
 
+// The top bar and footer sit in the page flow; the sidebar shares a grid row with the main column.
+const LAYOUT_CSS = `
+@media (min-width: 901px) {
+	#app:not(:empty) { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+	.sidebar { position: sticky; top: 0; }
+	.main-content { margin-left: 0; }
+}
+@media (max-width: 900px) {
+	.hamburger { position: sticky; top: 14px; margin: 14px 0 -54px 14px; }
+}
+`;
+
 const FAVICON = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='3' y='3' width='58' height='58' rx='10' fill='%230a0d12' stroke='%2361dafb' stroke-width='3'/><path d='M20 18h16c7.18 0 12 4.64 12 11.19 0 4.65-2.49 8.22-6.88 10.06L47 46H36.34l-4.8-5.3H29V46H20V18zm9 7v9h6.25c2.41 0 3.9-1.72 3.9-4.48 0-2.92-1.54-4.52-4.34-4.52H29z' fill='%2361dafb'/></svg>`;
 
 function writeHtmlShell() {
@@ -895,7 +909,7 @@ function writeHtmlShell() {
 <!-- ghostpaw-docs-shell -->
 <style>.pre{max-width:42rem;margin:4rem auto;padding:0 1.25rem;font:400 1rem/1.6 system-ui,sans-serif;color:#dce7f3}.pre h1{font-size:1.6rem;line-height:1.25;margin:0 0 .75rem}.pre a{color:#62e6f2}.pre li{margin:.25rem 0}#app:not(:empty)~.pre{display:none}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}</style>
 <link rel="icon" href="${FAVICON}" />
-<style>${CSS}</style>
+<style>${minifyCss(CSS)}</style>
 </head>
 <body>
 <div id="app"></div>
@@ -926,7 +940,10 @@ async function main() {
 		console.log('[demo] build complete');
 	}
 
-	await writeFile(join(OUT_DIR, 'index.html'), writeHtmlShell());
+	await writeFile(
+		join(OUT_DIR, 'index.html'),
+		addDocsChrome(writeHtmlShell(), { lib: 'codex', layoutCss: LAYOUT_CSS }),
+	);
 	console.log('[demo] wrote index.html');
 }
 
