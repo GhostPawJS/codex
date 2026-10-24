@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import ts from 'typescript';
 import {
 	assertMcpReplies,
@@ -170,12 +170,23 @@ try {
 	assertRoundTrip(remembered, searched);
 	const { replies } = await session(bin, ['mcp', '--db', db], [...legacyRequests, discover]);
 	assertMcpReplies(replies, remembered);
-	const dedicated = join(modules, '.bin', 'ghostpaw-codex-mcp');
-	const packedBin = pack.files.find((file) => file.path === 'dist/mcp-server.js');
-	assert.ok(packedBin.mode & 0o111);
+	// `npx -y @ghostpaw/codex ...` (registry, mcp.json, README) only works while npm can
+	// pick the executable: a single bin, or one named after the unscoped package.
+	const binNames = Object.keys(pkg.bin);
+	assert.ok(
+		binNames.length === 1 || binNames.includes(packageName.replace(/^@[^/]+\//, '')),
+		`npx ${packageName} cannot pick an executable from bins: ${binNames.join(', ')}`,
+	);
+	const npx = join(dirname(process.execPath), 'npx');
+	assert.equal(
+		run(npx, ['--no-install', packageName, '--version'], { cwd: temp }).trim(),
+		pkg.version,
+	);
+	const packedServer = pack.files.find((file) => file.path === 'dist/mcp-server.js');
+	assert.ok(packedServer.mode & 0o111);
 	const { replies: dedicatedReplies } = await session(
-		dedicated,
-		['--db', ':memory:'],
+		process.execPath,
+		[join(modules, packageName, 'dist/mcp-server.js'), '--db', ':memory:'],
 		legacyRequests.slice(0, 2),
 	);
 	assert.equal(dedicatedReplies[0].result.protocolVersion, '2025-11-25');

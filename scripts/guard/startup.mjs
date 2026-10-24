@@ -21,9 +21,7 @@ export async function coldStarts(db = ':memory:', firstSearch) {
 			else
 				await session(
 					process.execPath,
-					name === 'mcp-server'
-						? [pkg.bin['ghostpaw-codex-mcp'], '--db', db]
-						: [cli, 'mcp', '--db', db],
+					name === 'mcp-server' ? ['dist/mcp-server.js', '--db', db] : [cli, 'mcp', '--db', db],
 					name === 'mcp-search' ? [firstSearch] : [discover],
 				);
 			samples.push(performance.now() - start);

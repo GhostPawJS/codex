@@ -131,8 +131,7 @@
 		"fflate": "0.8.3"
 	},
 	"bin": {
-		"ghostpaw-codex": "./dist/cli.js",
-		"ghostpaw-codex-mcp": "./dist/mcp-server.js"
+		"ghostpaw-codex": "./dist/cli.js"
 	},
 	"mcpName": "io.github.GhostPawJS/codex"
 }
