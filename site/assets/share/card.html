@@ -1,0 +1,20 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: "T"; src: url("../fonts/tektur-var.woff2"); font-weight: 500 900; font-stretch: 75% 100%; }
+@font-face { font-family: "M"; src: url("../fonts/martian-mono-var.woff2"); font-weight: 400 700; }
+html,body{margin:0}
+body{width:1200px;height:630px;position:relative;overflow:hidden;background:#04070b;color:#e3edf5;font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+background-image:linear-gradient(rgba(98,230,242,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(98,230,242,.05) 1px,transparent 1px);background-size:48px 48px}
+.art{position:absolute;right:-10px;top:-22px;width:820px;mix-blend-mode:screen;-webkit-mask-image:linear-gradient(to right,transparent 0,#000 30%);mask-image:linear-gradient(to right,transparent 0,#000 30%)}
+.t{position:absolute;left:64px;top:0;bottom:0;width:640px;display:flex;flex-direction:column;justify-content:center}
+.b{font:700 30px/1 "T";font-stretch:85%;display:flex;align-items:center;gap:12px;margin:0 0 34px}
+.b i{display:block;width:14px;height:30px;background:#62e6f2;box-shadow:0 0 16px rgba(98,230,242,.5)}
+h1{font:700 64px/1.02 "T";font-stretch:86%;margin:0 0 26px;text-shadow:0 0 30px rgba(98,230,242,.22)}
+p{font-size:27px;line-height:1.35;margin:0;color:#93a5b9}
+p code{font-family:"M";font-size:22px;color:#62e6f2}
+.s{position:absolute;inset:0;background:repeating-linear-gradient(to bottom,transparent 0 3px,rgba(4,7,11,.3) 3px 4px)}
+</style></head><body>
+<img class="art" src="og-art.webp"><div class="s"></div>
+<div class="t"><div class="b">GhostPaw codex<i></i></div><h1>When one agent saves a wrong fact, every agent trusts it.</h1><p>Beliefs with a source, a certainty and a history.<br><code>npm install @ghostpaw/codex</code></p></div>
+</body></html>

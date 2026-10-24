@@ -42,7 +42,8 @@
 			"!server.json",
 			"!glama.json",
 			"!mcpb/manifest.json",
-			"!.claude-plugin/*.json"
+			"!.claude-plugin/*.json",
+			"!site"
 		]
 	}
 }

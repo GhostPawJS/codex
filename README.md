@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/npm/l/@ghostpaw/codex)](LICENSE)
 [![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](package.json)
 [![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.GhostPawJS%2Fcodex-06d6a0)](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.GhostPawJS%2Fcodex/versions/latest)
-[![Live Demo](https://img.shields.io/badge/demo-live-06d6a0?style=flat&logo=github)](https://ghostpawjs.github.io/codex)
+[![Live Demo](https://img.shields.io/badge/demo-live-06d6a0?style=flat&logo=github)](https://codex.ghostpaw.dev/docs/)
 
 Local, evidence-backed memory for AI agents. One SQLite file, zero runtime
 dependencies.
@@ -17,7 +17,7 @@ they remember, confirm or correct instead of appending, and see which beliefs
 are stale, fading or weakly evidenced. It runs as a TypeScript library, an MCP
 server, a CLI and an Agent Skill, all generated from the same seven tools.
 
-Website: [ghostpaw.dev/agent-memory](https://ghostpaw.dev/agent-memory/)
+Website: [codex.ghostpaw.dev](https://codex.ghostpaw.dev/)
 
 Requires **Node.js 24+** (uses the built-in `node:sqlite`).
 

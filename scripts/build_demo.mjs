@@ -881,11 +881,34 @@ function writeHtmlShell() {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Codex — Belief Console</title>
+<meta name="description" content="Interactive demo of @ghostpaw/codex: store claims with a source and a certainty, see which ones are stale or weakly sourced, and correct them. The library runs in your browser on an in-memory SQLite database (sql.js); nothing is sent anywhere." />
+<link rel="canonical" href="https://codex.ghostpaw.dev/docs/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Belief Console · @ghostpaw/codex interactive demo" />
+<meta property="og:description" content="Interactive demo of @ghostpaw/codex: store claims with a source and a certainty, see which ones are stale or weakly sourced, and correct them. The library runs in your browser on an in-memory SQLite database (sql.js); nothing is sent anywhere." />
+<meta property="og:url" content="https://codex.ghostpaw.dev/docs/" />
+<meta property="og:image" content="https://codex.ghostpaw.dev/docs/share.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="A glowing cyan paw print on a holographic belief card with a rose flag, beside the line: When one agent saves a wrong fact, every agent trusts it." />
+<meta name="twitter:card" content="summary_large_image" />
+<!-- ghostpaw-docs-shell -->
+<style>.pre{max-width:42rem;margin:4rem auto;padding:0 1.25rem;font:400 1rem/1.6 system-ui,sans-serif;color:#dce7f3}.pre h1{font-size:1.6rem;line-height:1.25;margin:0 0 .75rem}.pre a{color:#62e6f2}.pre li{margin:.25rem 0}#app:not(:empty)~.pre{display:none}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}</style>
 <link rel="icon" href="${FAVICON}" />
 <style>${CSS}</style>
 </head>
 <body>
 <div id="app"></div>
+<main class="pre">
+<h1>Belief Console: the @ghostpaw/codex interactive demo</h1>
+<p>Store claims with a source and a certainty, see which ones are stale or weakly sourced, and correct them. This page loads the library into your browser with an in-memory SQLite database. It needs JavaScript; the demo appears here once it has loaded.</p>
+<ul>
+<li><a href="https://codex.ghostpaw.dev/">What @ghostpaw/codex is, with a worked example</a></li>
+<li><a href="https://github.com/GhostPawJS/codex#readme">README on GitHub</a></li>
+<li><a href="https://www.npmjs.com/package/@ghostpaw/codex">@ghostpaw/codex on npm</a></li>
+<li><a href="https://ghostpaw.dev/">All GhostPaw libraries</a></li>
+</ul>
+</main>
 <script type="module" src="./app.js"></script>
 </body>
 </html>`;

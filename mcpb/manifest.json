@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/GhostPawJS/codex.git"
   },
-  "homepage": "https://ghostpaw.dev/agent-memory/",
+  "homepage": "https://codex.ghostpaw.dev/",
   "documentation": "https://github.com/GhostPawJS/codex/blob/main/README.md",
   "support": "https://github.com/GhostPawJS/codex/issues",
   "license": "MIT",
