@@ -42,7 +42,11 @@
     "agent-skills",
     "claude-code",
     "cursor",
-    "cli"
+    "cli",
+    "ghostpaw",
+    "ai-agents",
+    "llm-tools",
+    "node-sqlite"
   ],
   "server": {
     "type": "node",
