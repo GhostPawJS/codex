@@ -4,7 +4,7 @@ import type { DismissalRecord } from '../dismissals/types.ts';
 import type { ToolEntityRef } from './tool_types.ts';
 
 export function toBeliefRef(record: BeliefRecord): ToolEntityRef {
-	return { kind: 'belief', id: record.id, title: record.claim };
+	return toBeliefIdRef(record.id, record.claim);
 }
 
 export function toBeliefIdRef(id: number, claim?: string): ToolEntityRef {

@@ -27,7 +27,7 @@ export function hybridRecall<TValue>(
 	limit = 20,
 	minScore = 0.01,
 ): HybridRecallResult<TValue>[] {
-	const semanticRanks = [...candidates]
+	const semanticRanks = candidates
 		.map((candidate) => ({
 			id: candidate.id,
 			similarity: cosineSimilarity(queryVector, candidate.vector),
@@ -39,7 +39,7 @@ export function hybridRecall<TValue>(
 	}
 	return candidates
 		.map((candidate) => {
-			const semantic = semanticRankMap.get(candidate.id) ?? { rank: null, similarity: 0 };
+			const semantic = semanticRankMap.get(candidate.id) as { rank: number; similarity: number };
 			const fusion = computeFusionScore({
 				lexicalRank: candidate.lexicalRank,
 				semanticRank: semantic.rank,

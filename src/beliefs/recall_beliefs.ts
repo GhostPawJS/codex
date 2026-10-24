@@ -4,17 +4,12 @@ import { deserializeVectorBlob } from '../lib/deserialize_vector_blob.ts';
 import { hybridRecall } from '../lib/hybrid_recall.ts';
 import { computeRecallWeight } from '../lib/recall_weight.ts';
 import { resolveNow } from '../resolve_now.ts';
-
 import { mapBeliefRow } from './map_belief_row.ts';
+import { normalizeClaim } from './normalize_claim.ts';
 import type { BeliefRow, RecallOptions, RecallResultItem } from './types.ts';
 
 function tokenizeQuery(query: string): string[] {
-	return query
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, ' ')
-		.trim()
-		.split(/\s+/)
-		.filter(Boolean);
+	return normalizeClaim(query).split(/\s+/).filter(Boolean);
 }
 
 function safeFtsQuery(db: CodexDb, ftsExpr: string, limit: number): { id: number }[] {
@@ -29,11 +24,11 @@ function safeFtsQuery(db: CodexDb, ftsExpr: string, limit: number): { id: number
 	}
 }
 
-function fetchLexicalCandidateIds(db: CodexDb, query: string, limit: number): Map<number, number> {
-	const tokens = tokenizeQuery(query);
-	if (tokens.length === 0) {
-		return new Map();
-	}
+function fetchLexicalCandidateIds(
+	db: CodexDb,
+	tokens: readonly string[],
+	limit: number,
+): Map<number, number> {
 	const searches = [
 		`"${tokens.join(' ')}"`,
 		tokens.join(' '),
@@ -54,12 +49,11 @@ function fetchLexicalCandidateIds(db: CodexDb, query: string, limit: number): Ma
 }
 
 function loadActiveBeliefRows(db: CodexDb, ids?: readonly number[]): BeliefRow[] {
-	if (ids && ids.length === 0) {
-		return [];
-	}
 	if (!ids) {
 		return db
-			.prepare('SELECT * FROM beliefs WHERE superseded_by IS NULL ORDER BY verified_at DESC')
+			.prepare(
+				'SELECT * FROM beliefs WHERE superseded_by IS NULL ORDER BY verified_at DESC LIMIT 300',
+			)
 			.all<BeliefRow>();
 	}
 	const placeholders = ids.map(() => '?').join(', ');
@@ -82,23 +76,14 @@ export function recall(
 		return [];
 	}
 
-	const totalActive = Number(
-		db.prepare('SELECT COUNT(*) AS count FROM beliefs WHERE superseded_by IS NULL').get()?.count ??
-			0,
-	);
-	if (totalActive === 0) {
-		return [];
-	}
+	if (!db.prepare('SELECT 1 FROM beliefs WHERE superseded_by IS NULL LIMIT 1').get()) return [];
 
 	const candidateCap = 300;
-	const lexicalRanks = fetchLexicalCandidateIds(db, query, candidateCap);
+	const lexicalRanks = fetchLexicalCandidateIds(db, tokens, candidateCap);
 	let rows =
 		lexicalRanks.size === 0
 			? loadActiveBeliefRows(db)
 			: loadActiveBeliefRows(db, [...lexicalRanks.keys()]);
-	if (lexicalRanks.size === 0 && rows.length > candidateCap) {
-		rows = rows.slice(0, candidateCap);
-	}
 	rows = rows.filter(
 		(row) =>
 			(!options.category || row.category === options.category) &&

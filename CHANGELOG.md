@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- `remember`, `inspect_codex_item` and `review_codex` are faster on large
+  stores. Belief vectors for proximity checks are decoded once per connection
+  and refreshed when the database changes, lineage is resolved in one recursive
+  query instead of one query per step, and status and trend summaries read only
+  the columns they need. At 10,000 beliefs p95 drops from 30-55 ms to under
+  20 ms. Results, ordering and the schema are unchanged.
 - `npm run check:deps` uses the shared zero-dependency check (manifest and
   packed tarball) and runs as its own CI and release step.
 - Added AGENTS.md with contributor guidance.

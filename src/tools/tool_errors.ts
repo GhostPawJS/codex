@@ -1,4 +1,4 @@
-import { type CodexError, isCodexError } from '../errors.ts';
+import { isCodexError } from '../errors.ts';
 import { searchCodexToolName } from './tool_names.ts';
 import { inspectItemNext, reviewViewNext, useToolNext } from './tool_next.ts';
 import type { ToolErrorCode, ToolErrorKind, ToolFailure, ToolNextStepHint } from './tool_types.ts';
@@ -16,27 +16,11 @@ function mapCodexErrorCode(code: string): { kind: ToolErrorKind; toolCode: ToolE
 		case 'validation':
 			return { kind: 'protocol', toolCode: 'invalid_input' };
 		case 'state':
-			return { kind: 'domain', toolCode: 'invalid_state' };
 		case 'conflict':
 			return { kind: 'domain', toolCode: 'invalid_state' };
-		case 'invariant':
-			return { kind: 'system', toolCode: 'system_error' };
 		default:
 			return { kind: 'system', toolCode: 'system_error' };
 	}
-}
-
-function buildRecoveryHints(error: CodexError): ToolNextStepHint[] {
-	if (error.code === 'not_found') {
-		return [
-			useToolNext(searchCodexToolName, 'Search for the belief by query to find its current id.'),
-			reviewViewNext('flags', 'Check flags to find beliefs needing attention.'),
-		];
-	}
-	if (error.code === 'validation') {
-		return [];
-	}
-	return [];
 }
 
 export function translateToolError(
@@ -45,7 +29,17 @@ export function translateToolError(
 ): ToolFailure {
 	if (isCodexError(error)) {
 		const { kind, toolCode } = mapCodexErrorCode(error.code);
-		const next = options.next ?? buildRecoveryHints(error);
+		const next =
+			options.next ??
+			(error.code === 'not_found'
+				? [
+						useToolNext(
+							searchCodexToolName,
+							'Search for the belief by query to find its current id.',
+						),
+						reviewViewNext('flags', 'Check flags to find beliefs needing attention.'),
+					]
+				: []);
 		const result = toolFailure(kind, toolCode, options.summary ?? error.message, error.message, {
 			next: next.length > 0 ? next : undefined,
 		});

@@ -186,16 +186,16 @@ cloud vCPU), 10,000 beliefs in a file-backed database:
 
 | Operation | p50 | p95 |
 |---|---:|---:|
-| `search_codex` (tool) | 4.0 ms | 4.6 ms |
-| MCP `tools/call` search, stdio framing included | 4.2 ms | 4.7 ms |
-| `read.recall` | 4.0 ms | 7.3 ms |
-| `inspect_codex_item` | 14.9 ms | 30.2 ms |
-| `write.remember` (includes proximity scan) | 17.1 ms | 34.4 ms |
-| `review_codex` | 32.2 ms | 53.1 ms |
+| `search_codex` (tool) | 3.6 ms | 5.0 ms |
+| MCP `tools/call` search, stdio framing included | 3.8 ms | 4.2 ms |
+| `read.recall` | 3.7 ms | 4.8 ms |
+| `inspect_codex_item` | 3.5 ms | 3.8 ms |
+| `write.remember` (includes proximity scan) | 4.5 ms | 5.6 ms |
+| `review_codex` | 11.7 ms | 13.2 ms |
 
-Cold start (process spawn to first response, median): `--version` 29 ms,
-MCP `server/discover` 26 ms, first search against the 10,000-belief file
-57 ms. Seeding 10,000 beliefs takes 2.2 s on disk.
+Cold start (process spawn to first response, median): `--version` 26 ms,
+MCP `server/discover` 24 ms, first search against the 10,000-belief file
+53 ms. Seeding 10,000 beliefs takes 2.2 s on disk.
 
 Gzip sizes and cold-start medians are budgeted in `budgets.json` and enforced
 by `npm run check`.

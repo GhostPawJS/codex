@@ -44,28 +44,17 @@ export function retryNext(
 }
 
 export function searchNext(query: string, message: string): ToolNextStepHint {
-	return {
-		kind: 'use_tool',
-		message,
-		tool: searchCodexToolName,
-		suggestedInput: { query },
-	};
+	return useToolNext(searchCodexToolName, message, { query });
 }
 
 export function dismissNext(beliefA: number, beliefB: number): ToolNextStepHint {
-	return {
-		kind: 'use_tool',
-		message: 'Dismiss this proximity pair if the beliefs are unrelated.',
-		tool: dismissProximityToolName,
-		suggestedInput: { beliefA, beliefB },
-	};
+	return useToolNext(
+		dismissProximityToolName,
+		'Dismiss this proximity pair if the beliefs are unrelated.',
+		{ beliefA, beliefB },
+	);
 }
 
 export function reviseNext(action: string, beliefId: number, message: string): ToolNextStepHint {
-	return {
-		kind: 'use_tool',
-		message,
-		tool: reviseBeliefToolName,
-		suggestedInput: { action, beliefId },
-	};
+	return useToolNext(reviseBeliefToolName, message, { action, beliefId });
 }

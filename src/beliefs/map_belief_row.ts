@@ -3,9 +3,7 @@ import { computeFreshness } from '../lib/freshness.ts';
 import type { BeliefRecord, BeliefRow, StrengthTier } from './types.ts';
 
 export function getStrengthTier(certainty: number): StrengthTier {
-	if (certainty >= 0.7) return 'strong';
-	if (certainty >= 0.4) return 'fading';
-	return 'faint';
+	return certainty >= 0.7 ? 'strong' : certainty >= 0.4 ? 'fading' : 'faint';
 }
 
 export function mapBeliefRow(row: BeliefRow, now: number): BeliefRecord {

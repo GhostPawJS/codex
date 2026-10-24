@@ -12,63 +12,39 @@ function collectReasons(
 	categoryCount: number,
 	totalActive: number,
 ): FlagReasonCode[] {
-	const reasons: FlagReasonCode[] = [];
-	if (recordFreshness < 0.4) reasons.push('stale');
-	else if (recordFreshness < 0.7) reasons.push('fading');
-	if (row.evidence === 1) reasons.push('single_evidence');
-	if (lineageDepth > 2) reasons.push('unstable');
-	if (row.source === 'distilled' || row.source === 'inferred') reasons.push('low_trust');
-	if (totalActive >= 5 && categoryCount <= 1) reasons.push('gap');
-	return reasons;
+	return [
+		recordFreshness < 0.4 ? 'stale' : recordFreshness < 0.7 ? 'fading' : null,
+		row.evidence === 1 ? 'single_evidence' : null,
+		lineageDepth > 2 ? 'unstable' : null,
+		row.source === 'distilled' || row.source === 'inferred' ? 'low_trust' : null,
+		totalActive >= 5 && categoryCount <= 1 ? 'gap' : null,
+	].filter((reason): reason is FlagReasonCode => reason !== null);
 }
 
 function buildLineageDepthMap(db: CodexDb): Map<number, number> {
 	const edges = db
 		.prepare('SELECT id, superseded_by FROM beliefs WHERE superseded_by IS NOT NULL')
 		.all<{ id: number; superseded_by: number }>();
-	if (edges.length === 0) return new Map();
-	const adj = new Map<number, number[]>();
-	const allIds = new Set<number>();
+	const groups = new Map<number, Set<number>>();
+	function group(id: number): Set<number> {
+		let members = groups.get(id);
+		if (!members) {
+			members = new Set([id]);
+			groups.set(id, members);
+		}
+		return members;
+	}
 	for (const { id, superseded_by } of edges) {
-		allIds.add(id);
-		allIds.add(superseded_by);
-		let neighbors = adj.get(id);
-		if (!neighbors) {
-			neighbors = [];
-			adj.set(id, neighbors);
-		}
-		neighbors.push(superseded_by);
-		let reverseNeighbors = adj.get(superseded_by);
-		if (!reverseNeighbors) {
-			reverseNeighbors = [];
-			adj.set(superseded_by, reverseNeighbors);
-		}
-		reverseNeighbors.push(id);
-	}
-	const visited = new Set<number>();
-	const depthMap = new Map<number, number>();
-	for (const startId of allIds) {
-		if (visited.has(startId)) continue;
-		const component: number[] = [];
-		const stack = [startId];
-		while (stack.length > 0) {
-			const current = stack.pop();
-			if (current === undefined) continue;
-			if (visited.has(current)) continue;
-			visited.add(current);
-			component.push(current);
-			const neighbors = adj.get(current);
-			if (neighbors) {
-				for (const neighbor of neighbors) {
-					if (!visited.has(neighbor)) stack.push(neighbor);
-				}
-			}
-		}
-		for (const id of component) {
-			depthMap.set(id, component.length);
+		let a = group(id);
+		let b = group(superseded_by);
+		if (a === b) continue;
+		if (a.size < b.size) [a, b] = [b, a];
+		for (const member of b) {
+			a.add(member);
+			groups.set(member, a);
 		}
 	}
-	return depthMap;
+	return new Map([...groups].map(([id, members]) => [id, members.size]));
 }
 
 export function listFlags(db: CodexDb, now?: number): FlagResultItem[] {

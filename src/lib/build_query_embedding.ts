@@ -1,3 +1,4 @@
+import { normalizeClaim } from '../beliefs/normalize_claim.ts';
 import { normalizeVector } from './normalize_vector.ts';
 
 const DEFAULT_DIMENSION = 256;
@@ -11,15 +12,8 @@ function hash(text: string): number {
 	return value >>> 0;
 }
 
-function normalizeText(text: string): string {
-	return text
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, ' ')
-		.trim();
-}
-
 export function buildQueryEmbedding(text: string, dimension = DEFAULT_DIMENSION): Float32Array {
-	const normalized = normalizeText(text);
+	const normalized = normalizeClaim(text);
 	const buckets = new Array<number>(dimension).fill(0);
 	for (const token of normalized.split(/\s+/).filter(Boolean)) {
 		const tokenBucket = hash(token) % dimension;

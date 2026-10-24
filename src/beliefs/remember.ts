@@ -5,6 +5,7 @@ import { withTransaction } from '../with_transaction.ts';
 import { listBeliefProximity } from './list_belief_proximity.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
 import { prepareBeliefStorage } from './prepare_belief_storage.ts';
+import { appendProximityVector, currentProximitySnapshot } from './proximity_vectors.ts';
 import { sourceInitialCertainty } from './source_initial_certainty.ts';
 import type { BeliefRow, RememberBeliefInput, RememberOptions, RememberResult } from './types.ts';
 import {
@@ -25,14 +26,17 @@ export function remember(
 	const timestamp = resolveNow(options?.now);
 	const prepared = prepareBeliefStorage(input.claim);
 	const certainty = clampCertainty(input.certainty ?? sourceInitialCertainty(input.source));
+	const snapshot = currentProximitySnapshot(db);
 	const record = withTransaction(db, () => {
 		const result = db
-			.prepare(`
+			.prepare(
+				`
 			INSERT INTO beliefs (
 				claim, claim_normalized, certainty, evidence, source, category, created_at, verified_at,
 				superseded_by, provenance, deferred_until, embedding, embedding_norm, embedding_dim, embedding_version
 			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`)
+		`,
+			)
 			.run(
 				input.claim,
 				prepared.claimNormalized,
@@ -58,6 +62,7 @@ export function remember(
 		}
 		return mapBeliefRow(row, timestamp);
 	});
+	appendProximityVector(db, snapshot, record.id, prepared.embedding);
 	const proximity =
 		options?.skipProximity === true ? [] : listBeliefProximity(db, record.id, 3, 0.7, timestamp);
 	return { ...record, proximity };
