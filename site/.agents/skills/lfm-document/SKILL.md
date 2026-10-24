@@ -4,8 +4,8 @@ description: Plans, writes and ships a set of editable document templates as the
 license: MIT
 compatibility: Needs lfm, and Chrome or Chromium for the release's prints, page checks, start guides and listing images. LibreOffice, when installed, adds a second opinion. Fonts come from Google Fonts.
 metadata:
-  lfm-version: "0.1.8"
-  lfm-sha256: "d78ee05994808e833abbf11ac4bb48f25f910dfcfb4bdf79d72488f2b33bc14f"
+  lfm-version: "0.1.9"
+  lfm-sha256: "73683529d8a19c84e092d70125a984421ede79d5a5942e907ca5239a85382e70"
 ---
 
 # Build and ship editable documents with lfm

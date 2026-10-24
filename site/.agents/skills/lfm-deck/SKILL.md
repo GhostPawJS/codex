@@ -4,8 +4,8 @@ description: Plans, writes and ships slide decks as the deliverable of an lfm pr
 license: MIT
 compatibility: Needs lfm, and Chrome or Chromium for the release's prints, slide checks, start guides and listing images. LibreOffice, when installed, adds a second opinion. Fonts come from Google Fonts.
 metadata:
-  lfm-version: "0.1.8"
-  lfm-sha256: "2636ea8b0dbe47ce97f48186ade9eb87e6b81f3fae0426209771199e5a1abe21"
+  lfm-version: "0.1.9"
+  lfm-sha256: "47701510916f0519dca88c96168d669d8eff0d36bad66f132a39939ae5fcbcde"
 ---
 
 # Build and ship slide decks with lfm

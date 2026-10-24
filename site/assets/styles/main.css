@@ -26,10 +26,8 @@ html { -webkit-text-size-adjust: 100%; background: var(--void); }
 body {
   margin: 0; color: var(--ghost); font: 400 1.0625rem/1.6 var(--body); font-synthesis: none;
   background-color: var(--void);
-  background-image:
-    linear-gradient(rgba(98, 230, 242, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(98, 230, 242, 0.035) 1px, transparent 1px);
-  background-size: 48px 48px;
+  background-image: radial-gradient(ellipse 80rem 40rem at 75% -10rem, rgba(98, 230, 242, 0.07), transparent 70%);
+  background-repeat: no-repeat;
 }
 img { display: block; max-width: 100%; height: auto; }
 code, input, kbd, samp { font-family: var(--mono); font-synthesis: none; }
@@ -192,3 +190,12 @@ pre code { color: var(--ghost); }
   .hero { grid-template-columns: 1.08fr 1fr; padding-top: 4rem; padding-bottom: 4.5rem; }
 }
 .record-form, .worry, .numbers, .start { content-visibility: auto; contain-intrinsic-size: auto 40rem; }
+
+/* Shared GhostPaw chrome: top bar, version badge, footer library row. */
+.top { flex-wrap: wrap; gap: 0.5rem 1rem; }
+.top nav { flex-wrap: wrap; gap: 0.4rem 1.1rem; }
+.brand .crumb { color: var(--spectral); font-weight: 600; margin-left: -0.5rem; }
+.ver { font: 500 0.85rem var(--mono); color: var(--spectral); vertical-align: middle; border: 1px solid var(--rule); padding: 0.1rem 0.4rem; }
+.foot-libs { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; margin-bottom: 1rem; font: 600 1rem var(--display); }
+.foot-libs a { color: var(--ghost); text-decoration: none; display: inline-block; padding: 0.2rem 0; }
+.foot-libs a:hover, .foot-libs a[aria-current] { color: var(--spectral); }

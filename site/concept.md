@@ -46,7 +46,7 @@ Delivery: `npm install @ghostpaw/codex` into a Node.js 24+ project (tables go in
 - Seven tools for agents: search_codex, review_codex, inspect_codex_item, remember_belief, revise_belief, retire_belief, dismiss_proximity. https://github.com/GhostPawJS/codex
 - Recall is hybrid: FTS5 preselection plus local cosine similarity over trigram-hash embeddings, fused with reciprocal rank fusion; no model call. https://github.com/GhostPawJS/codex
 - Every write returns semantically nearby beliefs so near-duplicates surface at once. https://github.com/GhostPawJS/codex
-- dist/index.js of 0.3.2 is 31.5 KB gzip and imports in about 4 ms on the maintainer box; 380 tests pass, measured 2026-10-24. https://github.com/GhostPawJS/codex
+- dist/index.js of 0.3.2 is 31.5 KB gzip and imports in about 2.5 ms on the maintainer box (median of 11, re-measured at low load); 380 tests pass, measured 2026-10-24. https://github.com/GhostPawJS/codex
 - One audit found 26 of 45 auto-saved memories never read once. V066
 
 ## Axes
@@ -118,7 +118,7 @@ One belief, five moves, on a dark scope. The page centres on a single belief pan
 | code and file names | Martian Mono, Cascadia Mono, Consolas, monospace | crisp, slightly narrow mono for install lines, calls and file names like MEMORY.md V010 |
 
 ## Form
-The belief is a pane: panel ground, 1px rule border, a 3px top bar in alarm rose while flagged and ward green once confirmed, and a 12px chamfer on the top right corner like a HUD frame. No drop shadows; a soft glow only on the live pane's top bar. A superseded belief sits behind and below the current pane as a violet-edged afterimage with its claim struck through. Steps are numbered tabs with a glowing underline. One column on phones with the call under the pane; on desktop the pane and the call sit side by side. The page ground carries the shared faint 48px grid.
+The belief is a pane: panel ground, 1px rule border, a 3px top bar in alarm rose while flagged and ward green once confirmed, and a 12px chamfer on the top right corner like a HUD frame. No drop shadows; a soft glow only on the live pane's top bar. A superseded belief sits behind and below the current pane as a violet-edged afterimage with its claim struck through. Steps are numbered tabs with a glowing underline. One column on phones with the call under the pane; on desktop the pane and the call sit side by side. The page ground is plain void with one faint cyan glow at the top right.
 
 ## Imagery
 | Image | Job | Art direction | Source |
@@ -141,6 +141,7 @@ Reduced motion: no sweep; panes swap without movement and the afterimage is show
 - Never present voices as customers; describe what developers report in our words. V010 V014
 
 ## Changelog
+- 2026-10-24: portal chrome pass. Shared top bar (GhostPaw/<lib>, Live demo or Docs, GitHub, npm), version badge, footer row of all seven libraries; sibling links row dropped from the start section; import time re-measured at low machine load; the ruled grid on the page ground was replaced by one radial glow (lfm 0.1.9 rejects ruled ground textures); share card relabelled GhostPaw/<lib> with the install line.
 - 2026-10-24: codex 0.3.2 on npm. The five drill steps re-run against 0.3.2 with the same clock (same certainty, freshness, flags and deleted ids); kicker, intro, JSON-LD version and numbers updated (31.5 KB gzip, 380 tests from the v0.3.2 tag).
 - 2026-10-24: visual rebuild after owner review: paper index cards replaced by the shared dark spectral identity (void, spectral cyan, wraith violet, alarm rose, ward green; Tektur, system sans, Martian Mono; generated paw-on-card and memory-shard art). Drill values, numbers and copy rules kept; direction 3 struck and direction 9 chosen.
 - 2026-10-24: codex 0.3.0 shipped during the build (MCP server, CLI); facts, numbers and limits updated; card values now come from running 0.3.0.

@@ -4,8 +4,8 @@ description: Plans, builds and ships a printable as the deliverable of an lfm pr
 license: MIT
 compatibility: Needs lfm; Chrome or Chromium for the PDFs and listing images. Uses web search and a browser when available, and asks the owner for what it cannot source.
 metadata:
-  lfm-version: "0.1.8"
-  lfm-sha256: "e83270335cf8dc6ae2b7654ea4903fdad570059a0691acc360d6d555147610d5"
+  lfm-version: "0.1.9"
+  lfm-sha256: "849065054e16b2aac8af36efa2b6fff627072285f3310638a27224442a4b7684"
 ---
 
 # Build and ship a printable with lfm

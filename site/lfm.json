@@ -18,7 +18,12 @@
     "impressum": "https://lab.anonyfox.com/impressum/",
     "privacy": "https://lab.anonyfox.com/datenschutz/",
     "mit": "https://opensource.org/license/mit",
-    "orgId": "https://ghostpaw.dev/#org"
+    "orgId": "https://ghostpaw.dev/#org",
+    "agentContacts": "https://affinity.ghostpaw.dev/",
+    "agentIdentity": "https://souls.ghostpaw.dev/",
+    "agentSkills": "https://grimoire.ghostpaw.dev/",
+    "agentEmail": "https://email.ghostpaw.dev/",
+    "agentTelegram": "https://telegram.ghostpaw.dev/"
   },
   "jsonld": {
     "@context": "https://schema.org",

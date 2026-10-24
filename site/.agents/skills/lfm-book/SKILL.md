@@ -4,8 +4,8 @@ description: Researches, plans, writes and ships an ebook as the deliverable of 
 license: MIT
 compatibility: Needs lfm and the project's research files; Chrome or Chromium for the PDF. Uses web search, a browser and image generation when available, and asks the owner for what it cannot source.
 metadata:
-  lfm-version: "0.1.8"
-  lfm-sha256: "fbc70a5fa34eda653db35e7c65d69f4b20bbb36f35001a116ee03c4cbf5d257d"
+  lfm-version: "0.1.9"
+  lfm-sha256: "cf4e95fce835f6e6fc0ec0e6bb944598c9ddcd4f3958256bd47240805a5009b4"
 ---
 
 # Write and ship a book with lfm

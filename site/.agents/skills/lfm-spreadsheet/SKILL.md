@@ -4,8 +4,8 @@ description: Plans, builds and ships a spreadsheet template as the deliverable o
 license: MIT
 compatibility: Needs lfm; Chrome or Chromium for the start PDFs and listing images. LibreOffice, when installed, recalculates every file as a second opinion. The owner's Google account for the one Google Sheets step.
 metadata:
-  lfm-version: "0.1.8"
-  lfm-sha256: "299425112ae879070fa436245762ae052e346734863c1921211e1b241742e013"
+  lfm-version: "0.1.9"
+  lfm-sha256: "d78d21351c0777fade4a32bbd81aa85b857983f8c7e089eb29dbcc96dd8aaea6"
 ---
 
 # Build and ship a spreadsheet template with lfm

@@ -4,8 +4,8 @@ description: Collects verbatim posts, comments and reviews from real buyers and 
 license: MIT
 compatibility: Works with any toolset. Uses web search, page fetching, a browser or data connectors when available, and asks the user for sources otherwise.
 metadata:
-  lfm-version: "0.1.8"
-  lfm-sha256: "de92cdc89335fe04f12ba24e1ccc44db03d4f243f313fb467aca3546c724fbc5"
+  lfm-version: "0.1.9"
+  lfm-sha256: "185424eb2efe9e6571e371f7c864b1b9723cd34880eff246dd0eb55e46bd97de"
 ---
 
 # Research for an lfm page
@@ -94,12 +94,11 @@ circulate where the buyer looks. Open each at phone width when you can and recor
 the grid across all peers, update the baseline (the most frequent value per fact: the page this market
 already has) and list gaps no peer uses.
 
-**Minimums from zero:** 60 voices from 5 platforms, including an image or video
+**Project totals across all batches, whatever the first batch is called:** 60 voices from 5 platforms, including an image or video
 platform when one is reachable, and 12 peers. **Stop** when the minimums hold and the last 10
 voices you found, in the order you found them, brought no new platform and no new kind of problem or
 wish (a new detail of a known problem does not count), or at twice the minimums, whichever comes first.
-If the minimums cannot be met, add `shortfall: <what and why>` to the batch heading. Ongoing batches have
-no minimum; they end when the trigger is covered.
+If the minimums cannot be met, add `shortfall: <what and why>` to any batch heading in either file; it waives both voice and peer minimums and stays visible in the report. Ongoing and refresh batches only add to the totals; they have no separate minimum and end when the trigger is covered.
 
 ## research/human-voices.md format
 
@@ -124,7 +123,7 @@ Observer note: <only when there is something to observe>
 - Author: `buyer` would buy this; `adjacent` lives close to the problem (a partner, a colleague in another
   role, a fellow hobbyist answering in a forum); `creator`, `brand` and `expert` (a professional answering)
   speak about it publicly.
-- Fetched: today's date where you are.
+- Fetched: today's date where you are, except imported items retain their original fetch date.
 - Posted: as precise as the source shows. A relative age counts back from the fetch date and keeps only
   its unit's precision: "5 years ago" seen on 2026-10-17 is `2021`, "8 months ago" is `2026-02`, "3 days
   ago" is `2026-10-14`. Never add a day or month the source does not give.
@@ -174,17 +173,29 @@ articles, apps. Group free-text values into grid buckets you name, a peer with
 several values under the one its first screen leads with; the fact lines keep the exact values. The grid has one row
 per value, and the counts of each fact add up to the number of peers in the file.
 
+## Importing existing research
+
+Reuse research for pages serving the same buyers by copying the relevant entries into the project's
+research files; keep quotes and fetch dates, assign consecutive destination IDs and recount the grid.
+For each imported voice, put one optional line after its source URL and optional Observer note; for a
+peer, put it after the heading or facts: `Imported: YYYY-MM-DD from <origin file or page and original item ID>`.
+Use the import date and a nonempty origin identifying where the item came from, for example
+`Imported: 2026-10-17 from ../home/research/human-voices.md V014`.
+Only this line records provenance: keep a single Observer note and do not add standalone Origin fields.
+Imported fetch dates may precede the batch; future dates and posted/fetched/import ordering are still
+checked. Imports count toward totals and duplicate quotes or peer URLs are still reported.
+
 ## Validate before saving
 
 `lfm compile` parses both files and reports every `research.*` finding with its line; when you can run
-it, fix what it reports. Either way, check each file yourself before you finish:
+it, fix what it reports. Research is checked before template preparation, so findings remain in the human or `--json` report even when templates are incomplete; run it from an initialized project. Either way, check each file yourself before you finish:
 
 - headings and field order match the format exactly; dates are as precise as their sources;
 - IDs are unique, consecutive and continue from the previous batch;
 - each grid column's counts add up to the number of peers in the file;
 - every entry has a URL, every quote sits in a `>` block, and no field is an empty placeholder;
 - no earlier batch changed (compare against what you read);
-- from zero: the minimums and the diversity limits hold, or a `shortfall` names what is missing.
+- project totals meet the minimums, or a `shortfall` names what is missing; diversity limits still apply.
 
 ## When a source is unreachable
 
@@ -223,7 +234,7 @@ Observer note: phone screen recording of a code editor, white caption box at the
 <example>
 ### P003 · Trade Coffee · https://www.drinktrade.com/ · fetched 2026-10-17 · via browser
 - Opening: "Coffee matched to your taste"; bag packshots; "Take the quiz"
-- Palette: off-white, black, one citrus accent
+- Palette: white, black, one citrus accent
 - Type: one geometric sans
 - Imagery: studio packshots of bags
 - Motion: none

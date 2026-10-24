@@ -4,8 +4,8 @@ description: Builds or improves the lfm sales page from concept.md - template, s
 license: MIT
 compatibility: Needs lfm, the project's research files and concept.md. Uses image generation, a browser and screenshots when available, and asks the user for what it cannot produce.
 metadata:
-  lfm-version: "0.1.8"
-  lfm-sha256: "71307f9a36d0b7ce79ba759946bb0a481c6487817ff0e159d384059f0ce5f445"
+  lfm-version: "0.1.9"
+  lfm-sha256: "64ec168354e7855476c0f7d1d7859ff9cecc62cfc55011aa064278625b124e2d"
 ---
 
 # Implement an lfm page
@@ -60,7 +60,12 @@ Make the core loop work with real content before any polish.
    FAQ answers); every destination into `urls`, except same-page `#fragment` links. The template renders
    them; it never repeats a literal. Templates are Go `html/template`: config numbers compare by value
    (`{{if ge .data.hours 6}}`) but there is no arithmetic, so store the values the first screen shows in
-   `data`, and compute the rest in the script. `build.browserData` lists the config paths the script needs
+   `data`, and compute the rest in the script. `lfm help template` lists helpers. Pass multiple
+   contexts to partials with `{{template "case" (dict "root" $ "case" .)}}`; read `.root.urls`
+   and `.case` inside. Guard optional paths directly with `{{with .data.note}}{{.}}{{end}}`
+   or `{{if .data.note}}{{.data.note}}{{end}}`; absent, null and empty values are allowed there.
+   `copy.machine` excludes table and role=table/grid content and names up to three review passages with source locations and window-level signals;
+   revise the named signal (rhythm or wording) while preserving factual content. `build.browserData` lists the config paths the script needs
    (`"data.check"`); the script reads the same shape back:
    `JSON.parse(document.getElementById("product-data").textContent).data.check`. A value that
    depends on today (this month's task) renders a default that is true all year in HTML, and the script
@@ -200,6 +205,9 @@ frames that changed. Then review by looking:
 Without Chrome, ask the user for phone and desktop screenshots of the whole page, and report the visual
 review as not done rather than passed.
 
+Keep your own review state (screenshots, logs, scripts, browser checks) in `qa/` at the project root.
+The project's .gitignore excludes it; research/ holds only the two research files.
+
 The page is done when `lfm compile --release` reports 0 errors and 0 warnings, the review left nothing
 above detail level, and the report's `Next` line says deploy.
 
@@ -232,3 +240,9 @@ These ship on pages that looked finished in chosen screenshots; check each in th
   concept.md first, then the page.
 
 After deployment, `lfm check <url> --json` checks the published page with the same page rules.
+
+Pair a built target with `lfm check <url> --project <dir> --json` to include project-only rules.
+Use `lfm check --project <dir> --json` to check output/ against current source without publishing.
+Release checks require installed Chrome and Lighthouse plus loopback sockets. Timing findings
+use up to three measurements; review informational diagnostics and third-party rows separately.
+Page grounds must be white, cool or neutral grey, dark, or saturated subject colours. Warm off-whites and paper, parchment or notebook decoration fail `design.ground`; `data-design-reason` does not exempt it.

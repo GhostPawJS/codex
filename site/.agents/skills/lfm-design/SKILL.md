@@ -4,8 +4,8 @@ description: Turns an lfm project's research into concept.md, the single brief i
 license: MIT
 compatibility: Needs the research files of the project; works with any toolset. Running lfm compile checks the result.
 metadata:
-  lfm-version: "0.1.8"
-  lfm-sha256: "d0846634add4e98840e5437d41f5b4a302c250956f8c98099d4f3456e735cccb"
+  lfm-version: "0.1.9"
+  lfm-sha256: "2c522d57c2f551a8169f692b02d1d13a9737372fe542b802c8558b43cdb57543"
 ---
 
 # Design for an lfm page
@@ -73,7 +73,7 @@ Work through the sections in order; each builds on the one before.
    Research tells you the hesitations around it, not the facts.
 6. **Facts.** At least 10 checked facts true of this subject and hardly any other: numbers, units
    and timings, textures, sounds and light, tools and vocabulary, failure modes and rituals, places. Words
-   that only rate or label a style are not facts; a fact can be checked against the subject. Each fact cites its source.
+   that only rate or label a style are not facts; a fact can be checked against the subject. Each fact cites its source; a relative Markdown link such as `[theme](assets/theme.css)` counts when it names an existing file inside the project, including through symlinks.
 7. **Axes.** At least 5 design axes on which the data separates. Per axis: the market
    position with the peers that hold it, the voice position with the voices that hold it, and your chosen
    position: break from the market where it clusters, match the voices; where both agree, the axis is free,
@@ -93,7 +93,10 @@ Work through the sections in order; each builds on the one before.
 10. **Concept.** The chosen direction, pushed once more: what would make it astonishing without slowing
    the visitor? Say how it builds on its sparks.
 11. **Spine.** The page's sections in order, each with its job and the evidence it shows.
-12. **Visual system.** Derive palette, type, form, imagery and motion from the concept and the axes. For
+12. **Visual system.** Grounds are white, cool or neutral grey, dark, or a saturated colour from the subject;
+    never cream, beige, ivory or other warm off-whites, and no paper, parchment or notebook styling
+    (grain/noise overlays, ruled lines, torn edges as page decoration); the compiler fails on them.
+    Derive palette, type, form, imagery and motion from the concept and the axes. For
     each, list about eight candidates of your own in your notes (not in the file), estimate the chance a
     typical generator picks each, and
     choose one below roughly 10% that serves the spine. Cite a voice, peer or fact for it: type and form
@@ -106,6 +109,12 @@ Work through the sections in order; each builds on the one before.
     shows with reduced motion.
 13. **Copy.** The buyers' own words to use, the tone, and the words to avoid, each citing voices. Write the
     exact phrases as `Use: "…"` and `Avoid: "…"` lines; `lfm compile` holds the page to them.
+    Only the leading quoted list is banned on an Avoid line; explanation text or IDs
+    end the list. `Avoid: "body search"; say "FTS5 search"` bans only "body search".
+    On English pages, simple s/es/ed/ing forms of the final Use word count too;
+    other languages keep exact word forms and show near-match hints.
+
+For a hub that routes to other pages and sells nothing itself, the next step is a named link per product page with ItemList JSON-LD; Offer and BuyAction stay on the product pages.
 
 Then run `lfm compile`. Its `Next` line names the step that follows, normally the lfm-implementation skill.
 
