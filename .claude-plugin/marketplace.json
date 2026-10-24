@@ -1,0 +1,13 @@
+{
+  "name": "ghostpaw-codex",
+  "owner": {
+    "name": "Anonyfox"
+  },
+  "plugins": [
+    {
+      "name": "ghostpaw-codex",
+      "source": "./",
+      "description": "Local belief and memory engine with evidence, certainty, and honest revision history."
+    }
+  ]
+}

@@ -5,7 +5,13 @@
 		"clientKind": "git",
 		"useIgnoreFile": true
 	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
@@ -24,6 +30,17 @@
 		}
 	},
 	"files": {
-		"includes": ["**", "!**/dist", "!**/node_modules", "!**/*.d.ts", "!**/*.d.cts", "!**/*.d.mts"]
+		"includes": [
+			"**",
+			"!**/dist",
+			"!**/node_modules",
+			"!**/*.d.ts",
+			"!**/*.d.cts",
+			"!**/*.d.mts",
+			"!plugin.json",
+			"!mcp.json",
+			"!server.json",
+			"!.claude-plugin/*.json"
+		]
 	}
 }

@@ -13,13 +13,25 @@
 				"types": "./dist/index.d.cts",
 				"default": "./dist/index.cjs"
 			}
-		}
+		},
+		"./mcp": {
+			"import": {
+				"types": "./dist/mcp.d.ts",
+				"default": "./dist/mcp.js"
+			},
+			"require": {
+				"types": "./dist/mcp.d.cts",
+				"default": "./dist/mcp.cjs"
+			}
+		},
+		"./package.json": "./package.json"
 	},
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"files": [
-		"dist"
+		"dist",
+		"skills"
 	],
 	"sideEffects": false,
 	"scripts": {
@@ -35,11 +47,13 @@
 		"typecheck": "tsc --noEmit",
 		"check": "biome check && tsc --noEmit",
 		"clean": "rm -rf dist demo",
-		"version": "biome format --write package.json package-lock.json && git add package.json package-lock.json",
+		"version": "node scripts/sync_version.mjs && git add src/version.ts && biome format --write package.json package-lock.json && git add package.json package-lock.json",
 		"prepublishOnly": "npm run check && npm run build",
 		"release:patch": "npm version patch && git push && git push --tags",
 		"release:minor": "npm version minor && git push && git push --tags",
-		"release:major": "npm version major && git push && git push --tags"
+		"release:major": "npm version major && git push && git push --tags",
+		"surfaces": "node --experimental-strip-types scripts/surfaces/generate.mjs",
+		"check:surfaces": "node --experimental-strip-types scripts/surfaces/generate.mjs --check"
 	},
 	"engines": {
 		"node": ">=24"
@@ -63,7 +77,15 @@
 		"agent",
 		"tools",
 		"typescript",
-		"zero-dependencies"
+		"zero-dependencies",
+		"mcp",
+		"mcp-server",
+		"model-context-protocol",
+		"agent-memory",
+		"agent-skills",
+		"claude-code",
+		"cursor",
+		"cli"
 	],
 	"license": "MIT",
 	"repository": {
@@ -94,5 +116,9 @@
 		"sql.js-fts5": "^1.4.0",
 		"tsup": "^8.4.0",
 		"typescript": "^5.9.3"
-	}
+	},
+	"bin": {
+		"ghostpaw-codex": "./dist/cli.js"
+	},
+	"mcpName": "io.github.GhostPawJS/codex"
 }

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ghostpaw-codex",
+  "version": "0.2.6",
+  "description": "Local belief and memory engine with evidence, certainty, and honest revision history.",
+  "author": {
+    "name": "Anonyfox",
+    "email": "max@anonyfox.com",
+    "url": "https://anonyfox.com"
+  },
+  "homepage": "https://github.com/GhostPawJS/codex",
+  "repository": "https://github.com/GhostPawJS/codex.git",
+  "license": "MIT",
+  "keywords": [
+    "belief",
+    "memory",
+    "knowledge",
+    "certainty",
+    "provenance",
+    "recall",
+    "semantic-search",
+    "embeddings",
+    "sqlite",
+    "local-first",
+    "llm",
+    "ai",
+    "agent",
+    "tools",
+    "typescript",
+    "zero-dependencies",
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "agent-memory",
+    "agent-skills",
+    "claude-code",
+    "cursor",
+    "cli"
+  ]
+}

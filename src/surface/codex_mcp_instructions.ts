@@ -1,0 +1,2 @@
+export const codexMcpInstructions =
+	'Codex is a local belief and memory engine that records claims, evidence, certainty, and revision history. Search before you remember to avoid duplicates and recover relevant context. Inspect before you revise; use revise for confirmation, correction, merging, forgetting, or deferral. Use retire only for permanent erasure. Certainty is not truth: confidence and derived flags guide attention, never prove a claim. Preserve honest lineage when understanding changes and ask for clarification when the intended action is ambiguous.';
