@@ -60,7 +60,8 @@ export function addDocsChrome(html, { lib, layoutCss = '' }) {
 .gp-links{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem}
 .gp-links a{display:inline-block;padding:.2rem 0}
 ${layoutCss}`);
-	const head = `${font ? `<link rel="preload" href="${font}" as="font" type="font/woff2" crossorigin />\n` : ''}<style>${css}</style>\n`;
+	const icon = /rel="icon"/.test(html) ? '' : '<link rel="icon" href="../favicon.png" />\n';
+	const head = `${icon}${font ? `<link rel="preload" href="${font}" as="font" type="font/woff2" crossorigin />\n` : ''}<style>${css}</style>\n`;
 	const top = `<header class="gp-top"><div class="gp-wrap">
 <a class="gp-brand" href="https://ghostpaw.dev/">GhostPaw<span class="gp-crumb">/${lib}</span></a>
 <nav aria-label="${lib} elsewhere"><a href="${home}">Overview</a><a href="${gh}">GitHub</a><a href="${npm}">npm</a></nav>
