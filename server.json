@@ -8,7 +8,7 @@
     "url": "https://github.com/GhostPawJS/codex.git",
     "source": "github"
   },
-  "websiteUrl": "https://ghostpawjs.github.io/codex",
+  "websiteUrl": "https://ghostpaw.anonyfox.com/codex/",
   "packages": [
     {
       "registryType": "npm",

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { type ManifestSpec, renderManifests } from './manifests.ts';
+import { type ManifestSpec, renderManifests, renderMcpbManifest } from './manifests.ts';
 
 const spec: ManifestSpec = {
 	name: 'example',
@@ -39,4 +39,34 @@ test('manifest formats retain exact package versions and transport commands', ()
 	assert.equal(result.plugin.repository, spec.repository);
 	assert.deepEqual(JSON.parse(JSON.stringify(result)), result);
 	assert.throws(() => renderManifests({ ...spec, description: 'x'.repeat(101) }));
+});
+
+test('MCPB manifest retains portable paths and user configuration', () => {
+	const result = renderMcpbManifest({
+		...spec,
+		longDescription: 'Long description',
+		documentation: 'https://example.com/docs',
+		support: 'https://example.com/issues',
+		entryPoint: 'server/main.js',
+		env: { EXAMPLE_DB: `\${user_config.db}` },
+		userConfig: {
+			db: {
+				type: 'string',
+				title: 'Database',
+				description: 'Local database',
+				required: false,
+				default: `\${HOME}/example.db`,
+			},
+		},
+		tools: [{ name: 'find', description: 'Find records' }],
+	});
+	assert.equal(result.manifest_version, '0.3');
+	assert.deepEqual(result.server.mcp_config, {
+		command: 'node',
+		args: [`\${__dirname}/server/main.js`],
+		env: { EXAMPLE_DB: `\${user_config.db}` },
+	});
+	assert.equal(result.user_config.db?.default, `\${HOME}/example.db`);
+	assert.deepEqual(result.tools, [{ name: 'find', description: 'Find records' }]);
+	assert.deepEqual(result.compatibility.runtimes, { node: '>=24.0.0' });
 });

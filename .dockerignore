@@ -1,0 +1,10 @@
+node_modules
+.git
+dist
+coverage
+.mcpb-build
+server.mcpb
+demo
+*.log
+.env
+.env.*

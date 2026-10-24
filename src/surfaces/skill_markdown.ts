@@ -14,7 +14,10 @@ export interface SkillMarkdownSpec<TCtx> {
 	workflows: readonly { name: string; description: string }[];
 	principles: readonly string[];
 }
-export function renderSkillMarkdown<TCtx>(spec: SkillMarkdownSpec<TCtx>): string {
+export function renderSkillMarkdown<TCtx>(
+	spec: SkillMarkdownSpec<TCtx>,
+	{ referencesBase = 'references' }: { referencesBase?: string } = {},
+): string {
 	if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(spec.name) || spec.name.length > 64)
 		throw new Error('Invalid skill name');
 	if (
@@ -74,7 +77,8 @@ export function renderSkillMarkdown<TCtx>(spec: SkillMarkdownSpec<TCtx>): string
 		'## Workflow guides',
 		'',
 		...spec.workflows.map(
-			(workflow) => `- [${workflow.name}](references/${workflow.name}.md): ${workflow.description}`,
+			(workflow) =>
+				`- [${workflow.name}](${referencesBase}/${workflow.name}.md): ${workflow.description}`,
 		),
 		'',
 		'## Principles',

@@ -1,0 +1,109 @@
+{
+  "manifest_version": "0.3",
+  "name": "ghostpaw-codex",
+  "display_name": "GhostPaw Codex",
+  "version": "0.2.6",
+  "description": "Local belief and memory engine with evidence, certainty, and honest revision history.",
+  "long_description": "Local belief and memory engine with evidence, certainty, and revision history. Stores data in a local SQLite database.",
+  "author": {
+    "name": "Anonyfox",
+    "email": "max@anonyfox.com",
+    "url": "https://anonyfox.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GhostPawJS/codex.git"
+  },
+  "homepage": "https://ghostpaw.anonyfox.com/codex/",
+  "documentation": "https://github.com/GhostPawJS/codex/blob/main/README.md",
+  "support": "https://github.com/GhostPawJS/codex/issues",
+  "license": "MIT",
+  "keywords": [
+    "belief",
+    "memory",
+    "knowledge",
+    "certainty",
+    "provenance",
+    "recall",
+    "semantic-search",
+    "embeddings",
+    "sqlite",
+    "local-first",
+    "llm",
+    "ai",
+    "agent",
+    "tools",
+    "typescript",
+    "zero-dependencies",
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "agent-memory",
+    "agent-skills",
+    "claude-code",
+    "cursor",
+    "cli"
+  ],
+  "server": {
+    "type": "node",
+    "entry_point": "server/mcp-server.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/mcp-server.js"
+      ],
+      "env": {
+        "GHOSTPAW_CODEX_DB": "${user_config.db_path}"
+      }
+    }
+  },
+  "user_config": {
+    "db_path": {
+      "type": "string",
+      "title": "Database path",
+      "description": "Path to the local SQLite database.",
+      "required": false,
+      "default": "${HOME}/.ghostpaw/codex.db"
+    }
+  },
+  "tools": [
+    {
+      "name": "search_codex",
+      "description": "Search active beliefs by natural language query. Returns ranked matches with recall scores and transparency metadata."
+    },
+    {
+      "name": "review_codex",
+      "description": "Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, or trends for time-based patterns."
+    },
+    {
+      "name": "inspect_codex_item",
+      "description": "Inspect one belief in full detail: certainty, freshness, strength, source, category, lineage chain, proximity to similar beliefs, and version diff when applicable."
+    },
+    {
+      "name": "remember_belief",
+      "description": "Create a new belief from a claim, source, and category. Automatically detects nearby beliefs for duplicate awareness."
+    },
+    {
+      "name": "revise_belief",
+      "description": "Revise an existing belief: confirm it still holds, correct it with a new claim, merge multiple beliefs into one, forget it from active recall, or defer its next flag review."
+    },
+    {
+      "name": "retire_belief",
+      "description": "Permanently delete a belief and its entire lineage chain. No trace remains. This is for privacy and hard erasure, not normal revision."
+    },
+    {
+      "name": "dismiss_proximity",
+      "description": "Record that two beliefs are not meaningfully related despite proximity detection. Uses exponential backoff — the pair will resurface less frequently with each dismissal."
+    }
+  ],
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=24.0.0"
+    }
+  }
+}

@@ -15,7 +15,7 @@ export default defineConfig([
 		removeNodeProtocol: false,
 	},
 	{
-		entry: ['src/cli.ts'],
+		entry: { cli: 'src/cli.ts', 'mcp-server': 'src/mcp_server_bin.ts' },
 		format: ['esm'],
 		dts: false,
 		target: 'node24',
@@ -27,6 +27,7 @@ export default defineConfig([
 		banner: { js: '#!/usr/bin/env node' },
 		onSuccess: async () => {
 			chmodSync('dist/cli.js', 0o755);
+			chmodSync('dist/mcp-server.js', 0o755);
 		},
 	},
 ]);

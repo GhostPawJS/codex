@@ -15,7 +15,7 @@ process.exitCode = await runToolCli(process.argv.slice(2), {
 	closeContext: (db) => db.close(),
 	commands: {
 		mcp: async (options) => {
-			const { serveCodexMcp } = await import('./mcp.ts');
+			const { serveCodexMcp } = await import('./surface/serve_codex_mcp.ts');
 			await serveCodexMcp(options.db === undefined ? {} : { dbPath: options.db });
 		},
 		skill: async () => {

@@ -12,3 +12,10 @@ test('database path precedence is flag, environment, home default', () => {
 	assert.equal(resolveCodexDbPath({ env: { GHOSTPAW_CODEX_DB: 'env' } }), 'env');
 	assert.equal(resolveCodexDbPath({ env: {} }), join(homedir(), '.ghostpaw', 'codex.db'));
 });
+
+test('empty environment path uses the default', () => {
+	assert.equal(
+		resolveCodexDbPath({ env: { GHOSTPAW_CODEX_DB: '' } }),
+		resolveCodexDbPath({ env: {} }),
+	);
+});

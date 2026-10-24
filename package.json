@@ -31,7 +31,8 @@
 	"types": "./dist/index.d.ts",
 	"files": [
 		"dist",
-		"skills"
+		"skills",
+		"SKILL.md"
 	],
 	"sideEffects": false,
 	"scripts": {
@@ -63,7 +64,8 @@
 		"check:size": "node scripts/guard/size.mjs",
 		"check:api": "node scripts/guard/api.mjs",
 		"check:consumer": "node scripts/guard/consumer.mjs",
-		"check:startup": "node scripts/guard/startup.mjs"
+		"check:startup": "node scripts/guard/startup.mjs",
+		"mcpb": "node scripts/mcpb/build.mjs"
 	},
 	"engines": {
 		"node": ">=24"
@@ -107,7 +109,7 @@
 		"email": "max@anonyfox.com",
 		"url": "https://anonyfox.com"
 	},
-	"homepage": "https://github.com/GhostPawJS/codex",
+	"homepage": "https://ghostpaw.anonyfox.com/codex/",
 	"bugs": {
 		"url": "https://github.com/GhostPawJS/codex/issues"
 	},
@@ -129,7 +131,8 @@
 		"fflate": "0.8.3"
 	},
 	"bin": {
-		"ghostpaw-codex": "./dist/cli.js"
+		"ghostpaw-codex": "./dist/cli.js",
+		"ghostpaw-codex-mcp": "./dist/mcp-server.js"
 	},
 	"mcpName": "io.github.GhostPawJS/codex"
 }

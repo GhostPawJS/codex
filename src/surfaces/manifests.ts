@@ -57,3 +57,50 @@ export function renderManifests(spec: ManifestSpec) {
 		},
 	};
 }
+
+export interface McpbManifestSpec {
+	name: string;
+	title: string;
+	version: string;
+	description: string;
+	longDescription: string;
+	author: { name: string; email?: string; url?: string };
+	repository: string;
+	homepage: string;
+	documentation: string;
+	support: string;
+	license: string;
+	keywords: string[];
+	entryPoint: string;
+	env: Record<string, string>;
+	userConfig: Record<
+		string,
+		{ type: 'string'; title: string; description: string; required: boolean; default: string }
+	>;
+	tools: readonly { name: string; description: string }[];
+}
+export function renderMcpbManifest(spec: McpbManifestSpec) {
+	return {
+		manifest_version: '0.3',
+		name: spec.name,
+		display_name: spec.title,
+		version: spec.version,
+		description: spec.description,
+		long_description: spec.longDescription,
+		author: spec.author,
+		repository: { type: 'git', url: spec.repository },
+		homepage: spec.homepage,
+		documentation: spec.documentation,
+		support: spec.support,
+		license: spec.license,
+		keywords: spec.keywords,
+		server: {
+			type: 'node',
+			entry_point: spec.entryPoint,
+			mcp_config: { command: 'node', args: [`\${__dirname}/${spec.entryPoint}`], env: spec.env },
+		},
+		user_config: spec.userConfig,
+		tools: spec.tools,
+		compatibility: { platforms: ['darwin', 'win32', 'linux'], runtimes: { node: '>=24.0.0' } },
+	};
+}

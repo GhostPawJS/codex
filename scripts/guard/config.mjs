@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 export const packageName = '@ghostpaw/codex';
 export const publicEntries = ['.', './mcp'];
 export const binName = 'ghostpaw-codex';
-export const extraFiles = ['skills/codex/SKILL.md'];
+export const extraFiles = ['SKILL.md', 'skills/codex/SKILL.md'];
 export const entries = {
 	full: `export * from './dist/index.js';`,
 	tools: `import {tools} from './dist/index.js'; export const registry = tools.codexTools;`,
 	'read-write': `export {read, write} from './dist/index.js';`,
 	mcp: `export * from './dist/mcp.js';`,
 	cli: { entryPoints: ['dist/cli.js'] },
+	'mcp-server': { entryPoints: ['dist/mcp-server.js'] },
 };
 export const claim = {
 	claim: 'Mira prefers jasmine tea during planning',

@@ -49,3 +49,13 @@ test('reject invalid skill metadata', () => {
 	for (const description of ['', 'x'.repeat(1025), 'Missing usage'])
 		assert.throws(() => renderSkillMarkdown({ ...spec, description }));
 });
+
+test('reference base changes only workflow link targets', () => {
+	assert.equal(
+		renderSkillMarkdown(spec, { referencesBase: 'skills/example/references' }),
+		renderSkillMarkdown(spec).replace(
+			'(references/search.md)',
+			'(skills/example/references/search.md)',
+		),
+	);
+});

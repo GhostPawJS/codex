@@ -21,6 +21,7 @@ import {
 import { run, session } from './process.mjs';
 
 const root = process.cwd();
+run(process.execPath, ['scripts/mcpb/build.mjs', '--stage-only']);
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const temp = mkdtempSync(join(tmpdir(), 'library-consumer-'));
 try {
@@ -45,6 +46,8 @@ try {
 		'LICENSE',
 		'package.json',
 		...extraFiles,
+		...readdirSync('skills/codex/references').map((name) => `skills/codex/references/${name}`),
+		...Object.values(pkg.bin),
 		...publicEntries.flatMap((key) => {
 			const entry = pkg.exports[key];
 			return [entry.import.default, entry.import.types, entry.require.default];
@@ -167,6 +170,16 @@ try {
 	assertRoundTrip(remembered, searched);
 	const { replies } = await session(bin, ['mcp', '--db', db], [...legacyRequests, discover]);
 	assertMcpReplies(replies, remembered);
+	const dedicated = join(modules, '.bin', 'ghostpaw-codex-mcp');
+	const packedBin = pack.files.find((file) => file.path === 'dist/mcp-server.js');
+	assert.ok(packedBin.mode & 0o111);
+	const { replies: dedicatedReplies } = await session(
+		dedicated,
+		['--db', ':memory:'],
+		legacyRequests.slice(0, 2),
+	);
+	assert.equal(dedicatedReplies[0].result.protocolVersion, '2025-11-25');
+	assert.ok(dedicatedReplies[1].result.tools.some((tool) => tool.name === 'search_codex'));
 	console.log(
 		`Consumer: ESM, CJS, NodeNext types, CLI, SQLite and MCP pass. Tarball ${pack.size} bytes; unpacked ${pack.unpackedSize} bytes.`,
 	);

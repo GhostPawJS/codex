@@ -40,6 +40,8 @@
 			"!plugin.json",
 			"!mcp.json",
 			"!server.json",
+			"!glama.json",
+			"!mcpb/manifest.json",
 			"!.claude-plugin/*.json"
 		]
 	}

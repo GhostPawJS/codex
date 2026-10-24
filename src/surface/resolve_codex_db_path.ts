@@ -6,7 +6,6 @@ export function resolveCodexDbPath(
 ): string {
 	return (
 		options.flag ??
-		(options.env ?? process.env).GHOSTPAW_CODEX_DB ??
-		join(homedir(), '.ghostpaw', 'codex.db')
+		((options.env ?? process.env).GHOSTPAW_CODEX_DB || join(homedir(), '.ghostpaw', 'codex.db'))
 	);
 }
