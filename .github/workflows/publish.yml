@@ -4,6 +4,10 @@ on:
   push:
     tags: ["v*"]
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   id-token: write
@@ -13,18 +17,18 @@ jobs:
     name: Verify · Publish · Release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: package-lock.json
           registry-url: "https://registry.npmjs.org"
 
-      - run: npm ci
-
-      - name: Verify version matches tag
+      - name: Verify tag matches package.json and is on main
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           PKG=$(node -p "require('./package.json').version")
@@ -32,24 +36,106 @@ jobs:
             echo "::error::Version mismatch: package.json=$PKG tag=$TAG"
             exit 1
           fi
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag $GITHUB_REF_NAME is not on main"
+            exit 1
+          fi
           echo "Version verified: $PKG"
 
-      - name: Lint & typecheck
+      - run: npm ci
+
+      - name: Full quality gate
         run: npm run check
+        env:
+          RATCHET_BASE: ${{ github.sha }}
 
-      - name: Test
-        run: npm run test
-
-      - name: Build
-        run: npm run build
-
-      - name: Verify package contents
-        run: npm pack --dry-run
-
+      # npm trusted publishing (OIDC): no token, provenance attached automatically.
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --ignore-scripts
+
+      - name: Verify the registry serves the new version
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          PKG=$(node -p "require('./package.json').version")
+          for i in $(seq 1 20); do
+            LATEST=$(npm view "$NAME" dist-tags.latest 2>/dev/null || true)
+            if [ "$LATEST" = "$PKG" ]; then echo "dist-tags.latest = $LATEST"; exit 0; fi
+            sleep 15
+          done
+          echo "::error::dist-tags.latest is '$LATEST', expected $PKG"
+          exit 1
+
+      - name: Build the MCP Bundle (server.mcpb)
+        run: npm run mcpb
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          awk -v v="$PKG" '
+            $0 ~ "^## \\[" v "\\]" { on = 1; next }
+            on && /^## \[/ { exit }
+            on { print }
+          ' CHANGELOG.md > RELEASE_NOTES.md
+          if [ ! -s RELEASE_NOTES.md ]; then
+            echo "::error::CHANGELOG.md has no section for $PKG"
+            exit 1
+          fi
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
+          body_path: RELEASE_NOTES.md
           generate_release_notes: true
+          files: server.mcpb
+          fail_on_unmatched_files: true
+
+  mcp-registry:
+    name: Publish to the MCP Registry
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      MCP_PUBLISHER_VERSION: v1.8.4
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Verify server.json matches the tag
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          for f in server.json; do
+            V=$(node -p "require('./$f').version")
+            P=$(node -p "require('./$f').packages[0].version")
+            if [ "$V" != "$TAG" ] || [ "$P" != "$TAG" ]; then
+              echo "::error::$f version=$V package=$P, expected $TAG"
+              exit 1
+            fi
+          done
+
+      - name: Install mcp-publisher
+        run: |
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+
+      # GitHub OIDC: grants the io.github.GhostPawJS/* namespace, no token involved.
+      - name: Authenticate (GitHub OIDC)
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish server.json
+        run: ./mcp-publisher publish
+
+      - name: Verify the registry entry
+        run: |
+          NAME=$(node -p "require('./server.json').name")
+          TAG="${GITHUB_REF_NAME#v}"
+          ENC=$(node -p "encodeURIComponent(process.argv[1])" "$NAME")
+          URL="https://registry.modelcontextprotocol.io/v0.1/servers/${ENC}/versions/${TAG}"
+          for i in $(seq 1 10); do
+            if curl -fsS "$URL" -o entry.json; then
+              echo "Registry entry: $URL"; cat entry.json; exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Registry does not list $NAME@$TAG"
+          exit 1
