@@ -1,0 +1,8 @@
+{
+	"mcpServers": {
+		"ghostpaw-codex": {
+			"command": "npx",
+			"args": ["-y", "@ghostpaw/codex", "mcp"]
+		}
+	}
+}
