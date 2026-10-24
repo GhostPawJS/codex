@@ -1,12 +1,14 @@
+<a href="https://codex.ghostpaw.dev/"><img src="https://raw.githubusercontent.com/GhostPawJS/codex/main/.github/social-preview.png" alt="GhostPaw codex: When one agent saves a wrong fact, every agent trusts it." width="100%"></a>
+
 # @ghostpaw/codex
 
-[![npm](https://img.shields.io/npm/v/@ghostpaw/codex)](https://www.npmjs.com/package/@ghostpaw/codex)
-[![CI](https://github.com/GhostPawJS/codex/actions/workflows/ci.yml/badge.svg)](https://github.com/GhostPawJS/codex/actions/workflows/ci.yml)
-[![node](https://img.shields.io/node/v/@ghostpaw/codex)](https://nodejs.org)
-[![license](https://img.shields.io/npm/l/@ghostpaw/codex)](LICENSE)
-[![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](package.json)
-[![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.GhostPawJS%2Fcodex-06d6a0)](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.GhostPawJS%2Fcodex/versions/latest)
-[![Live Demo](https://img.shields.io/badge/demo-live-06d6a0?style=flat&logo=github)](https://codex.ghostpaw.dev/docs/)
+[![npm](https://img.shields.io/npm/v/@ghostpaw/codex?style=flat-square&labelColor=0a1119&color=62e6f2&label=npm)](https://www.npmjs.com/package/@ghostpaw/codex) [![CI](https://img.shields.io/github/actions/workflow/status/GhostPawJS/codex/ci.yml?branch=main&style=flat-square&labelColor=0a1119&label=CI)](https://github.com/GhostPawJS/codex/actions/workflows/ci.yml) [![site](https://img.shields.io/badge/site-codex.ghostpaw.dev-62e6f2?style=flat-square&labelColor=0a1119)](https://codex.ghostpaw.dev/) [![runtime deps](https://img.shields.io/badge/runtime_deps-0-7af0b4?style=flat-square&labelColor=0a1119)](package.json) [![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.GhostPawJS%2Fcodex-b39dff?style=flat-square&labelColor=0a1119)](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.GhostPawJS%2Fcodex/versions/latest) [![node](https://img.shields.io/badge/node-%E2%89%A524-93a5b9?style=flat-square&labelColor=0a1119)](https://nodejs.org) [![license](https://img.shields.io/npm/l/@ghostpaw/codex?style=flat-square&labelColor=0a1119&color=93a5b9)](LICENSE)
+
+**Agent memory as beliefs with a source, a certainty and a revision history.**
+
+```bash
+npm install @ghostpaw/codex
+```
 
 Local, evidence-backed memory for AI agents. One SQLite file, zero runtime
 dependencies.
