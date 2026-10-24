@@ -1,6 +1,6 @@
 {
   "name": "ghostpaw-codex",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Local belief and memory engine with evidence, certainty, and honest revision history.",
   "author": {
     "name": "Anonyfox",
@@ -41,7 +41,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@ghostpaw/codex@0.3.0",
+        "@ghostpaw/codex@0.3.1",
         "mcp"
       ]
     }
