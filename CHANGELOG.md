@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- `npm run check:deps` uses the shared zero-dependency check (manifest and
+  packed tarball) and runs as its own CI and release step.
+- Added AGENTS.md with contributor guidance.
+
 ## [0.3.0] - 2026-10-24
 
 ### Added

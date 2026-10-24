@@ -50,6 +50,9 @@ jobs:
         env:
           RATCHET_BASE: ${{ github.sha }}
 
+      - name: Zero runtime dependencies
+        run: npm run check:deps
+
       # npm trusted publishing (OIDC): no token, provenance attached automatically.
       - name: Publish to npm
         run: npm publish --provenance --access public --ignore-scripts

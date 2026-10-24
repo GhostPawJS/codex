@@ -37,6 +37,9 @@ jobs:
         env:
           RATCHET_BASE: ${{ github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000' && github.event.before || '' }}
 
+      - name: Zero runtime dependencies
+        run: npm run check:deps
+
       - name: MCP Bundle builds and validates
         if: matrix.node-version == 24
         run: npm run mcpb
