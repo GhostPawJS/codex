@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-24
+
 ### Changed
 
 - `remember`, `inspect_codex_item` and `review_codex` are faster on large
@@ -47,5 +49,6 @@ All notable changes to this project are documented here. The format follows
 - CI runs on every push and pull request on Node 24 and 26. Releases publish
   through npm trusted publishing with provenance.
 
-[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/GhostPawJS/codex/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/GhostPawJS/codex/compare/v0.2.6...v0.3.0
