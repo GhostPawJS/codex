@@ -36,8 +36,8 @@ export function listBeliefProximity(
 	const belief = assertActiveBeliefExists(db, beliefId);
 	const originVector = deserializeVectorBlob(belief.embedding) ?? buildQueryEmbedding(belief.claim);
 	const rows = db
-		.prepare('SELECT * FROM beliefs WHERE superseded_by IS NULL AND id <> ?')
-		.all<BeliefRow>(beliefId);
+		.prepare('SELECT id, embedding FROM beliefs WHERE superseded_by IS NULL AND id <> ?')
+		.all<Pick<BeliefRow, 'id' | 'embedding'>>(beliefId);
 	if (rows.length === 0) return [];
 	const dismissed = loadActiveDismissals(db, beliefId, timestamp);
 	return rows
@@ -52,5 +52,10 @@ export function listBeliefProximity(
 		})
 		.sort((a, b) => b.similarity - a.similarity)
 		.slice(0, limit)
-		.map(({ row, similarity }) => ({ ...mapBeliefRow(row, timestamp), similarity }));
+		.map(({ row, similarity }) => {
+			// Full records are needed only for the selected matches, not the entire vector scan.
+			const selected = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(row.id);
+			if (!selected) throw new Error('Proximity belief could not be reloaded.');
+			return { ...mapBeliefRow(selected, timestamp), similarity };
+		});
 }

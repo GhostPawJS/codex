@@ -45,15 +45,25 @@
 		"lint:fix": "biome check --fix",
 		"format": "biome format --write",
 		"typecheck": "tsc --noEmit",
-		"check": "biome check && tsc --noEmit",
+		"check": "npm run check:types && npm run check:lint && npm run check:deps && npm test && npm run build && npm run check:surfaces && npm run check:size && npm run check:api && npm run check:consumer && npm run check:startup && npm run check:ratchet",
 		"clean": "rm -rf dist demo",
 		"version": "node scripts/sync_version.mjs && git add src/version.ts && biome format --write package.json package-lock.json && git add package.json package-lock.json",
-		"prepublishOnly": "npm run check && npm run build",
+		"prepublishOnly": "npm run check",
 		"release:patch": "npm version patch && git push && git push --tags",
 		"release:minor": "npm version minor && git push && git push --tags",
 		"release:major": "npm version major && git push && git push --tags",
 		"surfaces": "node --experimental-strip-types scripts/surfaces/generate.mjs",
-		"check:surfaces": "node --experimental-strip-types scripts/surfaces/generate.mjs --check"
+		"check:surfaces": "node --experimental-strip-types scripts/surfaces/generate.mjs --check",
+		"check:types": "tsc --noEmit",
+		"check:lint": "biome check",
+		"check:ratchet": "node --test scripts/guard/*.test.mjs && node scripts/guard/ratchet.mjs",
+		"budgets:update": "npm run build && node scripts/guard/size.mjs --update && node scripts/guard/api.mjs --update && node scripts/guard/startup.mjs --update",
+		"bench": "npm run build && node scripts/bench/bench.mjs",
+		"check:deps": "node scripts/guard/deps.mjs",
+		"check:size": "node scripts/guard/size.mjs",
+		"check:api": "node scripts/guard/api.mjs",
+		"check:consumer": "node scripts/guard/consumer.mjs",
+		"check:startup": "node scripts/guard/startup.mjs"
 	},
 	"engines": {
 		"node": ">=24"
@@ -115,7 +125,8 @@
 		"preact": "^10.29.0",
 		"sql.js-fts5": "^1.4.0",
 		"tsup": "^8.4.0",
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"fflate": "0.8.3"
 	},
 	"bin": {
 		"ghostpaw-codex": "./dist/cli.js"

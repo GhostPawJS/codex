@@ -1,0 +1,35 @@
+{
+	"size": {
+		"full": {
+			"minBytes": 95616,
+			"gzipBytes": 29504
+		},
+		"tools": {
+			"minBytes": 93120,
+			"gzipBytes": 28800
+		},
+		"read-write": {
+			"minBytes": 93120,
+			"gzipBytes": 28800
+		},
+		"mcp": {
+			"minBytes": 44544,
+			"gzipBytes": 14912
+		},
+		"cli": {
+			"minBytes": 105792,
+			"gzipBytes": 33600
+		}
+	},
+	"startup": {
+		"version": {
+			"medianMs": 150
+		},
+		"tools": {
+			"medianMs": 150
+		},
+		"mcp": {
+			"medianMs": 150
+		}
+	}
+}
