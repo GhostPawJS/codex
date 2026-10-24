@@ -48,7 +48,7 @@
 		"typecheck": "tsc --noEmit",
 		"check": "npm run check:types && npm run check:lint && npm run check:deps && npm test && npm run build && npm run check:surfaces && npm run check:size && npm run check:api && npm run check:consumer && npm run check:startup && npm run check:ratchet",
 		"clean": "rm -rf dist demo",
-		"version": "node scripts/sync_version.mjs && git add src/version.ts && biome format --write package.json package-lock.json && git add package.json package-lock.json",
+		"version": "node scripts/sync_version.mjs && npm run surfaces && git add src/version.ts SKILL.md skills plugin.json mcp.json server.json .claude-plugin mcpb && biome format --write package.json package-lock.json && git add package.json package-lock.json",
 		"prepublishOnly": "npm run check",
 		"release:patch": "npm version patch && git push && git push --tags",
 		"release:minor": "npm version minor && git push && git push --tags",
