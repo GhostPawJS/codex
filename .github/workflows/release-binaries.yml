@@ -58,6 +58,8 @@ jobs:
 
       - run: npm ci --ignore-scripts
 
+      - run: npm run build
+
       - name: Build the single executable
         run: node scripts/sea/build.mjs --target ${{ matrix.target }} --mode cache
 
@@ -68,6 +70,15 @@ jobs:
           [ "${{ runner.os }}" = "Windows" ] && BIN="$BIN.exe"
           node scripts/sea/smoke.mjs "$BIN"
           ls -l "$BIN"
+
+      - name: Cold-start numbers (info only)
+        shell: bash
+        env:
+          RUNS: "11"
+        run: |
+          BIN=dist-sea/${{ matrix.target }}/ghostpaw-codex
+          [ "${{ runner.os }}" = "Windows" ] && BIN="$BIN.exe"
+          node scripts/sea/bench.mjs "sea=$BIN" "node dist=node dist/cli.js" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Package
         shell: bash
