@@ -1,0 +1,137 @@
+name: Release binaries
+
+# Builds the ghostpaw-codex single executable (Node SEA) on each platform,
+# smoke-tests it, and on a v* tag attaches the archives, SHA256SUMS and build
+# provenance attestations to the GitHub Release that publish.yml creates.
+# Branch pushes, pull requests and manual runs only build and test; nothing
+# is uploaded outside the run's own artifacts.
+
+on:
+  push:
+    tags: ["v*"]
+    # Prototype branch: build and smoke-test every push. Drop before merging.
+    branches: ["sea-binary"]
+  pull_request:
+    paths:
+      - "src/**"
+      - "scripts/sea/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/release-binaries.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: binaries-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+permissions:
+  contents: read
+
+env:
+  # --build-sea needs Node >= 25.5. 26 is the line that turns LTS on 2026-10-28.
+  SEA_NODE_VERSION: "26.12.1"
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    # macOS x64 is not covered by Node's own SEA tests, so a failure there
+    # must not block the other platforms.
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: linux-x64, runner: ubuntu-24.04, experimental: false }
+          - { target: linux-arm64, runner: ubuntu-24.04-arm, experimental: false }
+          - { target: darwin-x64, runner: macos-15-intel, experimental: true }
+          - { target: darwin-arm64, runner: macos-15, experimental: false }
+          - { target: windows-x64, runner: windows-2025, experimental: false }
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.SEA_NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - run: npm ci --ignore-scripts
+
+      - name: Build the single executable
+        run: node scripts/sea/build.mjs --target ${{ matrix.target }} --mode cache
+
+      - name: Smoke test (version, SQLite write and read, MCP tools/list)
+        shell: bash
+        run: |
+          BIN=dist-sea/${{ matrix.target }}/ghostpaw-codex
+          [ "${{ runner.os }}" = "Windows" ] && BIN="$BIN.exe"
+          node scripts/sea/smoke.mjs "$BIN"
+          ls -l "$BIN"
+
+      - name: Package
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          NAME="ghostpaw-codex-${VERSION}-${{ matrix.target }}"
+          mkdir -p upload
+          cp LICENSE README.md dist-sea/${{ matrix.target }}/
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            (cd dist-sea/${{ matrix.target }} && 7z a -tzip "../../upload/${NAME}.zip" ghostpaw-codex.exe LICENSE README.md >/dev/null)
+          else
+            tar -C dist-sea/${{ matrix.target }} -czf "upload/${NAME}.tar.gz" ghostpaw-codex LICENSE README.md
+          fi
+          ls -l upload
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: binary-${{ matrix.target }}
+          path: upload/*
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: Checksums · Attest · Upload
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: binary-*
+          path: upload
+          merge-multiple: true
+
+      - name: SHA256SUMS
+        working-directory: upload
+        run: |
+          sha256sum ghostpaw-codex-* > SHA256SUMS
+          cat SHA256SUMS
+
+      # SLSA build provenance, signed through Sigstore, verifiable with
+      # `gh attestation verify <file> -R GhostPawJS/codex`.
+      - uses: actions/attest@v4
+        with:
+          subject-path: |
+            upload/ghostpaw-codex-*
+            upload/SHA256SUMS
+
+      # publish.yml creates the release after npm publish; wait for it.
+      - name: Upload to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          for _ in $(seq 1 40); do
+            if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+              gh release upload "$GITHUB_REF_NAME" upload/* --clobber
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::Release $GITHUB_REF_NAME did not appear within 10 minutes"
+          exit 1

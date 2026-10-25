@@ -65,7 +65,10 @@
 		"check:api": "node scripts/guard/api.mjs",
 		"check:consumer": "node scripts/guard/consumer.mjs",
 		"check:startup": "node scripts/guard/startup.mjs",
-		"mcpb": "node scripts/mcpb/build.mjs"
+		"mcpb": "node scripts/mcpb/build.mjs",
+		"sea": "node scripts/sea/build.mjs",
+		"sea:smoke": "node scripts/sea/smoke.mjs",
+		"sea:bench": "node scripts/sea/bench.mjs"
 	},
 	"engines": {
 		"node": ">=24"
