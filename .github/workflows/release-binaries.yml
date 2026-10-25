@@ -72,6 +72,7 @@ jobs:
           ls -l "$BIN"
 
       - name: Cold-start numbers (info only)
+        continue-on-error: true
         shell: bash
         env:
           RUNS: "11"

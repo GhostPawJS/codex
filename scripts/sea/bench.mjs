@@ -34,9 +34,10 @@ const mcp = (cmd, args, lines, waitForId) =>
 				try {
 					if (JSON.parse(line).id === waitForId) {
 						const ms = performance.now() - t;
+						// Wait for exit so Windows releases the db file before cleanup.
+						child.once('exit', () => resolve(ms));
 						child.stdin.end();
 						child.kill();
-						resolve(ms);
 						return;
 					}
 				} catch {}
@@ -110,7 +111,7 @@ for (const spec of process.argv.slice(2)) {
 			),
 		);
 	}
-	rmSync(dir, { recursive: true, force: true });
+	rmSync(dir, { recursive: true, force: true, maxRetries: 5 });
 	results[label] = Object.fromEntries(Object.entries(s).map(([k, v]) => [k, stats(v)]));
 }
 const keys = ['version', 'help', 'write', 'read', 'mcpList', 'mcpSearch'];

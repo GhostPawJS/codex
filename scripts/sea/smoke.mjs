@@ -54,8 +54,9 @@ const tools = await new Promise((done) => {
 		const line = out.split('\n').find((l) => l.includes('"id":2'));
 		if (!line) return;
 		clearTimeout(timer);
+		const listed = JSON.parse(line).result?.tools ?? [];
+		child.once('exit', () => done(listed));
 		child.stdin.end();
-		done(JSON.parse(line).result?.tools ?? []);
 	});
 	const send = (msg) => child.stdin.write(`${JSON.stringify({ jsonrpc: '2.0', ...msg })}\n`);
 	send({
@@ -71,5 +72,5 @@ const tools = await new Promise((done) => {
 	send({ id: 2, method: 'tools/list' });
 });
 if (tools.length === 0) fail('mcp tools/list returned no tools');
-rmSync(dir, { recursive: true, force: true });
+rmSync(dir, { recursive: true, force: true, maxRetries: 5 });
 console.log(`smoke ok: ${binary} ${version}, sqlite write+read, mcp ${tools.length} tools`);
