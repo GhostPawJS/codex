@@ -31,7 +31,7 @@
 <main>
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <p class="kicker"><code>@ghostpaw/codex</code> <span class="ver">0.3.2</span></p>
+      <p class="kicker"><code>@ghostpaw/codex</code> <span class="ver">0.4.0</span></p>
       <h1 id="hero-title">When one agent saves a wrong fact, every agent trusts it.</h1>
       <p class="lede">codex keeps what your agent believes as beliefs with a source, a certainty and a history, so you can read and delete them one at a time instead of rereading MEMORY.md.</p>
       <div class="install">
@@ -212,6 +212,43 @@ read.recall(db, 'graphql api'); // []</code></pre></div>
       <div><dt>Agent tools</dt><dd>7</dd></div>
     </dl>
     <p class="note">Measured 2026-10-24 on the maintainer's machine with Node.js 24.14.0 against codex 0.3.2: size of the published dist/index.js at gzip -9, median of 11 cold imports, tests from the v0.3.2 tag.</p>
+  </section>
+
+  <section id="binaries" class="binaries" aria-labelledby="binaries-title">
+    <h2 id="binaries-title">Run it without Node.js</h2>
+    <p class="intro">Since 0.4.0 every release also ships <code>ghostpaw-codex</code> as one executable with Node.js 26.12.1 inside. It has the same commands and the same MCP server as the npm package.</p>
+    <div class="bin-cmds">
+        <div><p class="cmd-label" id="bin-sh-label">macOS and Linux</p>
+        <div class="cmd"><input id="bin-sh" readonly value="curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh" aria-labelledby="bin-sh-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-sh">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-ps-label">Windows PowerShell</p>
+        <div class="cmd"><input id="bin-ps" readonly value="irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex" aria-labelledby="bin-ps-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-ps">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-mise-label">mise</p>
+        <div class="cmd"><input id="bin-mise" readonly value="mise use -g github:GhostPawJS/codex" aria-labelledby="bin-mise-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-mise">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-ubi-label">ubi</p>
+        <div class="cmd"><input id="bin-ubi" readonly value="ubi --project GhostPawJS/codex --exe ghostpaw-codex --in ~/.local/bin" aria-labelledby="bin-ubi-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-ubi">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-eget-label">eget</p>
+        <div class="cmd"><input id="bin-eget" readonly value="eget GhostPawJS/codex" aria-labelledby="bin-eget-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-eget">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-npx-label">npx, with Node.js 24 or newer</p>
+        <div class="cmd"><input id="bin-npx" readonly value="npx -y @ghostpaw/codex --help" aria-labelledby="bin-npx-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-npx">Copy</button></div></div>
+    </div>
+    <dl class="ledger wide">
+      <div><dt>linux-x64</dt><dd>41.7 MB tar.gz</dd></div>
+      <div><dt>linux-arm64</dt><dd>41.1 MB tar.gz</dd></div>
+      <div><dt>darwin-arm64</dt><dd>44.8 MB tar.gz</dd></div>
+      <div><dt>darwin-x64</dt><dd>46.4 MB tar.gz</dd></div>
+      <div><dt>windows-x64</dt><dd>38.4 MB zip</dd></div>
+    </dl>
+    <p class="note">Archive sizes of the v0.4.0 release assets. Linux builds need glibc 2.28 or newer; on Alpine, use npx.</p>
+    <ul class="bin-trust">
+      <li>install.sh and install.ps1 check each archive against SHA256SUMS and stop on a mismatch.</li>
+      <li>Each archive and SHA256SUMS carry a GitHub build attestation. Check one with <code>gh attestation verify &lt;archive&gt; -R GhostPawJS/codex</code>.</li>
+      <li>The binaries are not code signed. macOS builds carry an ad-hoc signature, so a browser download needs <code>xattr -d com.apple.quarantine ghostpaw-codex</code>. Windows may show a SmartScreen warning for a browser download.</li>
+    </ul>
+    <figure class="shot">
+      <a href="{{.urls.cliShot}}"><img src="assets/images/cli-1600.webp" srcset="assets/images/cli-800.webp 800w, assets/images/cli-1600.webp 1600w" sizes="(min-width: 68rem) 64rem, 100vw" width="1600" height="790" decoding="async" alt="Terminal session with ghostpaw-codex 0.4.0: --version prints 0.4.0, three belief add calls return success, search for postgres port finds the staging Postgres belief, review flags lists three beliefs with single_evidence, and search --help lists its flags." loading="lazy"></a>
+      <figcaption>A session with the 0.4.0 linux-x64 binary against a fresh database, output piped through jq. Open the image for full size.</figcaption>
+    </figure>
+    <p class="links"><a class="more" href="{{.urls.release}}">Release v0.4.0</a><a href="{{.urls.readmeInstall}}">Install notes in the README</a><a href="{{.urls.attest}}">gh attestation verify</a></p>
   </section>
 
   <section class="start" aria-labelledby="start-title">

@@ -94,8 +94,9 @@ One belief, five moves, on a dark scope. The page centres on a single belief pan
 3. What a belief records: the fields as a labelled form (claim, source, category, certainty, evidence, freshness, lineage). V019 V026
 4. If memory worries you: active-only recall, flags tell you what to prune, retire deletes, the database is a file you can open with sqlite3. V067 V066 V048
 5. Numbers: 0 runtime deps, Node 24+, 32.5 KB gzip, about 4 ms import, 378 tests, 7 tools. V017
-6. Start: install, quick start code, GitHub, README, live demo, back to the GhostPaw home.
-7. Footer: Impressum, Datenschutz.
+6. Binaries: one-line installs for the standalone `ghostpaw-codex` executable (curl, PowerShell, mise, ubi, eget, npx), the five targets with archive sizes, checksums and attestations, the unsigned note, and a screenshot of a real session. V067 V017
+7. Start: install, quick start code, GitHub, README, live demo, back to the GhostPaw home.
+8. Footer: Impressum, Datenschutz.
 
 ## Palette
 | Role | Color | Source |
@@ -125,6 +126,7 @@ The belief is a pane: panel ground, 1px rule border, a 3px top bar in alarm rose
 | --- | --- | --- | --- |
 | hero paw on belief card | protagonist | a translucent holographic card drawn in cyan light with a glowing ghost paw print on it and a small rose flag on its corner, violet afterimage cards behind, on pure black; no people, no logos V067 V073 | generated |
 | memory shard | atmosphere | a cracked shard of cyan light dissolving into violet particles, the wrong fact breaking up, on pure black V025 | generated |
+| terminal session | evidence | real output of the 0.4.0 binary against a fresh database (version, belief add, search, review flags, search --help), recorded with vhs in the page palette; never edited V067 V073 | real capture, docs/assets/cli.png |
 | share card | share preview | the hero art with the headline in the display face at 1200×630 | generated art, rendered from HTML |
 
 ## Motion
@@ -141,6 +143,7 @@ Reduced motion: no sweep; panes swap without movement and the afterimage is show
 - Never present voices as customers; describe what developers report in our words. V010 V014
 
 ## Changelog
+- 2026-10-27: codex 0.4.0 ships standalone binaries. New spine item 6, Binaries: install lines, targets and archive sizes from the v0.4.0 release assets, SHA256SUMS and attestation check, unsigned note, and the terminal session screenshot (new Imagery row). Other sections unchanged.
 - 2026-10-24: portal chrome pass. Shared top bar (GhostPaw/<lib>, Live demo or Docs, GitHub, npm), version badge, footer row of all seven libraries; sibling links row dropped from the start section; import time re-measured at low machine load; the ruled grid on the page ground was replaced by one radial glow (lfm 0.1.9 rejects ruled ground textures); share card relabelled GhostPaw/<lib> with the install line.
 - 2026-10-24: codex 0.3.2 on npm. The five drill steps re-run against 0.3.2 with the same clock (same certainty, freshness, flags and deleted ids); kicker, intro, JSON-LD version and numbers updated (31.5 KB gzip, 380 tests from the v0.3.2 tag).
 - 2026-10-24: visual rebuild after owner review: paper index cards replaced by the shared dark spectral identity (void, spectral cyan, wraith violet, alarm rose, ward green; Tektur, system sans, Martian Mono; generated paw-on-card and memory-shard art). Drill values, numbers and copy rules kept; direction 3 struck and direction 9 chosen.

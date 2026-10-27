@@ -27,7 +27,11 @@
     "cfBeacon": "https://static.cloudflareinsights.com/beacon.min.js",
     "docsCapture": "https://codex.ghostpaw.dev/docs/#/capture",
     "docsFlags": "https://codex.ghostpaw.dev/docs/#/flags",
-    "docsLog": "https://codex.ghostpaw.dev/docs/#/log"
+    "docsLog": "https://codex.ghostpaw.dev/docs/#/log",
+    "release": "https://github.com/GhostPawJS/codex/releases/tag/v0.4.0",
+    "readmeInstall": "https://github.com/GhostPawJS/codex#install",
+    "attest": "https://cli.github.com/manual/gh_attestation_verify",
+    "cliShot": "https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.png"
   },
   "jsonld": {
     "@context": "https://schema.org",
@@ -39,7 +43,7 @@
         "codeRepository": "{{.urls.github}}",
         "programmingLanguage": "TypeScript",
         "runtimePlatform": "Node.js 24",
-        "version": "0.3.2",
+        "version": "0.4.0",
         "license": "{{.urls.mit}}",
         "author": {
           "@type": "Organization",
