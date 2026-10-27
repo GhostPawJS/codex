@@ -44,6 +44,24 @@ if (!wrote.ok) fail(`write failed: ${JSON.stringify(wrote)}`);
 const read = JSON.parse(run(['--db', db, 'search_codex', '--query', 'sqlite']));
 if (read.data?.results?.length !== 1) fail(`read failed: ${JSON.stringify(read)}`);
 
+const added = JSON.parse(
+	run([
+		'belief',
+		'add',
+		'Noun verb smoke marker',
+		'--source',
+		'explicit',
+		'--category',
+		'fact',
+		'--db',
+		db,
+		'--json',
+	]),
+);
+if (!added.ok) fail('noun-verb add failed');
+const found = JSON.parse(run(['search', 'Noun verb smoke marker', '--db', db, '--json']));
+if (!found.data?.results?.length) fail('noun-verb search failed');
+
 const tools = await new Promise((done) => {
 	const child = spawn(binary, ['mcp', '--db', db], { stdio: ['pipe', 'pipe', 'inherit'] });
 	let out = '';

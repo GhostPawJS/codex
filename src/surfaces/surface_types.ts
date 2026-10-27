@@ -9,6 +9,16 @@ export interface JsonSchema {
 }
 export interface SurfaceTool<TCtx> {
 	name: string;
+	cli?: {
+		noun?: string;
+		verb: string;
+		positionals?: string[];
+		action?: {
+			property: string;
+			verbs?: Record<string, string>;
+			positionals?: Record<string, string[]>;
+		};
+	};
 	title?: string;
 	description: string;
 	inputSchema: JsonSchema & { type: 'object' };

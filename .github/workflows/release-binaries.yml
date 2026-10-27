@@ -9,8 +9,6 @@ name: Release binaries
 on:
   push:
     tags: ["v*"]
-    # Prototype branch: build and smoke-test every push. Drop before merging.
-    branches: ["sea-binary"]
   pull_request:
     paths:
       - "src/**"

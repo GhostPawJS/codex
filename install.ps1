@@ -12,6 +12,7 @@ $Version = $env:GHOSTPAW_VERSION
 $Dir = if ($env:GHOSTPAW_INSTALL_DIR) { $env:GHOSTPAW_INSTALL_DIR } else { Join-Path $env:LOCALAPPDATA 'Programs\ghostpaw\bin' }
 
 if ($env:PROCESSOR_ARCHITECTURE -ne 'AMD64') { throw "Only Windows x64 builds exist so far (found $env:PROCESSOR_ARCHITECTURE)" }
+if ($Version) { $Version = $Version.TrimStart('v') }
 if (-not $Version) {
 	$Version = (Invoke-RestMethod "https://api.github.com/repos/$Repo/releases/latest").tag_name.TrimStart('v')
 }
@@ -40,4 +41,5 @@ if (-not ($UserPath -split ';' | Where-Object { $_ -eq $Dir })) {
 	[Environment]::SetEnvironmentVariable('Path', "$UserPath;$Dir", 'User')
 	Write-Host "Added $Dir to your user PATH (open a new terminal)"
 }
+$env:PATH = "$Dir;$env:PATH"
 Write-Host "Installed $(Join-Path $Dir "$Bin.exe") $(& (Join-Path $Dir "$Bin.exe") --version)"

@@ -2,7 +2,7 @@ import type { CodexDb } from '../database.ts';
 import type { McpServerOptions } from '../surfaces/mcp_server.ts';
 import { codexVersion } from '../version.ts';
 import { codexMcpInstructions } from './codex_mcp_instructions.ts';
-import { codexSurfaceTools } from './codex_surface_tools.ts';
+import { codexMcpSurfaceTools } from './codex_surface_tools.ts';
 
 export function codexMcpOptions(
 	context: () => CodexDb | Promise<CodexDb>,
@@ -12,7 +12,7 @@ export function codexMcpOptions(
 		version: codexVersion,
 		title: 'Codex',
 		instructions: codexMcpInstructions,
-		tools: codexSurfaceTools,
+		tools: codexMcpSurfaceTools,
 		context,
 		annotations: (tool) => ({
 			readOnlyHint: tool.readOnly ?? false,
