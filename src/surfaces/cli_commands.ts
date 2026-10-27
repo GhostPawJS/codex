@@ -28,6 +28,7 @@ export function cliCommands<T>(tools: readonly SurfaceTool<T>[]) {
 				path: [cli.noun, verb].filter(Boolean).join(' '),
 				fixed: action && value !== undefined ? { [action.property]: value } : {},
 				positionals: action?.positionals?.[String(value)] ?? cli.positionals ?? [],
+				flags: action?.flags?.[String(value)],
 			};
 		});
 	});
@@ -77,19 +78,19 @@ export async function runCliCommand<T>(
 			if (flag === '--') break;
 			if (flag === '--db' || flag?.startsWith('--db=')) {
 				db = flag === '--db' ? args.splice(i + 1, 1)[0] : flag.slice(5);
-				if (!db || db.startsWith('--')) throw new CliUsageError('--db requires a path');
+				if (!db || /^--[a-z]/i.test(db)) throw new CliUsageError('--db requires a path');
 			} else if (flag === '--json') json = true;
 			else if (flag === '--quiet') quiet = true;
 			else if (flag === '--compact') compact = true;
 			else if (flag === '--help' || flag === '-h') help = true;
 			else if (['--version', '-V', '-v'].includes(flag ?? '')) {
-				if (!quiet) stdout.write(`${cliVersion(options.version)}\n`);
+				if (!quiet) stdout.write(`${cliVersion(options.version, { bin: options.bin })}\n`);
 				return 0;
 			} else if (flag !== '--no-color') continue;
 			args.splice(i--, 1);
 		}
 		if (args[0] === 'version') {
-			if (!quiet) stdout.write(`${cliVersion(options.version)}\n`);
+			if (!quiet) stdout.write(`${cliVersion(options.version, { bin: options.bin })}\n`);
 			return 0;
 		}
 		if (args[0] === 'help') {
@@ -107,6 +108,10 @@ export async function runCliCommand<T>(
 					schema.type === 'object' || !schema.type ? 'json' : (schema.type as CliArgument['type']),
 				description: schema.description,
 				enum: schema.enum,
+				parseValue:
+					command.tool.cli?.valueParsers?.[
+						name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
+					],
 				...(schema.items?.type ? { itemType: schema.items.type as CliArgument['type'] } : {}),
 			});
 			const properties = command.tool.inputSchema.properties ?? {};
@@ -123,7 +128,10 @@ export async function runCliCommand<T>(
 						: {}),
 				})),
 				flags: Object.entries(properties)
-					.filter(([name]) => !(name in command.fixed))
+					.filter(
+						([name]) =>
+							!(name in command.fixed) && (!command.flags || command.flags.includes(name)),
+					)
 					.map(([name, schema]) => ({
 						...argument(
 							name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`),
@@ -141,7 +149,7 @@ export async function runCliCommand<T>(
 				stdout.write(
 					entry
 						? renderCliHelp(specFor(entry))
-						: `${options.bin} ${options.version}\n${options.description}\n\nCommands:\n${matches.map((command) => `  ${command.path}`).join('\n')}\n  mcp, skill, tools [--json], describe <tool>, call <tool> [JSON|-], completions <bash|zsh|fish>, version\nGlobal flags: --db <path>, --json, --quiet, --compact, --help/-h, --version/-V/-v, --no-color\n`,
+						: `${options.bin} ${options.version}\n${options.description}\n${options.describeDb ? `\n${options.describeDb(db === undefined ? {} : { db })}\n` : ''}\nCommands:\n${matches.map((command) => `  ${command.path}`).join('\n')}\n  mcp, skill, tools [--json], describe <tool>, call <tool> [JSON|-], completions <bash|zsh|fish>, version\nGlobal flags: --db <path>, --json, --quiet, --compact, --help/-h, --version/-V/-v, --no-color\n`,
 				);
 			return 0;
 		}
@@ -202,14 +210,22 @@ export async function runCliCommand<T>(
 		}
 		const input = { ...(base as object), ...parseCliArgs(rest, spec), ...entry.fixed };
 		const errors = validateInput(entry.tool.inputSchema, input);
-		if (errors.length) throw new CliUsageError(errors.join('\n'));
+		if (errors.length) {
+			const missing = errors
+				.map((error) => /^\$\.([^:]+): required$/.exec(error)?.[1])
+				.filter(Boolean);
+			throw new CliUsageError(
+				`${missing.length ? `Missing required argument: ${missing.join(', ')}.` : errors.join('\n')} Usage: ${spec.command} ${entry.positionals.map((name) => `<${name}>`).join(' ')} [flags]. See ${spec.command} --help.`,
+			);
+		}
 		const context = await options.openContext(db === undefined ? {} : { db });
 		try {
 			const result = await entry.tool.handler(context, input);
 			const record = result as {
 				ok?: boolean;
 				outcome?: string;
-				error?: { code?: string; message?: string };
+				error?: { code?: string; message?: string; recovery?: string };
+				clarification?: { question: string; missing: string[] };
 				summary?: string;
 				data?: unknown;
 			};
@@ -221,13 +237,24 @@ export async function runCliCommand<T>(
 						: record.ok === false
 							? 1
 							: 0;
-			if (code) stderr.write(`${record.error?.message ?? record.summary ?? 'Tool failed'}\n`);
-			if (!quiet)
-				stdout.write(
-					json || !(stdout as { isTTY?: boolean }).isTTY
-						? `${JSON.stringify(result, null, compact ? undefined : 2)}\n`
-						: `${record.summary ?? ''}\n${JSON.stringify(record.data ?? {}, null, 2)}\n`,
+			if (code) {
+				const missing = record.clarification?.missing.map(
+					(name) => `--${name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
 				);
+				stderr.write(
+					`${record.clarification?.question ?? record.error?.message ?? record.summary ?? 'Tool failed'}\n${missing?.length ? `Missing: ${missing.join(', ')}\n` : ''}${record.error?.recovery ? `${record.error.recovery}\n` : ''}`,
+				);
+			}
+			if (json && !quiet)
+				stdout.write(`${JSON.stringify(result, null, compact ? undefined : 2)}\n`);
+			else if (!code && options.formatResult) {
+				stdout.write(options.formatResult(result, entry.tool, input, quiet));
+				const warnings = (result as { warnings?: { code?: string; message?: string }[] }).warnings;
+				if (!quiet)
+					for (const warning of warnings ?? [])
+						if (warning.code !== 'empty_result') stderr.write(`warning: ${warning.message}\n`);
+			} else if (!quiet && !code)
+				stdout.write(`${JSON.stringify(result, null, compact ? undefined : 2)}\n`);
 			return code;
 		} finally {
 			await options.closeContext?.(context);

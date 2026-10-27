@@ -20,7 +20,7 @@ describe('getTrends', () => {
 		strictEqual(trends.revisedHighCertaintyCount, 1);
 	});
 
-	it('detects repeatedly revised beliefs (instability)', async () => {
+	it('does not count merge fan-in as repeated correction', async () => {
 		const db = await createInitializedCodexDb();
 		remember(db, { claim: 'A', source: 'explicit', category: 'fact' }, { now: 1 });
 		remember(db, { claim: 'B', source: 'explicit', category: 'fact' }, { now: 2 });
@@ -28,7 +28,7 @@ describe('getTrends', () => {
 		const merged = mergeBeliefs(db, { beliefIds: [1, 2, 3], claim: 'ABC combined' }, { now: 10 });
 		strictEqual(merged.isActive, true);
 		const trends = getTrends(db);
-		strictEqual(trends.repeatedlyRevisedCount, 1);
+		strictEqual(trends.repeatedlyRevisedCount, 0);
 	});
 
 	it('returns zero instability for fresh codex', async () => {
@@ -37,4 +37,19 @@ describe('getTrends', () => {
 		const trends = getTrends(db);
 		strictEqual(trends.repeatedlyRevisedCount, 0);
 	});
+});
+
+it('counts corrections rather than merges or forgetting in calibration and repeated revision', async () => {
+	const db = await createInitializedCodexDb();
+	for (const claim of ['First', 'Second', 'Winner'])
+		remember(db, { claim, source: 'explicit', category: 'fact', certainty: 0.9 }, { now: 1 });
+	mergeBeliefs(db, { beliefIds: [1], successorId: 3 }, { now: 2 });
+	mergeBeliefs(db, { beliefIds: [2, 3] }, { now: 3 });
+	strictEqual(getTrends(db).revisedHighCertaintyCount, 0);
+	strictEqual(getTrends(db).calibrationAlerts.length, 0);
+	const corrected = correctBelief(db, 4, { claim: 'New understanding' }, { now: 4 });
+	strictEqual(getTrends(db).revisedHighCertaintyCount, 1);
+	correctBelief(db, corrected.id, { claim: 'Further correction' }, { now: 5 });
+	strictEqual(getTrends(db).repeatedlyRevisedCount, 1);
+	db.close();
 });

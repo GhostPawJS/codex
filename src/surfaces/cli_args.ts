@@ -10,6 +10,7 @@ export interface CliArgument {
 	required?: boolean;
 	variadic?: boolean;
 	itemType?: CliValueType;
+	parseValue?: ((raw: string) => unknown) | undefined;
 }
 export interface CliSpec {
 	command: string;
@@ -34,6 +35,7 @@ export function parseCliArgs(argv: string[], spec: CliSpec): Record<string, unkn
 				throw new CliUsageError(`Cannot read value file: ${raw.slice(1)}`);
 			}
 		}
+		if (arg.parseValue) return arg.parseValue(value);
 		let result: unknown = value;
 		if (arg.type === 'number' || arg.type === 'integer') {
 			result = Number(value);
@@ -79,7 +81,7 @@ export function parseCliArgs(argv: string[], spec: CliSpec): Record<string, unkn
 			const prefix = (name ?? '').slice(0, 3);
 			const suggestion = prefix ? flags.find((entry) => entry.name.startsWith(prefix)) : undefined;
 			throw new CliUsageError(
-				`Unknown flag: ${flag}${suggestion ? `; did you mean --${suggestion.name}?` : ''}`,
+				`Unknown flag: ${flag}${suggestion ? `; did you mean --${suggestion.name}?` : ''}. Allowed flags: ${flags.map((entry) => `--${entry.name}`).join(', ') || '(none)'}`,
 			);
 		}
 		if (negative && arg.type !== 'boolean')

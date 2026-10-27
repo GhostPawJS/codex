@@ -1,7 +1,6 @@
 import type { CodexDb } from '../database.ts';
 import type { DismissalRecord } from '../dismissals/types.ts';
 import * as write from '../write.ts';
-
 import { translateToolError } from './tool_errors.ts';
 import { defineCodexTool, integerSchema, objectSchema } from './tool_metadata.ts';
 import { dismissProximityToolName } from './tool_names.ts';
@@ -9,6 +8,7 @@ import { reviewViewNext } from './tool_next.ts';
 import { toDismissalRef } from './tool_ref.ts';
 import type { ToolResult } from './tool_types.ts';
 import { toolSuccess } from './tool_types.ts';
+import { validateToolInput } from './validate_tool_input.ts';
 
 export interface DismissProximityToolData {
 	dismissal: DismissalRecord;
@@ -20,6 +20,8 @@ export function dismissProximityToolHandler(
 	db: CodexDb,
 	input: { beliefA: number; beliefB: number },
 ): DismissProximityToolResult {
+	const invalid = validateToolInput(dismissProximityTool.inputSchema, input);
+	if (invalid) return invalid;
 	try {
 		const dismissal = write.dismissProximityPair(db, input.beliefA, input.beliefB);
 		return toolSuccess(

@@ -16,3 +16,15 @@ describe('buildQueryEmbedding', () => {
 		strictEqual(Array.from(vector).join(','), '0,0,0,0,0,0,0,0');
 	});
 });
+
+it('weights query token buckets without changing stored embedding defaults', () => {
+	const weighted = buildQueryEmbedding(
+		'fox warrior',
+		256,
+		new Map([
+			['fox', 0],
+			['warrior', 1],
+		]),
+	);
+	strictEqual(Array.from(weighted).join(','), Array.from(buildQueryEmbedding('warrior')).join(','));
+});

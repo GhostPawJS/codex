@@ -36,7 +36,7 @@ test('skill output has deterministic frontmatter, CLI, MCP and references', () =
 	for (const expected of [
 		'MCP:',
 		'example call <tool>',
-		'references/search.md',
+		'example skill search',
 		'Read-only.',
 		'| mode | string | yes | a, b.',
 		'Search first.',
@@ -50,12 +50,33 @@ test('reject invalid skill metadata', () => {
 		assert.throws(() => renderSkillMarkdown({ ...spec, description }));
 });
 
-test('reference base changes only workflow link targets', () => {
+test('workflow commands are independent of reference base', () => {
 	assert.equal(
 		renderSkillMarkdown(spec, { referencesBase: 'skills/example/references' }),
-		renderSkillMarkdown(spec).replace(
-			'(references/search.md)',
-			'(skills/example/references/search.md)',
-		),
+		renderSkillMarkdown(spec),
 	);
+});
+
+test('tool parameter tables expand nested objects and array element types', () => {
+	const tool = spec.tools[0];
+	assert.ok(tool);
+	const markdown = renderSkillMarkdown({
+		...spec,
+		tools: [
+			{
+				...tool,
+				inputSchema: {
+					type: 'object',
+					properties: {
+						parent: {
+							type: 'object',
+							required: ['child'],
+							properties: { child: { type: 'array', items: { type: 'integer' } } },
+						},
+					},
+				},
+			},
+		],
+	});
+	assert.match(markdown, /\| parent.child \| array of integer \| yes \|/);
 });

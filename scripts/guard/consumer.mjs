@@ -163,7 +163,7 @@ try {
 		{ cwd: temp },
 	);
 	const bin = join(modules, '.bin', binName);
-	assert.equal(run(bin, ['--version']).trim(), pkg.version);
+	assert.equal(run(bin, ['--version']).trim(), `${binName} ${pkg.version} (npm)`);
 	const db = join(temp, 'smoke.db');
 	const remembered = JSON.parse(run(bin, ['--db', db, ...cliRemember]));
 	const searched = JSON.parse(run(bin, ['--db', db, ...cliSearch]));

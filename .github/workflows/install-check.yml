@@ -36,7 +36,7 @@ jobs:
           export PATH="$GHOSTPAW_INSTALL_DIR:$PATH"
           if [ "$RUNNER_OS" = Linux ]; then export GHOSTPAW_VERIFY=attestation; fi
           curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --version "$version"
-          test "$(ghostpaw-codex --version)" = "codex $version (binary, ${{ matrix.os == 'ubuntu-24.04' && 'linux-x64' || 'darwin-arm64' }})"
+          test "$(ghostpaw-codex --version)" = "ghostpaw-codex $version (binary, ${{ matrix.os == 'ubuntu-24.04' && 'linux-x64' || 'darwin-arm64' }})"
           echo "Version: $version verified on $RUNNER_OS" >> "$GITHUB_STEP_SUMMARY"
           ghostpaw-codex belief add "Install check marker" --source explicit --category fact --db "$RUNNER_TEMP/codex.db" --json | jq -e '.ok == true'
           echo 'Belief add: passed' >> "$GITHUB_STEP_SUMMARY"
@@ -64,7 +64,7 @@ jobs:
           $env:GHOSTPAW_VERSION = $version
           $env:GHOSTPAW_INSTALL_DIR = Join-Path $env:RUNNER_TEMP 'codex-bin'
           irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex
-          if ((ghostpaw-codex --version) -ne "codex $version (binary, windows-x64)") { throw 'Version mismatch' }
+          if ((ghostpaw-codex --version) -ne "ghostpaw-codex $version (binary, windows-x64)") { throw 'Version mismatch' }
           "Version: $version verified on Windows" >> $env:GITHUB_STEP_SUMMARY
           $db = Join-Path $env:RUNNER_TEMP 'codex.db'
           $added = ghostpaw-codex belief add 'Install check marker' --source explicit --category fact --db $db --json | ConvertFrom-Json

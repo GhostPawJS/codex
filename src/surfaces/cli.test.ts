@@ -266,7 +266,19 @@ test('version flags and command print the human library variant', async () => {
 	for (const args of [['--version'], ['-V'], ['-v'], ['version']]) {
 		const result = await invoke(args);
 		assert.equal(result.code, 0);
-		assert.equal(result.out, 'codex 1.0 (library)\n');
+		assert.equal(result.out, 'test 1.0 (library)\n');
 		assert.equal(result.opens, 0);
+	}
+});
+
+test('database paths beginning with dashes follow the named-flag rule in both CLI forms', async () => {
+	for (const args of [
+		['tool', 'test', '--some-value', '2'],
+		['test_tool', '--some-value', '2'],
+	]) {
+		const result = await invoke([...args, '--db', '--123.db']);
+		assert.equal(result.code, 0);
+		assert.deepEqual(result.contexts, [{ db: '--123.db' }]);
+		assert.equal((await invoke([...args, '--db', '--quiet'])).code, 2);
 	}
 });

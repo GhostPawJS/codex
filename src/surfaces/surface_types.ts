@@ -13,12 +13,15 @@ export interface SurfaceTool<TCtx> {
 		noun?: string;
 		verb: string;
 		positionals?: string[];
+		valueParsers?: Record<string, (raw: string) => unknown>;
 		action?: {
 			property: string;
 			verbs?: Record<string, string>;
 			positionals?: Record<string, string[]>;
+			flags?: Record<string, string[]>;
 		};
 	};
+	example?: Record<string, unknown> | undefined;
 	title?: string;
 	description: string;
 	inputSchema: JsonSchema & { type: 'object' };

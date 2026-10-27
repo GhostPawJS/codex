@@ -12,16 +12,21 @@ function hash(text: string): number {
 	return value >>> 0;
 }
 
-export function buildQueryEmbedding(text: string, dimension = DEFAULT_DIMENSION): Float32Array {
+export function buildQueryEmbedding(
+	text: string,
+	dimension = DEFAULT_DIMENSION,
+	weights?: ReadonlyMap<string, number>,
+): Float32Array {
 	const normalized = normalizeClaim(text);
 	const buckets = new Array<number>(dimension).fill(0);
 	for (const token of normalized.split(/\s+/).filter(Boolean)) {
+		const weight = weights?.get(token) ?? 1;
 		const tokenBucket = hash(token) % dimension;
-		buckets[tokenBucket] = (buckets[tokenBucket] ?? 0) + 2;
+		buckets[tokenBucket] = (buckets[tokenBucket] ?? 0) + 2 * weight;
 		for (let index = 0; index < token.length - 2; index += 1) {
 			const trigram = token.slice(index, index + 3);
 			const trigramBucket = hash(`tri:${trigram}`) % dimension;
-			buckets[trigramBucket] = (buckets[trigramBucket] ?? 0) + 1;
+			buckets[trigramBucket] = (buckets[trigramBucket] ?? 0) + weight;
 		}
 	}
 	return normalizeVector(buckets);

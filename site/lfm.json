@@ -3,7 +3,7 @@
   "url": "https://codex.ghostpaw.dev/",
   "language": "en",
   "title": "codex: agent memory that shows a wrong fact's source and lets you correct it",
-  "description": "@ghostpaw/codex stores what your agent believes as claims with a source, a certainty and a revision history. Flags show what is stale or weakly sourced; one call corrects or deletes. Node.js 24, zero dependencies, MIT.",
+  "description": "@ghostpaw/codex stores what your agent believes as claims with a source, a certainty and a revision history. Flags show what is stale or weakly sourced; one call corrects or deletes. One executable per platform or npm (Node.js 24+), zero dependencies, MIT.",
   "socialImage": {
     "src": "assets/images/share.png",
     "alt": "A glowing cyan paw print on a holographic belief card with a rose flag, beside the line: When one agent saves a wrong fact, every agent trusts it."

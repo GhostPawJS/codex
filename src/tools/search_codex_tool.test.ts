@@ -60,11 +60,14 @@ describe('searchCodexToolHandler', () => {
 		}
 	});
 
-	it('returns empty for empty query via recall short-circuit', async () => {
+	it('rejects empty query with a recovery hint', async () => {
 		const db = await createInitializedCodexDb();
 		remember(db, { claim: 'Exists', source: 'explicit', category: 'fact' }, { now: 1 });
 		const result = searchCodexToolHandler(db, { query: '', minScore: 0 });
-		strictEqual(result.ok, true);
-		if (result.ok) strictEqual(result.data.results.length, 0);
+		strictEqual(result.ok, false);
+		if (result.outcome === 'error') {
+			strictEqual(result.error.code, 'invalid_input');
+			strictEqual(Boolean(result.error.recovery), true);
+		}
 	});
 });

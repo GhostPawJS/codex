@@ -89,3 +89,25 @@ describe('mergeBeliefs', () => {
 		strictEqual(getActiveBeliefRow(db, 2), null);
 	});
 });
+
+it('combines evidence and retains the strongest certainty unless overridden', async () => {
+	const db = await createInitializedCodexDb();
+	remember(
+		db,
+		{ claim: 'First', source: 'explicit', category: 'fact', certainty: 0.95 },
+		{ now: 1 },
+	);
+	remember(db, { claim: 'Second', source: 'inferred', category: 'fact' }, { now: 2 });
+	const merged = mergeBeliefs(db, { beliefIds: [1, 2], source: 'inferred' }, { now: 3 });
+	strictEqual(merged.evidence, 2);
+	strictEqual(merged.certainty, 0.95);
+	remember(db, { claim: 'Third', source: 'explicit', category: 'fact' }, { now: 4 });
+	const successor = mergeBeliefs(
+		db,
+		{ beliefIds: [merged.id], successorId: 4, certainty: 0.6 },
+		{ now: 5 },
+	);
+	strictEqual(successor.evidence, 3);
+	strictEqual(successor.certainty, 0.6);
+	db.close();
+});

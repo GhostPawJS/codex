@@ -1,7 +1,6 @@
 import type { FlagResultItem, LogRecord, StatusRecord, TrendRecord } from '../beliefs/types.ts';
 import type { CodexDb } from '../database.ts';
 import * as read from '../read.ts';
-
 import { translateToolError } from './tool_errors.ts';
 import { defineCodexTool, enumSchema, integerSchema, objectSchema } from './tool_metadata.ts';
 import { reviewCodexToolName } from './tool_names.ts';
@@ -9,6 +8,7 @@ import { inspectItemNext, reviseNext } from './tool_next.ts';
 import { toBeliefIdRef } from './tool_ref.ts';
 import type { ToolEntityRef, ToolNextStepHint, ToolResult } from './tool_types.ts';
 import { toolSuccess, toolWarning } from './tool_types.ts';
+import { validateToolInput } from './validate_tool_input.ts';
 
 type ReviewCodexView = 'flags' | 'log' | 'status' | 'trends';
 
@@ -79,6 +79,8 @@ export function reviewCodexToolHandler(
 	db: CodexDb,
 	input: { view: ReviewCodexView; limit?: number; now?: number },
 ): ReviewCodexToolResult {
+	const invalid = validateToolInput(reviewCodexTool.inputSchema, input);
+	if (invalid) return invalid;
 	try {
 		switch (input.view) {
 			case 'flags':
@@ -119,7 +121,10 @@ export const reviewCodexTool = defineCodexTool<
 		'One review surface payload. Flags include reason codes and review priority. Status includes integrity, distributions, and averages. Log includes typed entries. Trends include growing categories and calibration alerts.',
 	inputSchema: objectSchema(
 		{
-			view: enumSchema(['flags', 'status', 'log', 'trends'], 'Which codex review surface to load.'),
+			view: enumSchema(
+				['flags', 'status', 'log', 'trends'],
+				'Which codex review surface to load. Flags suppress single_evidence, low_trust and gap for beliefs created less than seven days ago.',
+			),
 			limit: integerSchema('Maximum entries for the log view.'),
 			now: integerSchema('Optional timestamp override for freshness computation.'),
 		},

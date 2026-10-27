@@ -480,16 +480,32 @@ ghostpaw-codex mcp|skill|tools|describe|call|completions|version|help
 Global flags can appear anywhere: `--db <path>`, `--json`, `--quiet`,
 `--compact`, `--help`/`-h`, `--version`/`-V`/`-v`, `--no-color`.
 `NO_COLOR` is accepted; output uses no terminal colors.
-Noun-verb commands print the full tool result as JSON with `--json` or when
-stdout is piped. Terminal output shows the summary and payload.
-`--quiet` suppresses stdout. `--compact` removes JSON indentation.
+Noun-verb commands print short text by default, including when stdout is piped.
+Search and review lists show one belief per line: `id  claim  [certainty source strength]`.
+Flags append reason codes; the log shows `id  type  claim`. Add, show, correct and
+merge show aligned detail fields and nearby beliefs. Status and trends show
+aligned `key: value` lines. `--json` prints the full tool result and `--compact`
+removes JSON indentation. Legacy tool invocation keeps its JSON output.
+`--quiet` prints only result ids for search, review flags and log, and the affected
+belief id for writes; status, trends and version print nothing.
 
 Use `help belief`, `belief --help` or `belief correct --help` for schema-derived
-help. Correction takes `--claim`; defer takes `--deferred-until` (timestamp).
+help. Each revision verb accepts only the flags it uses. Correction takes
+`--claim`; forgetting also accepts `--successor-id`. Deferral accepts
+`--deferred-until` as YYYY-MM-DD, DD.MM.YYYY, today, tomorrow, +3d, an ISO
+date-time with timezone, or epoch milliseconds. Calendar dates resolve to local
+end of day and must be in the future.
 Array flags repeat, kebab-case flags map to schema properties, and `@path`
 reads a value from a file. `--` ends flags. A positional `-`, or piped stdin
 with no arguments, reads a JSON object; explicit flags override its fields.
 Database selection uses `--db`, `GHOSTPAW_CODEX_DB`, then `~/.ghostpaw/codex.db`.
+Top-level help shows the resolved path. Version output starts with
+`ghostpaw-codex` and identifies binary target, npm or library execution.
+
+`ghostpaw-codex skill` prints the full skill reference. Use
+`ghostpaw-codex skill --list` to list workflow guides and
+`ghostpaw-codex skill capture-beliefs-well` to read a guide. `skill --help`
+shows these forms; unknown guide names include a suggestion.
 
 | Exit | Noun-verb result |
 |---|---|
@@ -500,7 +516,7 @@ Database selection uses `--db`, `GHOSTPAW_CODEX_DB`, then `~/.ghostpaw/codex.db`
 | 4 | Conflict or version mismatch |
 | 70 | Internal error |
 
-Errors go to stderr. With `--json`, usage and internal errors also print
+Errors and recovery hints go to stderr. Clarification prints the question and missing flags to stderr. With `--json`, usage and internal errors also print
 `{ok:false,error:{code,message}}` to stdout. Tool results retain their full
 shape. Legacy `tools [--json]`, `describe <tool>`, `call <tool> [JSON|-]`
 and `<tool_name> --parameter value` keep their existing exit codes.

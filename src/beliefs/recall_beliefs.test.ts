@@ -112,3 +112,25 @@ describe('recall', () => {
 		}
 	});
 });
+
+describe('recall relevance', () => {
+	it('downweights shared names and returns fewer results for the class repro', async () => {
+		const db = await createInitializedCodexDb();
+		for (const claim of [
+			'Fox mains a Warrior',
+			'Fox prefers prebuilt binaries',
+			'Fox lives in Germany',
+			'Fox writes TypeScript daily',
+			'Fox likes dark roast coffee',
+		])
+			remember(db, { claim, source: 'explicit', category: 'preference' }, { now: 1 });
+		const results = recall(db, 'what class does fox play', { now: 2 });
+		strictEqual(results[0]?.claim, 'Fox mains a Warrior');
+		strictEqual(results.length < 5, true);
+		const rare = recall(db, 'fox prebuilt', { now: 2 });
+		strictEqual(rare[0]?.claim, 'Fox prefers prebuilt binaries');
+		strictEqual(JSON.stringify(rare), JSON.stringify(recall(db, 'fox prebuilt', { now: 2 })));
+		strictEqual(recall(db, 'fox prebuilt', { now: 2, minScore: 100 }).length, 0);
+		db.close();
+	});
+});

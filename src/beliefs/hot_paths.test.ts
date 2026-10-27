@@ -4,7 +4,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { it } from 'node:test';
 import * as api from '../index.ts';
 
-// Pin the complete pre-optimization outputs, including order, floats and tool hints.
+// Pin outputs including correction-only trends, order, floats and tool hints.
 it('preserves remember, inspect and review outputs on a mixed belief history', (t) => {
 	const db = new DatabaseSync(':memory:');
 	api.initCodexTables(db);
@@ -41,7 +41,7 @@ it('preserves remember, inspect and review outputs on a mixed belief history', (
 	};
 	strictEqual(
 		createHash('sha256').update(JSON.stringify(result)).digest('hex'),
-		'f7c2b40b0549f9cc43f197e6670a93c8bce02ff4e0dbb3ce261c987ea87cd39a',
+		'aadd2d3b46c09c0bf5a56e8d46e08919b1ad6130fae939bea5f949bc7f071295',
 	);
 	db.close();
 });

@@ -5,19 +5,25 @@ import { resolveNow } from '../resolve_now.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
 import type { BeliefRow, FlagReasonCode, FlagResultItem } from './types.ts';
 
+export const FLAG_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
+
 function collectReasons(
 	row: BeliefRow,
 	recordFreshness: number,
 	lineageDepth: number,
 	categoryCount: number,
 	totalActive: number,
+	now: number,
 ): FlagReasonCode[] {
 	return [
 		recordFreshness < 0.4 ? 'stale' : recordFreshness < 0.7 ? 'fading' : null,
-		row.evidence === 1 ? 'single_evidence' : null,
+		now - row.created_at >= FLAG_GRACE_MS && row.evidence === 1 ? 'single_evidence' : null,
 		lineageDepth > 2 ? 'unstable' : null,
-		row.source === 'distilled' || row.source === 'inferred' ? 'low_trust' : null,
-		totalActive >= 5 && categoryCount <= 1 ? 'gap' : null,
+		now - row.created_at >= FLAG_GRACE_MS &&
+		(row.source === 'distilled' || row.source === 'inferred')
+			? 'low_trust'
+			: null,
+		now - row.created_at >= FLAG_GRACE_MS && totalActive >= 5 && categoryCount <= 1 ? 'gap' : null,
 	].filter((reason): reason is FlagReasonCode => reason !== null);
 }
 
@@ -66,6 +72,7 @@ export function listFlags(db: CodexDb, now?: number): FlagResultItem[] {
 				lineageDepth,
 				categoryCounts.get(row.category) ?? 0,
 				rows.length,
+				timestamp,
 			);
 			return {
 				...record,

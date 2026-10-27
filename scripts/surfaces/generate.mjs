@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { renderWorkflowGuide } from '../../src/surface/render_workflow_guide.ts';
 import { renderManifests, renderMcpbManifest } from '../../src/surfaces/manifests.ts';
 import { renderSkillMarkdown } from '../../src/surfaces/skill_markdown.ts';
 import { config, mcpbSpec } from './config.mjs';
@@ -14,7 +15,7 @@ const files = new Map([
 	[`skills/${config.slug}/SKILL.md`, renderSkillMarkdown(config.skill)],
 	...config.workflows.map((skill) => [
 		`skills/${config.slug}/references/${skill.name}.md`,
-		skill.content,
+		renderWorkflowGuide(skill),
 	]),
 	...Object.entries({
 		'mcpb/manifest.json': renderMcpbManifest(mcpbSpec),

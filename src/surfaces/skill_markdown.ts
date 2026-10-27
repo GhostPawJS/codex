@@ -1,4 +1,4 @@
-import type { SurfaceTool } from './surface_types.ts';
+import type { JsonSchema, SurfaceTool } from './surface_types.ts';
 
 export interface SkillMarkdownSpec<TCtx> {
 	name: string;
@@ -11,13 +11,14 @@ export interface SkillMarkdownSpec<TCtx> {
 	server: string;
 	about: string;
 	installation?: string;
+	cheatSheet?: string;
 	tools: readonly SurfaceTool<TCtx>[];
 	workflows: readonly { name: string; description: string }[];
 	principles: readonly string[];
 }
 export function renderSkillMarkdown<TCtx>(
 	spec: SkillMarkdownSpec<TCtx>,
-	{ referencesBase = 'references' }: { referencesBase?: string } = {},
+	{ referencesBase: _referencesBase = 'references' }: { referencesBase?: string } = {},
 ): string {
 	if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(spec.name) || spec.name.length > 64)
 		throw new Error('Invalid skill name');
@@ -43,6 +44,7 @@ export function renderSkillMarkdown<TCtx>(
 		`# ${spec.name}`,
 		'',
 		...(spec.installation ? [spec.installation, ''] : []),
+		...(spec.cheatSheet ? [spec.cheatSheet, ''] : []),
 		spec.about,
 		'',
 		'## Calling tools',
@@ -69,9 +71,24 @@ export function renderSkillMarkdown<TCtx>(
 			'| Parameter | Type | Required | Values / description |',
 			'| --- | --- | --- | --- |',
 		);
-		for (const [name, property] of Object.entries(tool.inputSchema.properties ?? {}))
+		const typeName = (schema: JsonSchema): string =>
+			schema.type === 'array'
+				? `array of ${typeName(schema.items ?? {})}`
+				: String(schema.type ?? schema.oneOf?.map(typeName).join(' / ') ?? 'any');
+		const rows = (schema: JsonSchema, prefix = '') => {
+			for (const [name, property] of Object.entries(schema.properties ?? {})) {
+				const path = prefix ? `${prefix}.${name}` : name;
+				lines.push(
+					`| ${path} | ${typeName(property)} | ${schema.required?.includes(name) ? 'yes' : 'no'} | ${(property.enum ? `${property.enum.join(', ')}. ` : '') + (property.description ?? '').replaceAll('|', '\\|').replaceAll('\n', ' ')} |`,
+				);
+				if (property.properties) rows(property, path);
+			}
+		};
+		rows(tool.inputSchema);
+		if (tool.example)
 			lines.push(
-				`| ${name} | ${property.type ?? property.oneOf?.map((branch) => branch.type).join(' / ') ?? 'any'} | ${tool.inputSchema.required?.includes(name) ? 'yes' : 'no'} | ${(property.enum ? `${property.enum.join(', ')}. ` : '') + (property.description ?? '').replaceAll('|', '\\|').replaceAll('\n', ' ')} |`,
+				'',
+				`Example: \`${spec.bin} call ${tool.name} '${JSON.stringify(tool.example)}'\``,
 			);
 		lines.push('');
 	}
@@ -79,8 +96,7 @@ export function renderSkillMarkdown<TCtx>(
 		'## Workflow guides',
 		'',
 		...spec.workflows.map(
-			(workflow) =>
-				`- [${workflow.name}](${referencesBase}/${workflow.name}.md): ${workflow.description}`,
+			(workflow) => `- \`${spec.bin} skill ${workflow.name}\`: ${workflow.description}`,
 		),
 		'',
 		'## Principles',

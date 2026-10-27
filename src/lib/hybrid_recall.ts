@@ -32,7 +32,7 @@ export function hybridRecall<TValue>(
 			id: candidate.id,
 			similarity: cosineSimilarity(queryVector, candidate.vector),
 		}))
-		.sort((a, b) => b.similarity - a.similarity);
+		.sort((a, b) => b.similarity - a.similarity || a.id - b.id);
 	const semanticRankMap = new Map<number, { rank: number; similarity: number }>();
 	for (const [index, entry] of semanticRanks.entries()) {
 		semanticRankMap.set(entry.id, { rank: index + 1, similarity: entry.similarity });
@@ -58,6 +58,6 @@ export function hybridRecall<TValue>(
 			};
 		})
 		.filter((candidate) => candidate.finalScore >= minScore)
-		.sort((a, b) => b.finalScore - a.finalScore)
+		.sort((a, b) => b.finalScore - a.finalScore || a.id - b.id)
 		.slice(0, limit);
 }

@@ -1,12 +1,12 @@
 import type { CodexDb } from '../database.ts';
 import * as write from '../write.ts';
-
 import { translateToolError } from './tool_errors.ts';
 import { defineCodexTool, integerSchema, objectSchema } from './tool_metadata.ts';
 import { retireBeliefToolName } from './tool_names.ts';
 import { reviewViewNext } from './tool_next.ts';
 import type { ToolResult } from './tool_types.ts';
 import { toolSuccess, toolWarning } from './tool_types.ts';
+import { validateToolInput } from './validate_tool_input.ts';
 
 export interface RetireBeliefToolData {
 	deletedIds: number[];
@@ -18,6 +18,8 @@ export function retireBeliefToolHandler(
 	db: CodexDb,
 	input: { beliefId: number },
 ): RetireBeliefToolResult {
+	const invalid = validateToolInput(retireBeliefTool.inputSchema, input);
+	if (invalid) return invalid;
 	try {
 		const deletedIds = write.deleteBelief(db, input.beliefId);
 		if (deletedIds.length === 0) {

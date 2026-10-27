@@ -13,6 +13,7 @@ export function initBeliefTables(db: CodexDb): void {
 			created_at INTEGER NOT NULL,
 			verified_at INTEGER NOT NULL,
 			superseded_by INTEGER REFERENCES beliefs(id),
+			superseded_reason TEXT,
 			provenance TEXT,
 			deferred_until INTEGER,
 			embedding BLOB NOT NULL,
@@ -21,6 +22,15 @@ export function initBeliefTables(db: CodexDb): void {
 			embedding_version TEXT NOT NULL
 		)
 	`);
+
+	if (
+		!db
+			.prepare('PRAGMA table_info(beliefs)')
+			.all<{ name: string }>()
+			.some((column) => column.name === 'superseded_reason')
+	) {
+		db.exec('ALTER TABLE beliefs ADD COLUMN superseded_reason TEXT');
+	}
 
 	db.exec('CREATE INDEX IF NOT EXISTS beliefs_active_idx ON beliefs (superseded_by)');
 	db.exec('CREATE INDEX IF NOT EXISTS beliefs_verified_idx ON beliefs (verified_at DESC)');

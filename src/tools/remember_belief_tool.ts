@@ -1,7 +1,6 @@
 import { BELIEF_CATEGORIES, BELIEF_SOURCES, type RememberResult } from '../beliefs/types.ts';
 import type { CodexDb } from '../database.ts';
 import * as write from '../write.ts';
-
 import { translateToolError } from './tool_errors.ts';
 import {
 	defineCodexTool,
@@ -15,6 +14,7 @@ import { dismissNext, inspectItemNext, searchNext } from './tool_next.ts';
 import { toBeliefRef } from './tool_ref.ts';
 import type { ToolNextStepHint, ToolResult } from './tool_types.ts';
 import { toolSuccess, toolWarning } from './tool_types.ts';
+import { validateToolInput } from './validate_tool_input.ts';
 
 export interface RememberBeliefToolData {
 	belief: RememberResult;
@@ -32,6 +32,8 @@ export function rememberBeliefToolHandler(
 		provenance?: string;
 	},
 ): RememberBeliefToolResult {
+	const invalid = validateToolInput(rememberBeliefTool.inputSchema, input);
+	if (invalid) return invalid;
 	try {
 		const result = write.remember(db, input);
 		const entities = [toBeliefRef(result)];

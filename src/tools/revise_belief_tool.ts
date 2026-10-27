@@ -1,7 +1,6 @@
 import { BELIEF_CATEGORIES, BELIEF_SOURCES } from '../beliefs/types.ts';
 import type { CodexDb } from '../database.ts';
 import * as write from '../write.ts';
-
 import { translateToolError } from './tool_errors.ts';
 import {
 	arraySchema,
@@ -17,6 +16,7 @@ import { dismissNext, inspectItemNext, reviewViewNext } from './tool_next.ts';
 import { toBeliefIdRef, toBeliefRef } from './tool_ref.ts';
 import type { ToolEntityRef, ToolNextStepHint, ToolResult } from './tool_types.ts';
 import { toolNeedsClarification, toolSuccess } from './tool_types.ts';
+import { validateToolInput } from './validate_tool_input.ts';
 
 export interface ReviseBeliefToolInput {
 	action: 'confirm' | 'correct' | 'merge' | 'forget' | 'defer';
@@ -77,7 +77,11 @@ function handleCorrect(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefT
 }
 
 function handleMerge(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefToolResult {
-	if (!input.beliefIds || input.beliefIds.length < 2) {
+	if (
+		!input.beliefIds ||
+		input.beliefIds.length === 0 ||
+		(input.beliefIds.length < 2 && input.successorId === undefined)
+	) {
 		return toolNeedsClarification(
 			'missing_required_choice',
 			'Merge requires at least two belief ids.',
@@ -149,6 +153,8 @@ export function reviseBeliefToolHandler(
 	db: CodexDb,
 	input: ReviseBeliefToolInput,
 ): ReviseBeliefToolResult {
+	const invalid = validateToolInput(reviseBeliefTool.inputSchema, input);
+	if (invalid) return invalid;
 	try {
 		switch (input.action) {
 			case 'confirm':

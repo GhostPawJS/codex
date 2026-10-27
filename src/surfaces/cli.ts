@@ -8,12 +8,19 @@ export interface ToolCliOptions<TCtx> {
 	bin: string;
 	version: string;
 	description: string;
+	describeDb?: (options: { db?: string }) => string;
+	formatResult?: (
+		result: unknown,
+		tool: SurfaceTool<TCtx>,
+		input: Record<string, unknown>,
+		quiet: boolean,
+	) => string;
 	tools: readonly SurfaceTool<TCtx>[];
 	openContext(opts: { db?: string }): TCtx | Promise<TCtx>;
 	closeContext?: (ctx: TCtx) => void | Promise<void>;
 	commands?: {
 		mcp?: (opts: { db?: string }) => unknown | Promise<unknown>;
-		skill?: () => string | Promise<string>;
+		skill?: (args: string[]) => string | Promise<string>;
 	};
 	stdin?: Readable & { isTTY?: boolean };
 	stdout?: Writable;
@@ -30,7 +37,9 @@ export async function runToolCli<TCtx>(
 			.some((arg) => ['--version', '-V', '-v'].includes(arg))
 	) {
 		if (!argv.includes('--quiet'))
-			(options.stdout ?? process.stdout).write(`${cliVersion(options.version)}\n`);
+			(options.stdout ?? process.stdout).write(
+				`${cliVersion(options.version, { bin: options.bin })}\n`,
+			);
 		return 0;
 	}
 	const modern = await runCliCommand(argv, options);
@@ -62,7 +71,7 @@ export async function runToolCli<TCtx>(
 	};
 	for (let i = 0; i < args.length; i++) {
 		if (args[i] === '--db') {
-			if (!args[i + 1] || args[i + 1]?.startsWith('--')) return fail('--db requires a path');
+			if (!args[i + 1] || /^--[a-z]/i.test(args[i + 1] ?? '')) return fail('--db requires a path');
 			db = args[i + 1];
 			args.splice(i, 2);
 			i--;
@@ -82,7 +91,7 @@ export async function runToolCli<TCtx>(
 		return 0;
 	}
 	if (['--version', '-V', '-v', 'version'].includes(command)) {
-		stdout.write(`${cliVersion(options.version)}\n`);
+		stdout.write(`${cliVersion(options.version, { bin: options.bin })}\n`);
 		return 0;
 	}
 	if (command === 'tools') {
@@ -99,8 +108,12 @@ export async function runToolCli<TCtx>(
 	}
 	if (command === 'skill') {
 		if (!options.commands?.skill) return fail('skill command unavailable');
-		stdout.write(await options.commands.skill());
-		return 0;
+		try {
+			stdout.write(await options.commands.skill(args));
+			return 0;
+		} catch (error) {
+			return fail(error instanceof Error ? error.message : String(error));
+		}
 	}
 	if (command === 'mcp') {
 		if (!options.commands?.mcp) return fail('mcp command unavailable');

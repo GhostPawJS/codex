@@ -15081,12 +15081,16 @@
 		"type": "SurfaceTool<TCtx>",
 		"members": {
 			"cli": {
-				"type": "{ noun?: string; verb: string; positionals?: string[]; action?: { property: string; verbs?: Record<string, string>; positionals?: Record<string, string[]>; }; } | undefined",
+				"type": "{ noun?: string; verb: string; positionals?: string[]; valueParsers?: Record<string, (raw: string) => unknown>; action?: { property: string; verbs?: Record<string, string>; positionals?: Record<string, string[]>; flags?: Record<string, string[]>; }; } | undefined",
 				"optional": true
 			},
 			"description": {
 				"type": "string",
 				"optional": false
+			},
+			"example": {
+				"type": "Record<string, unknown> | undefined",
+				"optional": true
 			},
 			"handler": {
 				"type": "(ctx: TCtx, input: Record<string, unknown>) => unknown | Promise<unknown>",
@@ -15121,7 +15125,7 @@
 				"optional": true
 			}
 		},
-		"definition": "interface SurfaceTool<TCtx> { name: string; cli?: { noun?: string; verb: string; positionals?: string[]; action?: { property: string; verbs?: Record<string, string>; positionals?: Record<string, string[]>; }; }; title?: string; description: string; inputSchema: JsonSchema & { type: 'object'; }; whenToUse?: string; whenNotToUse?: string; readOnly?: boolean; sideEffects?: string; handler(ctx: TCtx, input: Record<string, unknown>): unknown | Promise<unknown>; }",
+		"definition": "interface SurfaceTool<TCtx> { name: string; cli?: { noun?: string; verb: string; positionals?: string[]; valueParsers?: Record<string, (raw: string) => unknown>; action?: { property: string; verbs?: Record<string, string>; positionals?: Record<string, string[]>; flags?: Record<string, string[]>; }; }; example?: Record<string, unknown> | undefined; title?: string; description: string; inputSchema: JsonSchema & { type: 'object'; }; whenToUse?: string; whenNotToUse?: string; readOnly?: boolean; sideEffects?: string; handler(ctx: TCtx, input: Record<string, unknown>): unknown | Promise<unknown>; }",
 		"references": {
 			"JsonSchema": "./mcp:public.JsonSchema",
 			"TCtx": "./mcp:public.SurfaceTool.types.TCtx"

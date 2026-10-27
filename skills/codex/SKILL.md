@@ -2,7 +2,7 @@
 name: codex
 description: "Store, search, and revise local beliefs with evidence and revision history. Use when recalling preferences, capturing knowledge, or maintaining agent memory."
 license: "MIT"
-compatibility: "Release binary needs no runtime installation. npx requires Node.js 24+. MCP stdio or ghostpaw-codex CLI."
+compatibility: "Release binary needs no runtime installation. MCP stdio or ghostpaw-codex CLI."
 ---
 
 # codex
@@ -24,6 +24,25 @@ irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex
 ```
 
 Run tools as `ghostpaw-codex ...`; use `~/.local/bin/ghostpaw-codex` if it is not on PATH.
+
+## Quick reference
+
+Search before adding: `ghostpaw-codex search "deployment schedule"`.
+
+- `ghostpaw-codex belief add "Deploys go out on Tuesdays." --source explicit --category fact`
+- `ghostpaw-codex belief show <id>`
+- `ghostpaw-codex belief confirm <id>`
+- `ghostpaw-codex belief correct <id> --claim "Deploys go out on Wednesdays."`
+- `ghostpaw-codex belief forget <id>`
+- `ghostpaw-codex belief defer <id> --deferred-until +7d`
+- `ghostpaw-codex belief merge <id> <id>`
+- `ghostpaw-codex review flags|status|log|trends`
+- `--json` prints full results; `--quiet` prints ids only.
+- `ghostpaw-codex skill --list` lists guides; `ghostpaw-codex skill <guide>` reads one.
+
+Exit codes: 0 success, 1 operation failure, 2 usage, 3 clarification or missing belief, 4 conflict, 70 internal failure.
+
+Database: `~/.ghostpaw/codex.db`. Override with `--db <path>` or `GHOSTPAW_CODEX_DB`.
 
 Codex is a local belief and memory engine that records claims, evidence, certainty, and revision history. Search before you remember to avoid duplicates and recover relevant context. Inspect before you revise; use revise for confirmation, correction, merging, forgetting, or deferral. Use retire only for permanent erasure. Certainty is not truth: confidence and derived flags guide attention, never prove a claim. Preserve honest lineage when understanding changes and ask for clarification when the intended action is ambiguous.
 
@@ -49,9 +68,11 @@ Read-only.
 | --- | --- | --- | --- |
 | query | string | yes | Free-form natural language query. |
 | limit | integer | no | Maximum number of results. |
-| minScore | number | no | Minimum recall score threshold. |
+| minScore | number | no | Minimum final recall score, default 0.01; relative relevance filtering also applies. |
 | category | string | no | preference, fact, procedure, capability, custom. Optional category filter. |
 | source | string | no | explicit, observed, distilled, inferred. Optional source filter. |
+
+Example: `ghostpaw-codex call search_codex '{"query":"deployment schedule"}'`
 
 ## review_codex
 
@@ -65,9 +86,11 @@ Read-only.
 
 | Parameter | Type | Required | Values / description |
 | --- | --- | --- | --- |
-| view | string | yes | flags, status, log, trends. Which codex review surface to load. |
+| view | string | yes | flags, status, log, trends. Which codex review surface to load. Flags suppress single_evidence, low_trust and gap for beliefs created less than seven days ago. |
 | limit | integer | no | Maximum entries for the log view. |
 | now | integer | no | Optional timestamp override for freshness computation. |
+
+Example: `ghostpaw-codex call review_codex '{"view":"flags"}'`
 
 ## inspect_codex_item
 
@@ -82,6 +105,8 @@ Read-only.
 | Parameter | Type | Required | Values / description |
 | --- | --- | --- | --- |
 | beliefId | integer | yes | Belief identifier. |
+
+Example: `ghostpaw-codex call inspect_codex_item '{"beliefId":1}'`
 
 ## remember_belief
 
@@ -101,6 +126,8 @@ Writes: writes_state.
 | certainty | number | no | Optional initial certainty 0–1. |
 | provenance | string | no | Optional origin reference. |
 
+Example: `ghostpaw-codex call remember_belief '{"claim":"Deploys go out on Tuesdays.","source":"explicit","category":"procedure"}'`
+
 ## revise_belief
 
 Revise an existing belief: confirm it still holds, correct it with a new claim, merge multiple beliefs into one, forget it from active recall, or defer its next flag review.
@@ -115,13 +142,15 @@ Writes: writes_state.
 | --- | --- | --- | --- |
 | action | string | yes | confirm, correct, merge, forget, defer. Revision action. |
 | beliefId | integer | no | Single belief id. |
-| beliefIds | array | no | Belief ids for merge. |
+| beliefIds | array of integer | no | Belief ids for merge. |
 | claim | string | no | Replacement or merged claim. |
 | successorId | integer | no | Existing active successor belief id. |
 | deferredUntil | integer | no | Future timestamp for deferred review. |
 | source | string | no | explicit, observed, distilled, inferred. Optional replacement source. |
 | category | string | no | preference, fact, procedure, capability, custom. Optional replacement category. |
 | certainty | number | no | Optional certainty override. |
+
+Example: `ghostpaw-codex call revise_belief '{"action":"confirm","beliefId":1}'`
 
 ## retire_belief
 
@@ -136,6 +165,8 @@ Writes: writes_state.
 | Parameter | Type | Required | Values / description |
 | --- | --- | --- | --- |
 | beliefId | integer | yes | Belief id to delete. |
+
+Example: `ghostpaw-codex call retire_belief '{"beliefId":1}'`
 
 ## dismiss_proximity
 
@@ -152,25 +183,27 @@ Writes: writes_state.
 | beliefA | integer | yes | First belief id. |
 | beliefB | integer | yes | Second belief id. |
 
+Example: `ghostpaw-codex call dismiss_proximity '{"beliefA":1,"beliefB":2}'`
+
 ## Workflow guides
 
-- [search-and-retrieve-beliefs](references/search-and-retrieve-beliefs.md): Find relevant beliefs by natural-language query, then inspect exact candidates in detail without scanning the whole codex.
-- [capture-beliefs-well](references/capture-beliefs-well.md): Capture one belief per claim with correct source, category, and certainty, always searching first to avoid duplicates.
-- [review-flags-batch](references/review-flags-batch.md): Process a queue of flagged beliefs, triaging each by its reason code with the right revision verb.
-- [resolve-near-duplicate-beliefs](references/resolve-near-duplicate-beliefs.md): Decide whether two proximate beliefs are duplicates, successors, complementary, or genuinely distinct, then act accordingly.
-- [correct-belief-lineage-honestly](references/correct-belief-lineage-honestly.md): Use correct instead of forget-and-remember so lineage preserves what changed, when, and why.
-- [handle-ambiguous-belief-updates](references/handle-ambiguous-belief-updates.md): Choose the right verb when new information collides with an existing belief: confirm, correct, merge, forget-with-successor, or dismiss.
-- [process-stale-beliefs](references/process-stale-beliefs.md): Refresh or retire beliefs whose freshness has dropped too far, using flags to identify them and the right verb to resolve each.
-- [run-calibration-pass](references/run-calibration-pass.md): Detect and respond to systematic overconfidence by inspecting calibration alerts and high-certainty revision patterns in trends.
-- [defer-beliefs-pending-outcomes](references/defer-beliefs-pending-outcomes.md): Postpone flag processing for beliefs that cannot be judged yet by deferring them until a future date.
-- [erase-beliefs-for-privacy](references/erase-beliefs-for-privacy.md): Choose between forget (soft removal with audit trail) and retire (hard delete) based on privacy and compliance requirements.
-- [batch-ingest-with-deduplication](references/batch-ingest-with-deduplication.md): High-volume capture that avoids creating duplicates by searching before each remember and resolving overlaps immediately.
-- [diagnose-declining-integrity](references/diagnose-declining-integrity.md): Find the root cause when codex integrity is dropping by analyzing status, flags, and trends systematically.
-- [upgrade-source-evidence](references/upgrade-source-evidence.md): Promote a belief from a weaker source to a stronger one when direct evidence arrives, using correct to preserve lineage.
-- [pre-register-beliefs-before-decisions](references/pre-register-beliefs-before-decisions.md): Anchor beliefs with honest certainty before outcomes arrive to enable calibration tracking.
-- [direct-supersession-between-beliefs](references/direct-supersession-between-beliefs.md): Express that one belief already covers another by forgetting the weaker one with a successor pointer, without creating new entries.
-- [dismiss-false-proximity-pairs](references/dismiss-false-proximity-pairs.md): Suppress proximity pairs that are topically near but genuinely distinct, using exponential backoff to handle recurrence.
-- [monitor-portfolio-health](references/monitor-portfolio-health.md): Regular status and trends review as a maintenance ritual to catch problems before they compound.
+- `ghostpaw-codex skill search-and-retrieve-beliefs`: Find relevant beliefs by natural-language query, then inspect exact candidates in detail without scanning the whole codex.
+- `ghostpaw-codex skill capture-beliefs-well`: Capture one belief per claim with correct source, category, and certainty, always searching first to avoid duplicates.
+- `ghostpaw-codex skill review-flags-batch`: Process a queue of flagged beliefs, triaging each by its reason code with the right revision verb.
+- `ghostpaw-codex skill resolve-near-duplicate-beliefs`: Decide whether two proximate beliefs are duplicates, successors, complementary, or genuinely distinct, then act accordingly.
+- `ghostpaw-codex skill correct-belief-lineage-honestly`: Use correct instead of forget-and-remember so lineage preserves what changed, when, and why.
+- `ghostpaw-codex skill handle-ambiguous-belief-updates`: Choose the right verb when new information collides with an existing belief: confirm, correct, merge, forget-with-successor, or dismiss.
+- `ghostpaw-codex skill process-stale-beliefs`: Refresh or retire beliefs whose freshness has dropped too far, using flags to identify them and the right verb to resolve each.
+- `ghostpaw-codex skill run-calibration-pass`: Detect and respond to systematic overconfidence by inspecting calibration alerts and high-certainty revision patterns in trends.
+- `ghostpaw-codex skill defer-beliefs-pending-outcomes`: Postpone flag processing for beliefs that cannot be judged yet by deferring them until a future date.
+- `ghostpaw-codex skill erase-beliefs-for-privacy`: Choose between forget (soft removal with audit trail) and retire (hard delete) based on privacy and compliance requirements.
+- `ghostpaw-codex skill batch-ingest-with-deduplication`: High-volume capture that avoids creating duplicates by searching before each remember and resolving overlaps immediately.
+- `ghostpaw-codex skill diagnose-declining-integrity`: Find the root cause when codex integrity is dropping by analyzing status, flags, and trends systematically.
+- `ghostpaw-codex skill upgrade-source-evidence`: Promote a belief from a weaker source to a stronger one when direct evidence arrives, using correct to preserve lineage.
+- `ghostpaw-codex skill pre-register-beliefs-before-decisions`: Anchor beliefs with honest certainty before outcomes arrive to enable calibration tracking.
+- `ghostpaw-codex skill direct-supersession-between-beliefs`: Express that one belief already covers another by forgetting the weaker one with a successor pointer, without creating new entries.
+- `ghostpaw-codex skill dismiss-false-proximity-pairs`: Suppress proximity pairs that are topically near but genuinely distinct, using exponential backoff to handle recurrence.
+- `ghostpaw-codex skill monitor-portfolio-health`: Regular status and trends review as a maintenance ritual to catch problems before they compound.
 
 ## Principles
 

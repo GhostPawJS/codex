@@ -7,11 +7,13 @@ export function markNpmEntry(): void {
 export function cliVersion(
 	version: string,
 	{
+		bin = 'ghostpaw-codex',
 		sea = isSea,
 		npm = npmEntry,
 		platform = process.platform,
 		arch = process.arch,
 	}: {
+		bin?: string;
 		sea?: () => boolean;
 		npm?: boolean;
 		platform?: string;
@@ -29,5 +31,5 @@ export function cliVersion(
 		: npm
 			? 'npm'
 			: 'library';
-	return `codex ${version} (${variant})`;
+	return `${bin} ${version} (${variant})`;
 }

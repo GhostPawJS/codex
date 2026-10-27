@@ -16,7 +16,11 @@ export function mergeBeliefs(
 	options?: WriteOptions,
 ): BeliefRecord {
 	const uniqueIds = [...new Set(input.beliefIds)];
-	if (uniqueIds.length < 2) {
+	if (
+		uniqueIds.length === 0 ||
+		(uniqueIds.length < 2 &&
+			(input.successorId === undefined || uniqueIds.includes(input.successorId)))
+	) {
 		throw new CodexValidationError(
 			'Merging beliefs requires at least two distinct active beliefs.',
 		);
@@ -28,14 +32,28 @@ export function mergeBeliefs(
 			const successor = assertActiveBeliefExists(db, input.successorId);
 			for (const belief of beliefs) {
 				if (belief.id !== successor.id) {
-					db.prepare('UPDATE beliefs SET superseded_by = ?, verified_at = ? WHERE id = ?').run(
-						successor.id,
-						timestamp,
-						belief.id,
-					);
+					db.prepare(
+						`UPDATE beliefs SET superseded_by = ?, superseded_reason = 'merged', verified_at = ? WHERE id = ?`,
+					).run(successor.id, timestamp, belief.id);
 				}
 			}
-			return mapBeliefRow(successor, timestamp);
+			const mergedIn = beliefs.filter((belief) => belief.id !== successor.id);
+			const evidence =
+				successor.evidence + mergedIn.reduce((sum, belief) => sum + belief.evidence, 0);
+			const certainty = clampCertainty(
+				input.certainty ??
+					Math.max(
+						sourceInitialCertainty(input.source ?? successor.source),
+						successor.certainty,
+						...beliefs.map((belief) => belief.certainty),
+					),
+			);
+			db.prepare('UPDATE beliefs SET evidence = ?, certainty = ? WHERE id = ?').run(
+				evidence,
+				certainty,
+				successor.id,
+			);
+			return mapBeliefRow({ ...successor, evidence, certainty }, timestamp);
 		}
 		const primary = beliefs[0];
 		if (!primary) {
@@ -45,7 +63,10 @@ export function mergeBeliefs(
 		const prepared = prepareBeliefStorage(claim);
 		const source = input.source ?? primary.source;
 		const category = input.category ?? primary.category;
-		const certainty = clampCertainty(input.certainty ?? sourceInitialCertainty(source));
+		const certainty = clampCertainty(
+			input.certainty ??
+				Math.max(sourceInitialCertainty(source), ...beliefs.map((belief) => belief.certainty)),
+		);
 		const result = db
 			.prepare(`
 			INSERT INTO beliefs (
@@ -57,7 +78,7 @@ export function mergeBeliefs(
 				claim,
 				prepared.claimNormalized,
 				certainty,
-				1,
+				beliefs.reduce((sum, belief) => sum + belief.evidence, 0),
 				source,
 				category,
 				timestamp,
@@ -72,11 +93,9 @@ export function mergeBeliefs(
 			);
 		const successorId = Number(result.lastInsertRowid);
 		for (const belief of beliefs) {
-			db.prepare('UPDATE beliefs SET superseded_by = ?, verified_at = ? WHERE id = ?').run(
-				successorId,
-				timestamp,
-				belief.id,
-			);
+			db.prepare(
+				`UPDATE beliefs SET superseded_by = ?, superseded_reason = 'merged', verified_at = ? WHERE id = ?`,
+			).run(successorId, timestamp, belief.id);
 		}
 		const row = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(successorId);
 		if (!row) {

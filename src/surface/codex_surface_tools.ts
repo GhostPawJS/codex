@@ -1,6 +1,7 @@
 import type { CodexDb } from '../database.ts';
 import type { SurfaceTool } from '../surfaces/surface_types.ts';
 import { codexTools } from '../tools/tool_registry.ts';
+import { parseDeferralDate } from './parse_deferral_date.ts';
 
 const mapping: Record<string, NonNullable<SurfaceTool<CodexDb>['cli']>> = {
 	search_codex: { verb: 'search', positionals: ['query'] },
@@ -12,7 +13,18 @@ const mapping: Record<string, NonNullable<SurfaceTool<CodexDb>['cli']>> = {
 		noun: 'belief',
 		verb: 'revise',
 		positionals: ['beliefId'],
-		action: { property: 'action', positionals: { merge: ['beliefIds'] } },
+		valueParsers: { deferredUntil: parseDeferralDate },
+		action: {
+			property: 'action',
+			positionals: { merge: ['beliefIds'] },
+			flags: {
+				confirm: ['beliefId'],
+				correct: ['beliefId', 'claim', 'source', 'category', 'certainty'],
+				forget: ['beliefId', 'successorId'],
+				defer: ['beliefId', 'deferredUntil'],
+				merge: ['beliefIds', 'claim', 'successorId', 'source', 'category', 'certainty'],
+			},
+		},
 	},
 	dismiss_proximity: { noun: 'proximity', verb: 'dismiss', positionals: ['beliefA', 'beliefB'] },
 };
@@ -27,8 +39,23 @@ export const codexMcpSurfaceTools: readonly SurfaceTool<CodexDb>[] = codexTools.
 	handler: tool.handler as SurfaceTool<CodexDb>['handler'],
 }));
 
+const examples: Record<string, Record<string, unknown>> = {
+	search_codex: { query: 'deployment schedule' },
+	review_codex: { view: 'flags' },
+	inspect_codex_item: { beliefId: 1 },
+	remember_belief: {
+		claim: 'Deploys go out on Tuesdays.',
+		source: 'explicit',
+		category: 'procedure',
+	},
+	revise_belief: { action: 'confirm', beliefId: 1 },
+	retire_belief: { beliefId: 1 },
+	dismiss_proximity: { beliefA: 1, beliefB: 2 },
+};
+
 export const codexSurfaceTools: readonly SurfaceTool<CodexDb>[] =
 	/* @__PURE__ */ codexMcpSurfaceTools.map((tool) => ({
 		...tool,
+		example: examples[tool.name],
 		...(mapping[tool.name] ? { cli: mapping[tool.name] } : {}),
 	}));

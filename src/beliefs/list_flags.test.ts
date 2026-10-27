@@ -88,3 +88,13 @@ describe('listFlags', () => {
 		}
 	});
 });
+
+it('gives new beliefs seven days before evidence, trust and gap flags', async () => {
+	const db = await createInitializedCodexDb();
+	remember(db, { claim: 'New inference', source: 'inferred', category: 'fact' }, { now: 1 });
+	strictEqual(listFlags(db, 2).length, 0);
+	const flags = listFlags(db, 8 * 24 * 60 * 60 * 1000);
+	strictEqual(flags[0]?.reasonCodes.includes('single_evidence'), true);
+	strictEqual(flags[0]?.reasonCodes.includes('low_trust'), true);
+	db.close();
+});

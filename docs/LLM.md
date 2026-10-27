@@ -310,3 +310,36 @@ get a smaller, clearer runtime stack on top of the same truthful core:
 Both operate on the same underlying model. The same deterministic engine runs
 underneath whether the caller is a TypeScript function call or an LLM tool
 invocation.
+
+## Command-line use
+
+`ghostpaw-codex search <query>`, `review flags|status|log|trends`, `belief add`,
+`belief show` and revision verbs print compact text, including in pipes.
+Use `--json` for the full tool result (`--compact` removes indentation).
+`--quiet` prints all result ids for search, flags and log, and the affected id
+for writes; status, trends and version are silent. Errors include recovery
+hints on stderr. Clarification includes a question and missing flags, exiting 3.
+
+Search before adding, then inspect candidates with `ghostpaw-codex belief show <id>`.
+Use `belief correct <id> --claim "Replacement claim"` for corrections.
+`belief confirm|correct|forget|defer|merge --help` shows only the action's flags;
+unused flags are usage errors. Forget also accepts `--successor-id`.
+`belief defer <id> --deferred-until +3d` accepts YYYY-MM-DD, DD.MM.YYYY,
+today, tomorrow, +3d, ISO date-time with timezone and epoch milliseconds.
+Calendar dates use local end of day; all deferral values must be in the future.
+These date forms are CLI conveniences; tool input remains integer milliseconds.
+
+`ghostpaw-codex skill` prints the skill reference, `skill --list` lists guides,
+and `skill <guide>` prints the same content as the packaged reference file.
+`skill --help` describes the forms; unknown guides include a suggestion.
+Top-level help shows the resolved database path. Selection uses `--db <path>`,
+`GHOSTPAW_CODEX_DB`, then `~/.ghostpaw/codex.db`. Version output uses
+`ghostpaw-codex <version> (binary, <target>)`, `(npm)` or `(library)`.
+
+New beliefs have a seven-day grace period from creation for `single_evidence`,
+`low_trust` and `gap` flags. `stale`, `fading` and `unstable` still apply.
+Merges add the evidence of independent inputs; an existing successor retains
+its evidence and gains the merged-in evidence. Unless explicitly overridden,
+merge certainty is the maximum of the selected source's initial certainty and
+all input certainties (including an existing successor). Calibration trends
+count corrections only, excluding merges and forgetting.

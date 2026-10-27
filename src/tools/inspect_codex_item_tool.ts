@@ -1,7 +1,6 @@
 import type { BeliefDetailRecord, BeliefRecord } from '../beliefs/types.ts';
 import type { CodexDb } from '../database.ts';
 import * as read from '../read.ts';
-
 import { translateToolError } from './tool_errors.ts';
 import { defineCodexTool, integerSchema, objectSchema } from './tool_metadata.ts';
 import { inspectCodexItemToolName } from './tool_names.ts';
@@ -9,6 +8,7 @@ import { dismissNext, inspectItemNext, reviseNext } from './tool_next.ts';
 import { toBeliefIdRef, toBeliefRef } from './tool_ref.ts';
 import type { ToolNextStepHint, ToolResult } from './tool_types.ts';
 import { toolFailure, toolSuccess } from './tool_types.ts';
+import { validateToolInput } from './validate_tool_input.ts';
 
 export interface InspectCodexItemToolData {
 	detail: BeliefDetailRecord;
@@ -21,15 +21,20 @@ export function inspectCodexItemToolHandler(
 	db: CodexDb,
 	input: { beliefId: number },
 ): InspectCodexItemToolResult {
+	const invalid = validateToolInput(inspectCodexItemTool.inputSchema, input);
+	if (invalid) return invalid;
 	try {
 		const detail = read.getBeliefDetail(db, input.beliefId);
 		if (detail === null) {
-			return toolFailure(
+			const failure = toolFailure(
 				'domain',
 				'not_found',
 				'Belief not found.',
 				`Belief ${input.beliefId} does not exist.`,
 			);
+			failure.error.recovery =
+				'Search by query to locate a current belief id; for example query="deployment schedule".';
+			return failure;
 		}
 		const lineage = read.getBeliefLineage(db, input.beliefId);
 		const entities = [toBeliefIdRef(detail.id, detail.claim)];

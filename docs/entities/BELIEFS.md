@@ -57,9 +57,32 @@ Use beliefs through the main lifecycle verbs:
 
 Beliefs are corrected through supersession instead of overwrite. Once understanding changes, the previous belief remains in lineage so the codex can show what used to be believed and what replaced it.
 
+Merging combines evidence by summing the independent inputs. With `successorId`,
+the successor gains only the merged-in evidence, without counting itself twice.
+Explicit `certainty` takes precedence; otherwise merge certainty is the maximum
+of the source initial certainty and all input certainties, including an existing
+successor. Supersession stores whether a belief was corrected, merged or forgotten.
+Legacy rows use self-pointers and predecessor counts as a fallback. Calibration
+counts only corrections of beliefs with certainty at least 0.8. Repeated revision
+means two or more corrections in the active belief's correction chain, excluding
+merge fan-in.
+
+Flags allow a seven-day grace period from `createdAt`: `single_evidence`,
+`low_trust` and `gap` are suppressed before that age. `stale`, `fading` and
+`unstable` remain eligible. Deferral suppresses all flags until its timestamp.
+
 ## Retrieval Notes
 
 Recall is hybrid by default: FTS5 preselection plus local vector reranking. Beliefs are prepared for recall automatically on writes.
+
+Query tokens use document-frequency weighting over active beliefs. Common tokens
+(more than half the active set, when at least three beliefs exist) and English
+stopwords receive less weight in the query embedding and do not select lexical
+candidates alone when informative matches exist. Results below 55% of the best
+weighted lexical coverage plus semantic similarity are dropped. If only common
+terms match, at most three results are returned in lexical order, and the search
+tool reports a warning. Ranking is deterministic. `minScore` still filters the
+final fusion score and defaults to 0.01; the relative cutoff also applies.
 
 ## Related Concepts
 

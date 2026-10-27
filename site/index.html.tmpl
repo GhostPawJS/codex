@@ -35,13 +35,13 @@
       <h1 id="hero-title">When one agent saves a wrong fact, every agent trusts it.</h1>
       <p class="lede">codex keeps what your agent believes as beliefs with a source, a certainty and a history, so you can read and delete them one at a time instead of rereading MEMORY.md.</p>
       <div class="install">
-        <p class="cmd-label" id="lib-label">As a library</p>
-        <div class="cmd"><input id="cmd-lib" readonly value="npm install @ghostpaw/codex" aria-labelledby="lib-label" spellcheck="false"><button type="button" class="copy" data-copy="cmd-lib">Copy</button></div>
+        <p class="cmd-label" id="bin-label">Release binary, Linux and macOS (<a href="#binaries">every platform</a>)</p>
+        <div class="cmd"><input id="cmd-bin" readonly value="curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh" aria-labelledby="bin-label" spellcheck="false"><button type="button" class="copy" data-copy="cmd-bin">Copy</button></div>
         <p class="cmd-label" id="mcp-label">As a local MCP server</p>
-        <div class="cmd"><input id="cmd-mcp" readonly value="npx -y @ghostpaw/codex mcp" aria-labelledby="mcp-label" spellcheck="false"><button type="button" class="copy" data-copy="cmd-mcp">Copy</button></div>
+        <div class="cmd"><input id="cmd-mcp" readonly value="ghostpaw-codex mcp" aria-labelledby="mcp-label" spellcheck="false"><button type="button" class="copy" data-copy="cmd-mcp">Copy</button></div>
       </div>
       <p class="actions"><a class="button" href="#drill">Follow one wrong fact</a> <a href="{{.urls.github}}">Read the source on GitHub</a></p>
-      <p class="terms">Free, MIT licence, Node.js 24 or newer, zero runtime dependencies. One SQLite file on your machine.</p>
+      <p class="terms">Free, MIT licence, zero runtime dependencies. One executable and one SQLite file on your machine; npm and library use need Node.js 24 or newer.</p>
     </div>
     <figure class="hero-art frame">
       <div class="scope"><picture><source media="(min-width: 52rem)" srcset="assets/images/hero-720.webp" width="720" height="540"><img src="assets/images/hero-480.webp" width="480" height="360" alt="A glowing cyan paw print on a translucent belief card with a small rose flag on its corner, older violet cards fading behind it." fetchpriority="high"></picture><span class="scan" aria-hidden="true"></span></div>
@@ -215,21 +215,40 @@ read.recall(db, 'graphql api'); // []</code></pre></div>
   </section>
 
   <section id="binaries" class="binaries" aria-labelledby="binaries-title">
-    <h2 id="binaries-title">Run it without Node.js</h2>
-    <p class="intro">Since 0.4.0 every release also ships <code>ghostpaw-codex</code> as one executable with Node.js 26.12.1 inside. It has the same commands and the same MCP server as the npm package.</p>
+    <h2 id="binaries-title">Install</h2>
+    <p class="intro">The default way to run <code>ghostpaw-codex</code>: one executable per platform with Node.js inside, with the same commands and the same MCP server as the npm package. Each line downloads the latest release, checks it against the release&#39;s SHA256SUMS and puts the binary on the PATH (<code>~/.local/bin</code>; the Windows script adds its folder to the user PATH).</p>
     <div class="bin-cmds">
-        <div><p class="cmd-label" id="bin-sh-label">macOS and Linux</p>
-        <div class="cmd"><input id="bin-sh" readonly value="curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh" aria-labelledby="bin-sh-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-sh">Copy</button></div></div>
-        <div><p class="cmd-label" id="bin-ps-label">Windows PowerShell</p>
-        <div class="cmd"><input id="bin-ps" readonly value="irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex" aria-labelledby="bin-ps-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-ps">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-linux-x64-label">linux-x64</p>
+        <div class="cmd"><textarea id="bin-linux-x64" readonly rows="2" aria-labelledby="bin-linux-x64-label" spellcheck="false">curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target linux-x64 &amp;&amp; export PATH=&quot;$HOME/.local/bin:$PATH&quot;</textarea><button type="button" class="copy" data-copy="bin-linux-x64">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-linux-arm64-label">linux-arm64</p>
+        <div class="cmd"><textarea id="bin-linux-arm64" readonly rows="2" aria-labelledby="bin-linux-arm64-label" spellcheck="false">curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target linux-arm64 &amp;&amp; export PATH=&quot;$HOME/.local/bin:$PATH&quot;</textarea><button type="button" class="copy" data-copy="bin-linux-arm64">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-darwin-arm64-label">darwin-arm64</p>
+        <div class="cmd"><textarea id="bin-darwin-arm64" readonly rows="2" aria-labelledby="bin-darwin-arm64-label" spellcheck="false">curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target darwin-arm64 &amp;&amp; export PATH=&quot;$HOME/.local/bin:$PATH&quot;</textarea><button type="button" class="copy" data-copy="bin-darwin-arm64">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-darwin-x64-label">darwin-x64</p>
+        <div class="cmd"><textarea id="bin-darwin-x64" readonly rows="2" aria-labelledby="bin-darwin-x64-label" spellcheck="false">curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target darwin-x64 &amp;&amp; export PATH=&quot;$HOME/.local/bin:$PATH&quot;</textarea><button type="button" class="copy" data-copy="bin-darwin-x64">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-windows-x64-label">windows-x64 (PowerShell)</p>
+        <div class="cmd"><textarea id="bin-windows-x64" readonly rows="2" aria-labelledby="bin-windows-x64-label" spellcheck="false">irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex</textarea><button type="button" class="copy" data-copy="bin-windows-x64">Copy</button></div></div>
+    </div>
+    <h3>Other release installers</h3>
+    <div class="bin-cmds">
         <div><p class="cmd-label" id="bin-mise-label">mise</p>
         <div class="cmd"><input id="bin-mise" readonly value="mise use -g github:GhostPawJS/codex" aria-labelledby="bin-mise-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-mise">Copy</button></div></div>
         <div><p class="cmd-label" id="bin-ubi-label">ubi</p>
         <div class="cmd"><input id="bin-ubi" readonly value="ubi --project GhostPawJS/codex --exe ghostpaw-codex --in ~/.local/bin" aria-labelledby="bin-ubi-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-ubi">Copy</button></div></div>
         <div><p class="cmd-label" id="bin-eget-label">eget</p>
         <div class="cmd"><input id="bin-eget" readonly value="eget GhostPawJS/codex" aria-labelledby="bin-eget-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-eget">Copy</button></div></div>
+    </div>
+    <h3>npx / npm (for npm-based environments)</h3>
+    <div class="bin-cmds">
         <div><p class="cmd-label" id="bin-npx-label">npx, with Node.js 24 or newer</p>
         <div class="cmd"><input id="bin-npx" readonly value="npx -y @ghostpaw/codex --help" aria-labelledby="bin-npx-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-npx">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-npm-label">Global npm install</p>
+        <div class="cmd"><input id="bin-npm" readonly value="npm install -g @ghostpaw/codex" aria-labelledby="bin-npm-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-npm">Copy</button></div></div>
+    </div>
+    <h3>Library (for harnesses embedding it in code)</h3>
+    <div class="bin-cmds">
+        <div><p class="cmd-label" id="bin-lib-label">Add it to a Node.js 24+ project</p>
+        <div class="cmd"><input id="bin-lib" readonly value="npm install @ghostpaw/codex" aria-labelledby="bin-lib-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-lib">Copy</button></div></div>
     </div>
     <dl class="ledger wide">
       <div><dt>linux-x64</dt><dd>41.7 MB tar.gz</dd></div>

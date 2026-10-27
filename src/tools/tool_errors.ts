@@ -43,6 +43,10 @@ export function translateToolError(
 		const result = toolFailure(kind, toolCode, options.summary ?? error.message, error.message, {
 			next: next.length > 0 ? next : undefined,
 		});
+		if (error.code === 'state' || error.code === 'conflict')
+			result.error.recovery = 'Inspect the belief and choose an active id; for example beliefId=1.';
+		if (error.code === 'validation')
+			result.error.recovery = `Check the input fields: ${error.message}. Example: claim="Deploys go out on Tuesdays.", beliefId=1. See the tool schema for valid values.`;
 		if (error.code === 'not_found') {
 			result.error.recovery =
 				'The belief may have been superseded or deleted. Search by query to locate the current version.';

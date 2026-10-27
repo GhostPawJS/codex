@@ -11,8 +11,15 @@ function buildMergeTargetSet(db: CodexDb): Set<number> {
 	return new Set(rows.map((r) => r.superseded_by));
 }
 
-function classifyLogType(row: BeliefRow, mergeTargets: Set<number>): LogRecordType {
+function classifyLogType(
+	row: BeliefRow & { superseded_reason?: string | null },
+	mergeTargets: Set<number>,
+): LogRecordType {
 	if (row.superseded_by !== null) {
+		if (row.superseded_reason)
+			return row.superseded_reason === 'corrected'
+				? 'revised'
+				: (row.superseded_reason as LogRecordType);
 		if (row.superseded_by === row.id) return 'forgotten';
 		if (mergeTargets.has(row.superseded_by)) return 'merged';
 		return 'revised';
@@ -25,7 +32,7 @@ export function listLog(db: CodexDb, limit = 20): LogRecord[] {
 	const mergeTargets = buildMergeTargetSet(db);
 	return db
 		.prepare('SELECT * FROM beliefs ORDER BY verified_at DESC, created_at DESC LIMIT ?')
-		.all<BeliefRow>(limit)
+		.all<BeliefRow & { superseded_reason: string | null }>(limit)
 		.map((row) => ({
 			id: row.id,
 			type: classifyLogType(row, mergeTargets),

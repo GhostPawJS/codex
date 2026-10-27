@@ -48,11 +48,9 @@ export function correctBelief(
 				prepared.embeddingVersion,
 			);
 		const newId = Number(result.lastInsertRowid);
-		db.prepare('UPDATE beliefs SET superseded_by = ?, verified_at = ? WHERE id = ?').run(
-			newId,
-			timestamp,
-			beliefId,
-		);
+		db.prepare(
+			`UPDATE beliefs SET superseded_by = ?, superseded_reason = 'corrected', verified_at = ? WHERE id = ?`,
+		).run(newId, timestamp, beliefId);
 		const row = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(newId);
 		if (!row) {
 			throw new Error('Corrected belief could not be reloaded.');

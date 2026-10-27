@@ -6,6 +6,7 @@ import { computeRecallWeight } from '../lib/recall_weight.ts';
 import { resolveNow } from '../resolve_now.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
 import { normalizeClaim } from './normalize_claim.ts';
+import { queryTokenWeights } from './query_token_weights.ts';
 import type { BeliefRow, RecallOptions, RecallResultItem } from './types.ts';
 
 function tokenizeQuery(query: string): string[] {
@@ -79,7 +80,12 @@ export function recall(
 	if (!db.prepare('SELECT 1 FROM beliefs WHERE superseded_by IS NULL LIMIT 1').get()) return [];
 
 	const candidateCap = 300;
-	const lexicalRanks = fetchLexicalCandidateIds(db, tokens, candidateCap);
+	const { weights, informative, commonOnly } = queryTokenWeights(db, query);
+	const lexicalRanks = fetchLexicalCandidateIds(
+		db,
+		informative.length && !commonOnly ? informative : tokens,
+		candidateCap,
+	);
 	let rows =
 		lexicalRanks.size === 0
 			? loadActiveBeliefRows(db)
@@ -92,8 +98,8 @@ export function recall(
 	if (rows.length === 0) {
 		return [];
 	}
-	const queryVector = buildQueryEmbedding(query);
-	return hybridRecall(
+	const queryVector = buildQueryEmbedding(query, 256, weights);
+	const ranked = hybridRecall(
 		queryVector,
 		rows.map((row) => {
 			const record = mapBeliefRow(row, now);
@@ -105,19 +111,40 @@ export function recall(
 				recallWeight: computeRecallWeight(record.certainty, record.freshness, record.evidence),
 			};
 		}),
-		limit,
+		candidateCap,
 		minScore,
-	).map((result) => ({
-		...result.value.record,
-		recallScore: result.finalScore,
-		scoreParts: {
-			lexicalRank: result.lexicalRank,
-			semanticRank: result.semanticRank,
-			lexicalRrf: result.lexicalRrf,
-			semanticRrf: result.semanticRrf,
-			semanticSimilarity: result.semanticSimilarity,
-			recallWeight: result.recallWeight,
-			finalScore: result.finalScore,
-		},
-	}));
+	);
+	const signal = (result: (typeof ranked)[number]) => {
+		const claim = normalizeClaim(result.value.row.claim).split(/\s+/);
+		const coverage =
+			tokens.reduce(
+				(sum, token) =>
+					sum + (claim.some((word) => word.startsWith(token)) ? (weights.get(token) ?? 1) : 0),
+				0,
+			) / [...weights.values()].reduce((a, b) => a + b, 1e-9);
+		return coverage + Math.max(0, result.semanticSimilarity);
+	};
+	const best = Math.max(0, ...ranked.map(signal));
+	return ranked
+		.filter((result) => commonOnly || signal(result) >= best * 0.55)
+		.sort((a, b) =>
+			// With no informative lexical match, avoid promoting weak hash collisions.
+			commonOnly
+				? (a.lexicalRank ?? Infinity) - (b.lexicalRank ?? Infinity) || a.id - b.id
+				: signal(b) - signal(a) || b.finalScore - a.finalScore || a.id - b.id,
+		)
+		.slice(0, commonOnly ? Math.min(limit, 3) : limit)
+		.map((result) => ({
+			...result.value.record,
+			recallScore: result.finalScore,
+			scoreParts: {
+				lexicalRank: result.lexicalRank,
+				semanticRank: result.semanticRank,
+				lexicalRrf: result.lexicalRrf,
+				semanticRrf: result.semanticRrf,
+				semanticSimilarity: result.semanticSimilarity,
+				recallWeight: result.recallWeight,
+				finalScore: result.finalScore,
+			},
+		}));
 }

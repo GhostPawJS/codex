@@ -14,11 +14,9 @@ export function forgetBelief(db: CodexDb, beliefId: number, options?: ForgetOpti
 			assertActiveBeliefExists(db, options.successorId);
 		}
 		const next = options?.successorId ?? beliefId;
-		db.prepare('UPDATE beliefs SET superseded_by = ?, verified_at = ? WHERE id = ?').run(
-			next,
-			timestamp,
-			beliefId,
-		);
+		db.prepare(
+			`UPDATE beliefs SET superseded_by = ?, superseded_reason = 'forgotten', verified_at = ? WHERE id = ?`,
+		).run(next, timestamp, beliefId);
 		const row = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(beliefId);
 		if (!row) {
 			throw new Error('Forgotten belief could not be reloaded.');

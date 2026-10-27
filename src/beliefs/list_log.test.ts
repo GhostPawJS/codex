@@ -62,3 +62,12 @@ describe('listLog', () => {
 		strictEqual(log.length, 2);
 	});
 });
+
+it('classifies a single merged-in belief using its stored reason', async () => {
+	const db = await createInitializedCodexDb();
+	remember(db, { claim: 'One', source: 'explicit', category: 'fact' }, { now: 1 });
+	remember(db, { claim: 'Successor', source: 'explicit', category: 'fact' }, { now: 2 });
+	mergeBeliefs(db, { beliefIds: [1], successorId: 2 }, { now: 3 });
+	strictEqual(listLog(db).find((entry) => entry.id === 1)?.type, 'merged');
+	db.close();
+});

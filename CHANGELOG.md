@@ -8,6 +8,15 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- Print compact text for noun-verb CLI commands in terminals and pipes; support full JSON and result ids through `--json` and `--quiet`.
+- Include recovery hints and missing flags in CLI errors, the resolved database in help, and the binary name in version output.
+- Restrict revision help and flags to the selected action; accept local calendar dates, relative days, ISO date-times and epoch milliseconds for CLI deferral.
+- Expose workflow guides through `skill --list` and `skill <guide>`, with help and name suggestions; render command-based guide references, nested parameters, array element types and validated examples in the binary-first skill reference.
+- Return protocol errors with recovery hints for malformed tool input instead of crashes or undefined results.
+- Weight search query tokens by document frequency, filter weak relative matches, and cap common-term-only results with a warning.
+- Combine evidence and retain the strongest default certainty when merging beliefs; migrate supersession reasons to distinguish corrections, merges and forgetting in logs and calibration trends.
+- Allow seven days from creation before evidence, trust and category-gap review flags apply.
+- Print search warnings on stderr in text mode; `call`, `describe` and tool-flag invocations keep JSON output.
 - Default installation instructions to the release binary in the README and generated skill, with npm and library alternatives.
 - Include binary target, npm or library variant in human CLI version output.
 - Accept explicit installer targets with host validation and the macOS Rosetta exception.

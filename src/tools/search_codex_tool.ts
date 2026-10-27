@@ -1,7 +1,7 @@
+import { queryTokenWeights } from '../beliefs/query_token_weights.ts';
 import type { RecallResultItem } from '../beliefs/types.ts';
 import type { CodexDb } from '../database.ts';
 import * as read from '../read.ts';
-
 import { translateToolError } from './tool_errors.ts';
 import {
 	defineCodexTool,
@@ -16,6 +16,7 @@ import { inspectItemNext, reviewViewNext } from './tool_next.ts';
 import { toBeliefIdRef } from './tool_ref.ts';
 import type { ToolResult } from './tool_types.ts';
 import { toolSuccess, toolWarning } from './tool_types.ts';
+import { validateToolInput } from './validate_tool_input.ts';
 
 export interface SearchCodexToolData {
 	results: RecallResultItem[];
@@ -33,6 +34,8 @@ export function searchCodexToolHandler(
 		source?: string;
 	},
 ): SearchCodexToolResult {
+	const invalid = validateToolInput(searchCodexTool.inputSchema, input);
+	if (invalid) return invalid;
 	try {
 		const options: Parameters<typeof read.recall>[2] = {
 			limit: input.limit,
@@ -54,9 +57,18 @@ export function searchCodexToolHandler(
 		const warnings =
 			results.length === 0
 				? [toolWarning('empty_result', 'No beliefs matched the query.')]
-				: undefined;
+				: queryTokenWeights(db, input.query).commonOnly
+					? [
+							toolWarning(
+								'partial_match',
+								'Only common terms matched; showing at most three beliefs.',
+							),
+						]
+					: undefined;
 		return toolSuccess(
-			`Found ${results.length} belief${results.length === 1 ? '' : 's'}.`,
+			results.length === 0
+				? 'No beliefs matched.'
+				: `Found ${results.length} belief${results.length === 1 ? '' : 's'}.`,
 			{ results },
 			{
 				entities,
@@ -87,7 +99,8 @@ export const searchCodexTool = defineCodexTool<
 	inputDescriptions: {
 		query: 'Free-form natural language query describing what to recall.',
 		limit: 'Maximum number of results. Defaults to 20.',
-		minScore: 'Minimum recall score threshold. Defaults to 0.01.',
+		minScore:
+			'Minimum final recall score threshold. Defaults to 0.01; relative relevance filtering also applies.',
 		category: 'Optional filter: preference, fact, procedure, capability, or custom.',
 		source: 'Optional filter: explicit, observed, distilled, or inferred.',
 	},
@@ -97,7 +110,9 @@ export const searchCodexTool = defineCodexTool<
 		{
 			query: stringSchema('Free-form natural language query.'),
 			limit: integerSchema('Maximum number of results.'),
-			minScore: numberSchema('Minimum recall score threshold.'),
+			minScore: numberSchema(
+				'Minimum final recall score, default 0.01; relative relevance filtering also applies.',
+			),
 			category: enumSchema(
 				['preference', 'fact', 'procedure', 'capability', 'custom'],
 				'Optional category filter.',
