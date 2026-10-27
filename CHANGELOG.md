@@ -6,21 +6,33 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-27
+
 ### Added
 
-- Schema-derived noun-verb CLI commands, per-command help and bash/zsh/fish
-  completions, with JSON stdin, file values and global output flags.
-- Standalone binaries for linux-x64, linux-arm64, darwin-arm64, darwin-x64
-  and windows-x64, with SHA256SUMS and build attestations.
-- `install.sh` and `install.ps1` release installers and an external install
-  check on Linux, macOS and Windows.
+- 11 noun-verb CLI commands derived from the tool schemas:
+  `search`, `review`, `belief add|show|retire|confirm|correct|merge|forget|defer`
+  and `proximity dismiss`. Each has `--help`. Global flags: `--db`, `--json`,
+  `--quiet`, `--compact`, `--version`. `completions bash|zsh|fish` prints a
+  completion script.
+- Standalone binaries (Node 26.12.1 single executable) for 5 targets:
+  linux-x64, linux-arm64, darwin-arm64, darwin-x64 and windows-x64. Each
+  release carries SHA256SUMS and a GitHub build provenance attestation per
+  archive. Binaries are unsigned; macOS builds carry an ad-hoc signature.
+- `install.sh` and `install.ps1` install the binary from the release and
+  refuse an archive whose SHA-256 does not match SHA256SUMS.
+- An install check workflow installs each published release on
+  ubuntu-24.04, macos-15 and windows-2025 and runs `--version`, a write and
+  an MCP `initialize` + `tools/list` exchange.
 
 ### Changed
 
-- Noun-verb commands use exit codes 0 (success), 1 (tool error), 2 (usage),
-  3 (clarification or not found), 4 (conflict) and 70 (internal error).
-  Existing CLI forms retain their output and exit codes.
-- npm and standalone CLI entries share their options and lazy MCP wiring.
+- Noun-verb commands exit with 0 (success or no_op), 1 (tool error),
+  2 (usage error), 3 (needs clarification or not found), 4 (conflict) or
+  70 (internal error). The existing tool-name forms (`remember_belief --claim`,
+  `call`, `describe`, `tools`) keep their output and exit codes.
+- `SurfaceTool` has an optional `cli` field for the command mapping. No other
+  public type changed.
 
 ## [0.3.2] - 2026-10-24
 
@@ -71,7 +83,8 @@ All notable changes to this project are documented here. The format follows
 - CI runs on every push and pull request on Node 24 and 26. Releases publish
   through npm trusted publishing with provenance.
 
-[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/GhostPawJS/codex/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/GhostPawJS/codex/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/GhostPawJS/codex/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/GhostPawJS/codex/compare/v0.2.6...v0.3.0
