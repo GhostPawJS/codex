@@ -31,7 +31,7 @@
 <main>
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <p class="kicker"><code>@ghostpaw/codex</code> <span class="ver">0.4.0</span></p>
+      <p class="kicker"><code>@ghostpaw/codex</code> <span class="ver">0.5.1</span></p>
       <h1 id="hero-title">When one agent saves a wrong fact, every agent trusts it.</h1>
       <p class="lede">codex keeps what your agent believes as beliefs with a source, a certainty and a history, so you can read and delete them one at a time instead of rereading MEMORY.md.</p>
       <div class="install">
@@ -229,6 +229,14 @@ read.recall(db, 'graphql api'); // []</code></pre></div>
         <div><p class="cmd-label" id="bin-windows-x64-label">windows-x64 (PowerShell)</p>
         <div class="cmd"><textarea id="bin-windows-x64" readonly rows="2" aria-labelledby="bin-windows-x64-label" spellcheck="false">irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex</textarea><button type="button" class="copy" data-copy="bin-windows-x64">Copy</button></div></div>
     </div>
+    <dl class="ledger wide">
+      <div><dt>linux-x64</dt><dd>41.7 MB tar.gz</dd></div>
+      <div><dt>linux-arm64</dt><dd>41.1 MB tar.gz</dd></div>
+      <div><dt>darwin-arm64</dt><dd>44.8 MB tar.gz</dd></div>
+      <div><dt>darwin-x64</dt><dd>46.4 MB tar.gz</dd></div>
+      <div><dt>windows-x64</dt><dd>38.4 MB zip</dd></div>
+    </dl>
+    <p class="note">Archive sizes of the v0.5.1 release assets. Linux builds need glibc 2.28 or newer; on Alpine, use npx.</p>
     <h3>Other release installers</h3>
     <div class="bin-cmds">
         <div><p class="cmd-label" id="bin-mise-label">mise</p>
@@ -250,24 +258,16 @@ read.recall(db, 'graphql api'); // []</code></pre></div>
         <div><p class="cmd-label" id="bin-lib-label">Add it to a Node.js 24+ project</p>
         <div class="cmd"><input id="bin-lib" readonly value="npm install @ghostpaw/codex" aria-labelledby="bin-lib-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-lib">Copy</button></div></div>
     </div>
-    <dl class="ledger wide">
-      <div><dt>linux-x64</dt><dd>41.7 MB tar.gz</dd></div>
-      <div><dt>linux-arm64</dt><dd>41.1 MB tar.gz</dd></div>
-      <div><dt>darwin-arm64</dt><dd>44.8 MB tar.gz</dd></div>
-      <div><dt>darwin-x64</dt><dd>46.4 MB tar.gz</dd></div>
-      <div><dt>windows-x64</dt><dd>38.4 MB zip</dd></div>
-    </dl>
-    <p class="note">Archive sizes of the v0.4.0 release assets. Linux builds need glibc 2.28 or newer; on Alpine, use npx.</p>
     <ul class="bin-trust">
       <li>install.sh and install.ps1 check each archive against SHA256SUMS and stop on a mismatch.</li>
       <li>Each archive and SHA256SUMS carry a GitHub build attestation. Check one with <code>gh attestation verify &lt;archive&gt; -R GhostPawJS/codex</code>.</li>
       <li>The binaries are not code signed. macOS builds carry an ad-hoc signature, so a browser download needs <code>xattr -d com.apple.quarantine ghostpaw-codex</code>. Windows may show a SmartScreen warning for a browser download.</li>
     </ul>
     <figure class="shot">
-      <a href="{{.urls.cliShot}}"><img src="assets/images/cli-1600.webp" srcset="assets/images/cli-800.webp 800w, assets/images/cli-1600.webp 1600w" sizes="(min-width: 68rem) 64rem, 100vw" width="1600" height="790" decoding="async" alt="Terminal session with ghostpaw-codex 0.4.0: --version prints 0.4.0, three belief add calls return success, search for postgres port finds the staging Postgres belief, review flags lists three beliefs with single_evidence, and search --help lists its flags." loading="lazy"></a>
-      <figcaption>A session with the 0.4.0 linux-x64 binary against a fresh database, output piped through jq. Open the image for full size.</figcaption>
+      <a href="{{.urls.cliShot}}"><img src="assets/images/cli-1600.webp" srcset="assets/images/cli-800.webp 800w, assets/images/cli-1600.webp 1600w" sizes="(min-width: 68rem) 64rem, 100vw" width="1600" height="790" decoding="async" alt="Terminal session with ghostpaw-codex 0.5.1: --version prints the binary target, belief add prints a compact block, search for what class does fox play returns Fox mains a Warrior, search --quiet prints an id, belief defer +3d prints the date, review flags reports none for new beliefs, and skill --list lists workflow guides." loading="lazy"></a>
+      <figcaption>A session with the 0.5.1 linux-x64 binary against a small database of five beliefs. Open the image for full size.</figcaption>
     </figure>
-    <p class="links"><a class="more" href="{{.urls.release}}">Release v0.4.0</a><a href="{{.urls.readmeInstall}}">Install notes in the README</a><a href="{{.urls.attest}}">gh attestation verify</a></p>
+    <p class="links"><a class="more" href="{{.urls.release}}">Release v0.5.1</a><a href="{{.urls.readmeInstall}}">Install notes in the README</a><a href="{{.urls.attest}}">gh attestation verify</a></p>
   </section>
 
   <section class="start" aria-labelledby="start-title">

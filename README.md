@@ -61,12 +61,12 @@ irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex
 
 ```text
 $ ghostpaw-codex --version
-ghostpaw-codex 0.5.0 (binary, linux-x64)
+ghostpaw-codex 0.5.1 (binary, linux-x64)
 ```
 
-A session with the 0.4.0 linux-x64 binary against a fresh database (output piped through `jq` to keep it short):
+A session with the 0.5.1 linux-x64 binary against a small database of five beliefs:
 
-![ghostpaw-codex 0.4.0: version, belief add, search, review flags and search --help](https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.png)
+![ghostpaw-codex 0.5.1: version, belief add, search, search --quiet, belief defer, review flags and skill --list](https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.png)
 
 The same session as an [animated GIF](https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.gif).
 
@@ -87,7 +87,7 @@ registries:
     type: local
     path: codex-registry.yaml
 packages:
-  - name: GhostPawJS/codex@v0.4.0
+  - name: GhostPawJS/codex@v0.5.1
     registry: codex
 ```
 
@@ -123,7 +123,7 @@ download on macOS, remove quarantine with
 Linux binaries require glibc 2.28+; use npx on Alpine.
 See the [binary build workflow](.github/workflows/release-binaries.yml).
 
-Sizes for 0.4.0 (Node 26.12.1 inside each binary):
+Approximate sizes for 0.5.1 (Node 26.12.1 inside each binary):
 
 | Target | Archive | Binary |
 |---|---|---|
@@ -133,7 +133,7 @@ Sizes for 0.4.0 (Node 26.12.1 inside each binary):
 | darwin-x64 | 46.4 MB tar.gz | 149.5 MB |
 | windows-x64 | 38.4 MB zip | 105.6 MB |
 
-The npm package is 849 KB unpacked and needs Node 24+. Every release is
+The npm package is about 920 KB unpacked and needs Node 24+. Every release is
 installed and run on ubuntu-24.04, macos-15 and windows-2025 by the
 [install check](.github/workflows/install-check.yml).
 
