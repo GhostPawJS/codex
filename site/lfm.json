@@ -23,7 +23,8 @@
     "agentIdentity": "https://souls.ghostpaw.dev/",
     "agentSkills": "https://grimoire.ghostpaw.dev/",
     "agentEmail": "https://email.ghostpaw.dev/",
-    "agentTelegram": "https://telegram.ghostpaw.dev/"
+    "agentTelegram": "https://telegram.ghostpaw.dev/",
+    "cfBeacon": "https://static.cloudflareinsights.com/beacon.min.js"
   },
   "jsonld": {
     "@context": "https://schema.org",
