@@ -43,6 +43,12 @@ curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | 
 irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex
 ```
 
+A session with the 0.4.0 linux-x64 binary against a fresh database (output piped through `jq` to keep it short):
+
+![ghostpaw-codex 0.4.0: version, belief add, search, review flags and search --help](https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.png)
+
+The same session as an [animated GIF](https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.gif).
+
 Other release installers:
 
 ```sh
