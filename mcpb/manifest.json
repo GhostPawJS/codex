@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "ghostpaw-codex",
   "display_name": "GhostPaw Codex",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Local belief and memory engine with evidence, certainty, and honest revision history.",
   "long_description": "Local belief and memory engine with evidence, certainty, and revision history. Stores data in a local SQLite database.",
   "author": {
