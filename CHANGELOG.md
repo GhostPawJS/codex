@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Expand everyday query words with related terms (for example "class" and "play" for "mains a Warrior") so relevance no longer depends on insertion order when a query shares only a name with stored claims.
+
 ## [0.5.0] - 2026-10-27
 
 ### Changed

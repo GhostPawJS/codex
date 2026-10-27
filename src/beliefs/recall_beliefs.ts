@@ -4,6 +4,7 @@ import { deserializeVectorBlob } from '../lib/deserialize_vector_blob.ts';
 import { hybridRecall } from '../lib/hybrid_recall.ts';
 import { computeRecallWeight } from '../lib/recall_weight.ts';
 import { resolveNow } from '../resolve_now.ts';
+import { expandQuery } from './expand_query.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
 import { normalizeClaim } from './normalize_claim.ts';
 import { queryTokenWeights } from './query_token_weights.ts';
@@ -72,7 +73,7 @@ export function recall(
 	const limit = options.limit ?? 20;
 	const minScore = options.minScore ?? 0.01;
 
-	const tokens = tokenizeQuery(query);
+	const tokens = tokenizeQuery(expandQuery(query));
 	if (tokens.length === 0) {
 		return [];
 	}

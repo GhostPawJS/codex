@@ -127,6 +127,19 @@ describe('recall relevance', () => {
 		const results = recall(db, 'what class does fox play', { now: 2 });
 		strictEqual(results[0]?.claim, 'Fox mains a Warrior');
 		strictEqual(results.length < 5, true);
+		const late = await createInitializedCodexDb();
+		for (const claim of [
+			'Fox prefers prebuilt binaries',
+			'Fox lives in Germany',
+			'Fox writes TypeScript daily',
+			'Fox likes dark roast coffee',
+			'Fox mains a Warrior',
+		])
+			remember(late, { claim, source: 'explicit', category: 'preference' }, { now: 1 });
+		const lateResults = recall(late, 'what class does fox play', { now: 2 });
+		strictEqual(lateResults[0]?.claim, 'Fox mains a Warrior');
+		strictEqual(lateResults.length < 5, true);
+		late.close();
 		const rare = recall(db, 'fox prebuilt', { now: 2 });
 		strictEqual(rare[0]?.claim, 'Fox prefers prebuilt binaries');
 		strictEqual(JSON.stringify(rare), JSON.stringify(recall(db, 'fox prebuilt', { now: 2 })));

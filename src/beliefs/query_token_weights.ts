@@ -1,4 +1,5 @@
 import type { CodexDb } from '../database.ts';
+import { expandQuery } from './expand_query.ts';
 import { normalizeClaim } from './normalize_claim.ts';
 
 const STOPWORDS = new Set(
@@ -11,7 +12,7 @@ export function queryTokenWeights(
 	db: CodexDb,
 	query: string,
 ): { weights: Map<string, number>; informative: string[]; commonOnly: boolean } {
-	const tokens = [...new Set(normalizeClaim(query).split(/\s+/).filter(Boolean))];
+	const tokens = [...new Set(normalizeClaim(expandQuery(query)).split(/\s+/).filter(Boolean))];
 	const total =
 		db.prepare('SELECT COUNT(*) AS n FROM beliefs WHERE superseded_by IS NULL').get<{ n: number }>()
 			?.n ?? 0;
