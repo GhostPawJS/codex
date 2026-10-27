@@ -24,7 +24,10 @@
     "agentSkills": "https://grimoire.ghostpaw.dev/",
     "agentEmail": "https://email.ghostpaw.dev/",
     "agentTelegram": "https://telegram.ghostpaw.dev/",
-    "cfBeacon": "https://static.cloudflareinsights.com/beacon.min.js"
+    "cfBeacon": "https://static.cloudflareinsights.com/beacon.min.js",
+    "docsCapture": "https://codex.ghostpaw.dev/docs/#/capture",
+    "docsFlags": "https://codex.ghostpaw.dev/docs/#/flags",
+    "docsLog": "https://codex.ghostpaw.dev/docs/#/log"
   },
   "jsonld": {
     "@context": "https://schema.org",

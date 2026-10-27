@@ -260,6 +260,15 @@ import { createCodexMcpServer } from '@ghostpaw/codex/mcp';
 const server = createCodexMcpServer({ dbPath: './codex.db' });
 ```
 
+## Docs
+
+The live demo runs the library in your browser against an in-memory SQLite database. Each view below opens a different part of it:
+
+- [Dashboard](https://codex.ghostpaw.dev/docs/): integrity score and recent beliefs
+- [Capture](https://codex.ghostpaw.dev/docs/#/capture): record a belief and see close matches you already hold
+- [Flags](https://codex.ghostpaw.dev/docs/#/flags): beliefs flagged for review: confirm, correct or forget
+- [Activity Log](https://codex.ghostpaw.dev/docs/#/log): activity log of every write
+
 ## Why not MEMORY.md?
 
 A markdown memory file works until it doesn't:

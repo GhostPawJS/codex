@@ -1,0 +1,25 @@
+{
+  "heading": "Explore the Belief Console",
+  "pages": [
+    {
+      "key": "demo",
+      "label": "Dashboard",
+      "note": "integrity score and recent beliefs"
+    },
+    {
+      "key": "docsCapture",
+      "label": "Capture",
+      "note": "record a belief and see close matches you already hold"
+    },
+    {
+      "key": "docsFlags",
+      "label": "Flags",
+      "note": "beliefs flagged for review: confirm, correct or forget"
+    },
+    {
+      "key": "docsLog",
+      "label": "Activity Log",
+      "note": "activity log of every write"
+    }
+  ]
+}

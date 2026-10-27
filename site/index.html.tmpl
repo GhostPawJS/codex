@@ -232,6 +232,14 @@ read.recall(db, 'graphql api');
 read.listFlags(db);</code></pre>
     <p>The seven tools (<code>search_codex</code>, <code>review_codex</code>, <code>inspect_codex_item</code>, <code>remember_belief</code>, <code>revise_belief</code>, <code>retire_belief</code>, <code>dismiss_proximity</code>) ship with JSON Schemas for any LLM SDK. The MCP server and the command line tool use the same seven.</p>
     <p class="links"><a class="more" href="{{.urls.readme}}">Read the README</a><a href="{{.urls.demo}}">Try the live Belief Console</a><a href="{{.urls.npm}}">codex on npm</a></p>
+    <nav class="docs-map" aria-labelledby="docs-map-title">
+      <h3 id="docs-map-title">{{.data.docs.heading}}</h3>
+      <ul>
+        {{range .data.docs.pages}}
+        <li><a href="{{index $.urls .key}}">{{.label}}</a><span>{{.note}}</span></li>
+        {{end}}
+      </ul>
+    </nav>
   </section>
 </main>
 <footer class="foot">
