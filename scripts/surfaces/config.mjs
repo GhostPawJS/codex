@@ -4,6 +4,11 @@ import { codexSkillSpec } from '../../src/surface/codex_skill_spec.ts';
 import { codexSurfaceTools } from '../../src/surface/codex_surface_tools.ts';
 
 const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
+// The newest released server.mcpb. The Release workflow re-points it at the new tag's asset before
+// publishing to the MCP Registry; after a release, update mcpb/release.json to that release.
+const mcpbRelease = JSON.parse(
+	readFileSync(new URL('../../mcpb/release.json', import.meta.url), 'utf8'),
+);
 export const config = {
 	slug: 'codex',
 	skill: codexSkillSpec,
@@ -29,6 +34,10 @@ export const config = {
 				description: 'SQLite database path (default: ~/.ghostpaw/codex.db)',
 			},
 		],
+		mcpb: {
+			url: `https://github.com/GhostPawJS/codex/releases/download/v${mcpbRelease.version}/server.mcpb`,
+			fileSha256: mcpbRelease.fileSha256,
+		},
 	},
 };
 

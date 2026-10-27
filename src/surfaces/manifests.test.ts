@@ -41,6 +41,21 @@ test('manifest formats retain exact package versions and transport commands', ()
 	assert.throws(() => renderManifests({ ...spec, description: 'x'.repeat(101) }));
 });
 
+test('server manifest lists the MCP Bundle release asset when one is given', () => {
+	assert.equal(renderManifests(spec).server.packages.length, 1);
+	const url = 'https://github.com/example/example/releases/download/v1.2.3/server.mcpb';
+	const fileSha256 = 'a'.repeat(64);
+	const [npm, mcpb] = renderManifests({ ...spec, mcpb: { url, fileSha256 } }).server.packages;
+	assert.equal(npm?.registryType, 'npm');
+	assert.deepEqual(mcpb, {
+		registryType: 'mcpb',
+		identifier: url,
+		fileSha256,
+		transport: { type: 'stdio' },
+		environmentVariables: [{ name: 'EXAMPLE_DB', description: 'Database', isRequired: false }],
+	});
+});
+
 test('MCPB manifest retains portable paths and user configuration', () => {
 	const result = renderMcpbManifest({
 		...spec,

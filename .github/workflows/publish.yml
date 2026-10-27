@@ -117,6 +117,28 @@ jobs:
             fi
           done
 
+      # server.json in the repo points at the previous release's server.mcpb (its hash is only known
+      # after the release job builds it). Point the mcpb package at this tag's asset before publishing.
+      - name: Point the mcpb package at this release's server.mcpb
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "$GITHUB_REF_NAME" -R "$GITHUB_REPOSITORY" -p server.mcpb -O server.mcpb
+          SHA=$(sha256sum server.mcpb | cut -d' ' -f1)
+          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/server.mcpb"
+          node -e '
+            const fs = require("node:fs");
+            const [url, sha] = process.argv.slice(1);
+            const server = JSON.parse(fs.readFileSync("server.json", "utf8"));
+            const mcpb = server.packages.filter((p) => p.registryType === "mcpb");
+            if (mcpb.length !== 1) throw new Error(`expected one mcpb package, found ${mcpb.length}`);
+            mcpb[0].identifier = url;
+            mcpb[0].fileSha256 = sha;
+            fs.writeFileSync("server.json", `${JSON.stringify(server, null, 2)}\n`);
+          ' "$URL" "$SHA"
+          rm server.mcpb
+          echo "mcpb: $URL sha256 $SHA"
+
       - name: Install mcp-publisher
         run: |
           curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher

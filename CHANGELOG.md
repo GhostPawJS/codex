@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- MCP Registry: `server.json` lists the MCP Bundle (`server.mcpb` release asset, with its SHA-256) as a second package next to npm. The Release workflow points it at each new tag's asset before publishing.
+- README: terminal screenshot of a session with the 0.4.0 binary.
+
 ## [0.4.0] - 2026-10-27
 
 ### Added

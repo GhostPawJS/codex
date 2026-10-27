@@ -31,6 +31,21 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/GhostPawJS/codex/releases/download/v0.4.0/server.mcpb",
+      "fileSha256": "32a74f58d63226908e2ec1b3a8be7c522a2f69d4c9cc27a09e425de2c0487a6d",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "GHOSTPAW_CODEX_DB",
+          "description": "SQLite database path (default: ~/.ghostpaw/codex.db)",
+          "isRequired": false
+        }
+      ]
     }
   ]
 }

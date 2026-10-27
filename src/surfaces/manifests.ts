@@ -13,6 +13,18 @@ export interface ManifestSpec {
 	title: string;
 	websiteUrl?: string;
 	environment: { name: string; description: string }[];
+	/** MCP Bundle release asset for the MCP Registry `mcpb` package type. */
+	mcpb?: { url: string; fileSha256: string };
+}
+export interface ServerPackage {
+	registryType: string;
+	registryBaseUrl?: string;
+	identifier: string;
+	version?: string;
+	fileSha256?: string;
+	transport: { type: string };
+	packageArguments?: { type: string; value: string }[];
+	environmentVariables: { name: string; description: string; isRequired: boolean }[];
 }
 export function renderManifests(spec: ManifestSpec) {
 	if (spec.description.length > 100)
@@ -20,6 +32,33 @@ export function renderManifests(spec: ManifestSpec) {
 	const { name, version, description, author, homepage, repository, license, keywords } = spec;
 	const metadata = { name, version, description, author, homepage, repository, license, keywords };
 	const transport = { command: 'npx', args: ['-y', `${spec.packageName}@${version}`, 'mcp'] };
+	const environmentVariables = spec.environment.map((variable) => ({
+		...variable,
+		isRequired: false,
+	}));
+	const mcpbPackages: ServerPackage[] = spec.mcpb
+		? [
+				{
+					registryType: 'mcpb',
+					identifier: spec.mcpb.url,
+					fileSha256: spec.mcpb.fileSha256,
+					transport: { type: 'stdio' },
+					environmentVariables,
+				},
+			]
+		: [];
+	const packages: ServerPackage[] = [
+		{
+			registryType: 'npm',
+			registryBaseUrl: 'https://registry.npmjs.org',
+			identifier: spec.packageName,
+			version,
+			transport: { type: 'stdio' },
+			packageArguments: [{ type: 'positional', value: 'mcp' }],
+			environmentVariables,
+		},
+		...mcpbPackages,
+	];
 	return {
 		plugin: { $schema: 'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json', ...metadata },
 		mcp: {
@@ -40,20 +79,7 @@ export function renderManifests(spec: ManifestSpec) {
 			version,
 			repository: { url: repository, source: 'github' },
 			websiteUrl: spec.websiteUrl ?? homepage,
-			packages: [
-				{
-					registryType: 'npm',
-					registryBaseUrl: 'https://registry.npmjs.org',
-					identifier: spec.packageName,
-					version,
-					transport: { type: 'stdio' },
-					packageArguments: [{ type: 'positional', value: 'mcp' }],
-					environmentVariables: spec.environment.map((variable) => ({
-						...variable,
-						isRequired: false,
-					})),
-				},
-			],
+			packages,
 		},
 	};
 }
