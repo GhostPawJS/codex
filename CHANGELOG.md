@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-27
+
 ### Added
 
 - MCP Registry: `server.json` lists the MCP Bundle (`server.mcpb` release asset, with its SHA-256) as a second package next to npm. The Release workflow points it at each new tag's asset before publishing.
@@ -88,7 +90,8 @@ All notable changes to this project are documented here. The format follows
 - CI runs on every push and pull request on Node 24 and 26. Releases publish
   through npm trusted publishing with provenance.
 
-[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/GhostPawJS/codex/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/GhostPawJS/codex/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/GhostPawJS/codex/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/GhostPawJS/codex/compare/v0.3.0...v0.3.1
