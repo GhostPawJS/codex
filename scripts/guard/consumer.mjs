@@ -180,7 +180,7 @@ try {
 	const npx = join(dirname(process.execPath), 'npx');
 	assert.equal(
 		run(npx, ['--no-install', packageName, '--version'], { cwd: temp }).trim(),
-		pkg.version,
+		`${binName} ${pkg.version} (npm)`,
 	);
 	const packedServer = pack.files.find((file) => file.path === 'dist/mcp-server.js');
 	assert.ok(packedServer.mode & 0o111);
