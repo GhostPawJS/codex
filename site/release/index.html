@@ -30,7 +30,7 @@
 <main>
   <section class=hero aria-labelledby=hero-title>
     <div class=hero-copy>
-      <p class=kicker><code>@ghostpaw/codex</code> <span class=ver>0.5.1</span></p>
+      <p class=kicker><code>@ghostpaw/codex</code> <span class=ver>0.5.2</span></p>
       <h1 id=hero-title>When one agent saves a wrong fact, every agent trusts it.</h1>
       <p class=lede>codex keeps what your agent believes as beliefs with a source, a certainty and a history, so you can read and delete them one at a time instead of rereading MEMORY.md.</p>
       <div class=install>
@@ -87,7 +87,7 @@
       <div class=step-text>
         <h3>Another session finds it</h3>
         <p>A day later a different session asks about the API and gets the belief back with the flags still on it. That is the point: the second agent sees a guess, not a fact.</p>
-        <p>Recall is full-text search plus local similarity. No model is called.</p>
+        <p>Recall is lexical: full-text search with rarer words weighted higher, plus character-trigram similarity. No model is called.</p>
       </div>
       <div class="belief flagged">
         <p class=belief-id>Belief #1 · fact · recalled</p>
@@ -215,7 +215,7 @@ read.recall(db, &#39;graphql api&#39;); // []</code></pre></div>
 
   <section id=binaries class=binaries aria-labelledby=binaries-title>
     <h2 id=binaries-title>Install</h2>
-    <p class=intro>The default way to run <code>ghostpaw-codex</code>: one executable per platform with Node.js inside, with the same commands and the same MCP server as the npm package. Each line downloads the latest release, checks it against the release&#39;s SHA256SUMS and puts the binary on the PATH (<code>~/.local/bin</code>; the Windows script adds its folder to the user PATH).</p>
+    <p class=intro>The default way to run <code>ghostpaw-codex</code>: one executable per platform with Node.js inside, with the same commands and the same MCP server as the npm package. Each line downloads the latest release, checks it against the release&#39;s SHA256SUMS and installs the binary into <code>~/.local/bin</code>. The trailing <code>export</code> puts that folder on PATH for the current shell only; nothing edits <code>~/.profile</code>. The Windows script adds its folder to the user PATH.</p>
     <div class=bin-cmds>
         <div><p class=cmd-label id=bin-linux-x64-label>linux-x64</p>
         <div class=cmd><textarea id=bin-linux-x64 readonly rows=2 aria-labelledby=bin-linux-x64-label spellcheck=false>curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target linux-x64 &amp;&amp; export PATH=&#34;$HOME/.local/bin:$PATH&#34;</textarea><button type=button class=copy data-copy=bin-linux-x64>Copy</button></div></div>
@@ -228,14 +228,20 @@ read.recall(db, &#39;graphql api&#39;); // []</code></pre></div>
         <div><p class=cmd-label id=bin-windows-x64-label>windows-x64 (PowerShell)</p>
         <div class=cmd><textarea id=bin-windows-x64 readonly rows=2 aria-labelledby=bin-windows-x64-label spellcheck=false>irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex</textarea><button type=button class=copy data-copy=bin-windows-x64>Copy</button></div></div>
     </div>
+    <div class=bin-cmds>
+        <div><p class=cmd-label id=bin-profile-label>Keep it on PATH in new shells (appends one line to ~/.profile)</p>
+        <div class=cmd><input id=bin-profile readonly value="echo 'export PATH=&#34;$HOME/.local/bin:$PATH&#34;' &gt;&gt; ~/.profile" aria-labelledby=bin-profile-label spellcheck=false><button type=button class=copy data-copy=bin-profile>Copy</button></div></div>
+        <div><p class=cmd-label id=bin-pin-label>Pin a release instead of the latest (add --version)</p>
+        <div class=cmd><textarea id=bin-pin readonly rows=2 aria-labelledby=bin-pin-label spellcheck=false>curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target linux-x64 --version 0.5.2 &amp;&amp; export PATH=&#34;$HOME/.local/bin:$PATH&#34;</textarea><button type=button class=copy data-copy=bin-pin>Copy</button></div></div>
+    </div>
     <dl class="ledger wide">
       <div><dt>linux-x64</dt><dd>41.7 MB tar.gz</dd></div>
-      <div><dt>linux-arm64</dt><dd>41.1 MB tar.gz</dd></div>
+      <div><dt>linux-arm64</dt><dd>41.2 MB tar.gz</dd></div>
       <div><dt>darwin-arm64</dt><dd>44.8 MB tar.gz</dd></div>
       <div><dt>darwin-x64</dt><dd>46.4 MB tar.gz</dd></div>
       <div><dt>windows-x64</dt><dd>38.4 MB zip</dd></div>
     </dl>
-    <p class=note>Archive sizes of the v0.5.1 release assets. Linux builds need glibc 2.28 or newer; on Alpine, use npx.</p>
+    <p class=note>Archive sizes of the v0.5.2 release assets. Linux builds need glibc 2.28 or newer; on Alpine, use npx.</p>
     <h3>Other release installers</h3>
     <div class=bin-cmds>
         <div><p class=cmd-label id=bin-mise-label>mise</p>
@@ -263,10 +269,10 @@ read.recall(db, &#39;graphql api&#39;); // []</code></pre></div>
       <li>The binaries are not code signed. macOS builds carry an ad-hoc signature, so a browser download needs <code>xattr -d com.apple.quarantine ghostpaw-codex</code>. Windows may show a SmartScreen warning for a browser download.</li>
     </ul>
     <figure class=shot>
-      <a href=https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.png><img src=./cli-1600-d10e85c77d40.webp srcset="./cli-800-75d42ac4afe1.webp 800w, ./cli-1600-d10e85c77d40.webp 1600w" sizes="(min-width: 68rem) 64rem, 100vw" width=1600 height=790 decoding=async alt="Terminal session with ghostpaw-codex 0.5.1: --version prints the binary target, belief add prints a compact block, search for what class does fox play returns Fox mains a Warrior, search --quiet prints an id, belief defer +3d prints the date, review flags reports none for new beliefs, and skill --list lists workflow guides." loading=lazy></a>
-      <figcaption>A session with the 0.5.1 linux-x64 binary against a small database of five beliefs. Open the image for full size.</figcaption>
+      <a href=https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.png><img src=./cli-1600-6a3d671b381a.webp srcset="./cli-800-ddfb5a0b45aa.webp 800w, ./cli-1600-6a3d671b381a.webp 1600w" sizes="(min-width: 68rem) 64rem, 100vw" width=1600 height=790 decoding=async alt="Terminal session with ghostpaw-codex 0.5.2: --version --json prints name, version, variant and target; belief add prints a compact block; search for what class does fox play shares only common words, so it returns three beliefs and a low-signal warning; search for which warrior does fox main returns Fox mains a Warrior; after alias add class warrior, the first query returns that belief too." loading=lazy></a>
+      <figcaption>A session with the 0.5.2 linux-x64 binary against a small database of five beliefs. Open the image for full size.</figcaption>
     </figure>
-    <p class=links><a class=more href=https://github.com/GhostPawJS/codex/releases/tag/v0.5.1>Release v0.5.1</a><a href=https://github.com/GhostPawJS/codex#install>Install notes in the README</a><a href=https://cli.github.com/manual/gh_attestation_verify>gh attestation verify</a></p>
+    <p class=links><a class=more href=https://github.com/GhostPawJS/codex/releases/tag/v0.5.2>Release v0.5.2</a><a href=https://github.com/GhostPawJS/codex#install>Install notes in the README</a><a href=https://cli.github.com/manual/gh_attestation_verify>gh attestation verify</a></p>
   </section>
 
   <section class=start aria-labelledby=start-title>
@@ -312,6 +318,6 @@ read.listFlags(db);</code></pre>
 
 
 
-<script type=application/ld+json>{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","author":{"@id":"https://ghostpaw.dev/#org","@type":"Organization","name":"GhostPaw"},"codeRepository":"https://github.com/GhostPawJS/codex","description":"@ghostpaw/codex stores what your agent believes as claims with a source, a certainty and a revision history. Flags show what is stale or weakly sourced; one call corrects or deletes. One executable per platform or npm (Node.js 24+), zero dependencies, MIT.","license":"https://opensource.org/license/mit","name":"@ghostpaw/codex","programmingLanguage":"TypeScript","runtimePlatform":"Node.js 24","version":"0.5.1"}]}</script><script>document.documentElement.classList.add("js");
+<script type=application/ld+json>{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","author":{"@id":"https://ghostpaw.dev/#org","@type":"Organization","name":"GhostPaw"},"codeRepository":"https://github.com/GhostPawJS/codex","description":"@ghostpaw/codex stores what your agent believes as claims with a source, a certainty and a revision history. Flags show what is stale or weakly sourced; one call corrects or deletes. One executable per platform or npm (Node.js 24+), zero dependencies, MIT.","license":"https://opensource.org/license/mit","name":"@ghostpaw/codex","programmingLanguage":"TypeScript","runtimePlatform":"Node.js 24","version":"0.5.2"}]}</script><script>document.documentElement.classList.add("js");
 </script><script type=module>(()=>{document.documentElement.classList.add("js");let t=[...document.querySelectorAll('.drill [role="tab"]')],i=[...document.querySelectorAll(".step")],a=document.getElementById("next-step");function s(n,c,l){let o=t[n]||t[0];if(t.forEach(e=>{let r=e===o;e.setAttribute("aria-selected",String(r)),e.tabIndex=r?0:-1}),i.forEach(e=>{let r=e.id===o.getAttribute("aria-controls");e.hidden=!r,e.classList.toggle("open",r)}),a){let e=t.indexOf(o)===t.length-1;a.textContent=e?"Start again":"Next move"}if(c&&o.focus(),l){let e=new URL(location.href);e.searchParams.set("step",String(t.indexOf(o)+1)),history.replaceState(null,"",e)}}if(t.length){t.forEach((c,l)=>{c.addEventListener("click",()=>s(l,!1,!0)),c.addEventListener("keydown",o=>{let e=null;o.key==="ArrowRight"&&(e=(l+1)%t.length),o.key==="ArrowLeft"&&(e=(l-1+t.length)%t.length),o.key==="Home"&&(e=0),o.key==="End"&&(e=t.length-1),e!==null&&(o.preventDefault(),s(e,!0,!0))})}),a&&(a.hidden=!1,a.addEventListener("click",()=>{let c=t.findIndex(l=>l.getAttribute("aria-selected")==="true");s((c+1)%t.length,!1,!0)}));let n=Number(new URLSearchParams(location.search).get("step"));s(n>=1&&n<=t.length?n-1:0,!1,!1)}document.querySelectorAll(".copy").forEach(n=>{n.addEventListener("click",async()=>{let c=document.getElementById(n.dataset.copy);if(!c)return;try{await navigator.clipboard.writeText(c.value)}catch{c.select(),document.execCommand("copy")}let l=n.textContent;n.textContent="Copied",setTimeout(()=>{n.textContent=l},2e3)})})})();
 </script><script defer src=https://static.cloudflareinsights.com/beacon.min.js data-cf-beacon='{"token": "eb094a31847f4b1b96558586692a6f73"}'></script></body></html>

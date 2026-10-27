@@ -31,7 +31,7 @@
 <main>
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <p class="kicker"><code>@ghostpaw/codex</code> <span class="ver">0.5.1</span></p>
+      <p class="kicker"><code>@ghostpaw/codex</code> <span class="ver">0.5.2</span></p>
       <h1 id="hero-title">When one agent saves a wrong fact, every agent trusts it.</h1>
       <p class="lede">codex keeps what your agent believes as beliefs with a source, a certainty and a history, so you can read and delete them one at a time instead of rereading MEMORY.md.</p>
       <div class="install">
@@ -88,7 +88,7 @@
       <div class="step-text">
         <h3>Another session finds it</h3>
         <p>A day later a different session asks about the API and gets the belief back with the flags still on it. That is the point: the second agent sees a guess, not a fact.</p>
-        <p>Recall is full-text search plus local similarity. No model is called.</p>
+        <p>Recall is lexical: full-text search with rarer words weighted higher, plus character-trigram similarity. No model is called.</p>
       </div>
       <div class="belief flagged">
         <p class="belief-id">Belief #1 · fact · recalled</p>
@@ -216,7 +216,7 @@ read.recall(db, 'graphql api'); // []</code></pre></div>
 
   <section id="binaries" class="binaries" aria-labelledby="binaries-title">
     <h2 id="binaries-title">Install</h2>
-    <p class="intro">The default way to run <code>ghostpaw-codex</code>: one executable per platform with Node.js inside, with the same commands and the same MCP server as the npm package. Each line downloads the latest release, checks it against the release&#39;s SHA256SUMS and puts the binary on the PATH (<code>~/.local/bin</code>; the Windows script adds its folder to the user PATH).</p>
+    <p class="intro">The default way to run <code>ghostpaw-codex</code>: one executable per platform with Node.js inside, with the same commands and the same MCP server as the npm package. Each line downloads the latest release, checks it against the release&#39;s SHA256SUMS and installs the binary into <code>~/.local/bin</code>. The trailing <code>export</code> puts that folder on PATH for the current shell only; nothing edits <code>~/.profile</code>. The Windows script adds its folder to the user PATH.</p>
     <div class="bin-cmds">
         <div><p class="cmd-label" id="bin-linux-x64-label">linux-x64</p>
         <div class="cmd"><textarea id="bin-linux-x64" readonly rows="2" aria-labelledby="bin-linux-x64-label" spellcheck="false">curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target linux-x64 &amp;&amp; export PATH=&quot;$HOME/.local/bin:$PATH&quot;</textarea><button type="button" class="copy" data-copy="bin-linux-x64">Copy</button></div></div>
@@ -229,14 +229,20 @@ read.recall(db, 'graphql api'); // []</code></pre></div>
         <div><p class="cmd-label" id="bin-windows-x64-label">windows-x64 (PowerShell)</p>
         <div class="cmd"><textarea id="bin-windows-x64" readonly rows="2" aria-labelledby="bin-windows-x64-label" spellcheck="false">irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex</textarea><button type="button" class="copy" data-copy="bin-windows-x64">Copy</button></div></div>
     </div>
+    <div class="bin-cmds">
+        <div><p class="cmd-label" id="bin-profile-label">Keep it on PATH in new shells (appends one line to ~/.profile)</p>
+        <div class="cmd"><input id="bin-profile" readonly value="echo 'export PATH=&quot;$HOME/.local/bin:$PATH&quot;' &gt;&gt; ~/.profile" aria-labelledby="bin-profile-label" spellcheck="false"><button type="button" class="copy" data-copy="bin-profile">Copy</button></div></div>
+        <div><p class="cmd-label" id="bin-pin-label">Pin a release instead of the latest (add --version)</p>
+        <div class="cmd"><textarea id="bin-pin" readonly rows="2" aria-labelledby="bin-pin-label" spellcheck="false">curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target linux-x64 --version 0.5.2 &amp;&amp; export PATH=&quot;$HOME/.local/bin:$PATH&quot;</textarea><button type="button" class="copy" data-copy="bin-pin">Copy</button></div></div>
+    </div>
     <dl class="ledger wide">
       <div><dt>linux-x64</dt><dd>41.7 MB tar.gz</dd></div>
-      <div><dt>linux-arm64</dt><dd>41.1 MB tar.gz</dd></div>
+      <div><dt>linux-arm64</dt><dd>41.2 MB tar.gz</dd></div>
       <div><dt>darwin-arm64</dt><dd>44.8 MB tar.gz</dd></div>
       <div><dt>darwin-x64</dt><dd>46.4 MB tar.gz</dd></div>
       <div><dt>windows-x64</dt><dd>38.4 MB zip</dd></div>
     </dl>
-    <p class="note">Archive sizes of the v0.5.1 release assets. Linux builds need glibc 2.28 or newer; on Alpine, use npx.</p>
+    <p class="note">Archive sizes of the v0.5.2 release assets. Linux builds need glibc 2.28 or newer; on Alpine, use npx.</p>
     <h3>Other release installers</h3>
     <div class="bin-cmds">
         <div><p class="cmd-label" id="bin-mise-label">mise</p>
@@ -264,10 +270,10 @@ read.recall(db, 'graphql api'); // []</code></pre></div>
       <li>The binaries are not code signed. macOS builds carry an ad-hoc signature, so a browser download needs <code>xattr -d com.apple.quarantine ghostpaw-codex</code>. Windows may show a SmartScreen warning for a browser download.</li>
     </ul>
     <figure class="shot">
-      <a href="{{.urls.cliShot}}"><img src="assets/images/cli-1600.webp" srcset="assets/images/cli-800.webp 800w, assets/images/cli-1600.webp 1600w" sizes="(min-width: 68rem) 64rem, 100vw" width="1600" height="790" decoding="async" alt="Terminal session with ghostpaw-codex 0.5.1: --version prints the binary target, belief add prints a compact block, search for what class does fox play returns Fox mains a Warrior, search --quiet prints an id, belief defer +3d prints the date, review flags reports none for new beliefs, and skill --list lists workflow guides." loading="lazy"></a>
-      <figcaption>A session with the 0.5.1 linux-x64 binary against a small database of five beliefs. Open the image for full size.</figcaption>
+      <a href="{{.urls.cliShot}}"><img src="assets/images/cli-1600.webp" srcset="assets/images/cli-800.webp 800w, assets/images/cli-1600.webp 1600w" sizes="(min-width: 68rem) 64rem, 100vw" width="1600" height="790" decoding="async" alt="Terminal session with ghostpaw-codex 0.5.2: --version --json prints name, version, variant and target; belief add prints a compact block; search for what class does fox play shares only common words, so it returns three beliefs and a low-signal warning; search for which warrior does fox main returns Fox mains a Warrior; after alias add class warrior, the first query returns that belief too." loading="lazy"></a>
+      <figcaption>A session with the 0.5.2 linux-x64 binary against a small database of five beliefs. Open the image for full size.</figcaption>
     </figure>
-    <p class="links"><a class="more" href="{{.urls.release}}">Release v0.5.1</a><a href="{{.urls.readmeInstall}}">Install notes in the README</a><a href="{{.urls.attest}}">gh attestation verify</a></p>
+    <p class="links"><a class="more" href="{{.urls.release}}">Release v0.5.2</a><a href="{{.urls.readmeInstall}}">Install notes in the README</a><a href="{{.urls.attest}}">gh attestation verify</a></p>
   </section>
 
   <section class="start" aria-labelledby="start-title">

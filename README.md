@@ -84,7 +84,7 @@ $ ghostpaw-codex --version --json
 
 A session with the 0.5.2 linux-x64 binary against a small database of five beliefs:
 
-![ghostpaw-codex 0.5.2: version, belief add, a low-signal search with its warning, a distinctive-word search, search --quiet, belief defer, review flags and skill --list](https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.png)
+![ghostpaw-codex 0.5.2: version --json, belief add, a common-word search with its low-signal warning, a distinctive-word search, alias add and the aliased search](https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.png)
 
 The same session as an [animated GIF](https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.gif).
 
@@ -146,7 +146,7 @@ Approximate sizes for 0.5.2 (Node 26.12.1 inside each binary):
 | Target | Archive | Binary |
 |---|---|---|
 | linux-x64 | 41.7 MB tar.gz | 117.4 MB |
-| linux-arm64 | 41.1 MB tar.gz | 115.2 MB |
+| linux-arm64 | 41.2 MB tar.gz | 115.2 MB |
 | darwin-arm64 | 44.8 MB tar.gz | 146.7 MB |
 | darwin-x64 | 46.4 MB tar.gz | 149.5 MB |
 | windows-x64 | 38.4 MB zip | 105.6 MB |
