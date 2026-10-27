@@ -23,6 +23,81 @@ Website: [codex.ghostpaw.dev](https://codex.ghostpaw.dev/)
 
 Requires **Node.js 24+** (uses the built-in `node:sqlite`).
 
+## Install
+
+The [npm package](https://www.npmjs.com/package/@ghostpaw/codex) requires Node 24+:
+
+```sh
+npm install -g @ghostpaw/codex
+npx -y @ghostpaw/codex --help
+```
+
+Standalone binaries are available from [GitHub Releases](https://github.com/GhostPawJS/codex/releases)
+for linux-x64, linux-arm64, darwin-arm64, darwin-x64 and windows-x64.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh
+```
+
+```powershell
+irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex
+```
+
+Other release installers:
+
+```sh
+mise use -g github:GhostPawJS/codex
+ubi --project GhostPawJS/codex --exe ghostpaw-codex --in ~/.local/bin
+eget GhostPawJS/codex
+```
+
+For [aqua](https://aquaproj.github.io/docs/reference/registry-config/), define a
+`github_release` package in `aqua.yaml`:
+
+```yaml
+registries:
+  - name: codex
+    type: local
+    path: codex-registry.yaml
+packages:
+  - name: GhostPawJS/codex@v0.4.0
+    registry: codex
+```
+
+`codex-registry.yaml`:
+
+```yaml
+packages:
+  - type: github_release
+    repo_owner: GhostPawJS
+    repo_name: codex
+    asset: ghostpaw-codex-{{trimV .Version}}-{{.OS}}-{{.Arch}}.tar.gz
+    format: tar.gz
+    replacements: { amd64: x64 }
+    overrides:
+      - goos: windows
+        asset: ghostpaw-codex-{{trimV .Version}}-windows-{{.Arch}}.zip
+        format: zip
+    files:
+      - name: ghostpaw-codex
+```
+
+Install scripts verify SHA256SUMS. To verify a downloaded archive's
+[build attestation](https://cli.github.com/manual/gh_attestation_verify):
+
+```sh
+gh attestation verify <archive> -R GhostPawJS/codex
+```
+
+Set `GHOSTPAW_VERIFY=attestation` for attestation verification in `install.sh`.
+Binaries are unsigned; macOS binaries carry an ad-hoc signature. For a browser
+download on macOS, remove quarantine with
+`xattr -d com.apple.quarantine /path/to/ghostpaw-codex`.
+Linux binaries require glibc 2.28+; use npx on Alpine.
+See the [binary build workflow](.github/workflows/release-binaries.yml).
+
+<!-- sizes -->
+
 ## 30-second quickstart
 
 ### MCP server
@@ -74,17 +149,60 @@ A Dockerfile is included for container hosts:
 The server speaks MCP 2026-07-28 (stateless, `server/discover`) and the
 initialize-based revisions 2025-11-25, 2025-06-18, 2025-03-26 and 2024-11-05.
 
-### CLI
+## CLI
 
-```bash
-npx -y @ghostpaw/codex remember_belief --claim "Deploys go out on Tuesdays" --source explicit --category procedure
-npx -y @ghostpaw/codex search_codex --query "when do we deploy"
-npx -y @ghostpaw/codex tools              # list tools
-npx -y @ghostpaw/codex describe revise_belief
+```text
+ghostpaw-codex search <query> [--limit N --min-score N --category C --source S]
+ghostpaw-codex review <flags|status|log|trends> [--limit N --now N]
+ghostpaw-codex belief add <claim> --source S --category C [--certainty N --provenance P]
+ghostpaw-codex belief show <beliefId>
+ghostpaw-codex belief retire <beliefId>
+ghostpaw-codex belief confirm|correct|forget|defer <beliefId> [flags]
+ghostpaw-codex belief merge <beliefIds...> [flags]
+ghostpaw-codex proximity dismiss <beliefA> <beliefB>
+ghostpaw-codex mcp|skill|tools|describe|call|completions|version|help
 ```
 
-Install globally for the `ghostpaw-codex` binary: `npm i -g @ghostpaw/codex`.
-`ghostpaw-codex mcp` starts the stdio server.
+Global flags can appear anywhere: `--db <path>`, `--json`, `--quiet`,
+`--compact`, `--help`/`-h`, `--version`/`-V`/`-v`, `--no-color`.
+`NO_COLOR` is accepted; output uses no terminal colors.
+Noun-verb commands print the full tool result as JSON with `--json` or when
+stdout is piped. Terminal output shows the summary and payload.
+`--quiet` suppresses stdout. `--compact` removes JSON indentation.
+
+Use `help belief`, `belief --help` or `belief correct --help` for schema-derived
+help. Correction takes `--claim`; defer takes `--deferred-until` (timestamp).
+Array flags repeat, kebab-case flags map to schema properties, and `@path`
+reads a value from a file. `--` ends flags. A positional `-`, or piped stdin
+with no arguments, reads a JSON object; explicit flags override its fields.
+Database selection uses `--db`, `GHOSTPAW_CODEX_DB`, then `~/.ghostpaw/codex.db`.
+
+| Exit | Noun-verb result |
+|---|---|
+| 0 | Success, including no_op |
+| 1 | Tool error |
+| 2 | Usage or schema error |
+| 3 | Clarification needed or not found |
+| 4 | Conflict or version mismatch |
+| 70 | Internal error |
+
+Errors go to stderr. With `--json`, usage and internal errors also print
+`{ok:false,error:{code,message}}` to stdout. Tool results retain their full
+shape. Legacy `tools [--json]`, `describe <tool>`, `call <tool> [JSON|-]`
+and `<tool_name> --parameter value` keep their existing exit codes.
+`completions bash`, `completions zsh` and `completions fish` print shell scripts.
+
+```sh
+ghostpaw-codex belief add "Deploys go out on Tuesdays" --source explicit --category procedure
+```
+
+```sh
+ghostpaw-codex search "when do we deploy" --json | jq '.data.results'
+```
+
+```sh
+printf '%s' '{"beliefId":1}' | ghostpaw-codex belief show - --json
+```
 
 ### Agent Skill
 
@@ -221,7 +339,7 @@ are computed at read time.
 |---|---|
 | `@ghostpaw/codex` | `initCodexTables`, `read`, `write`, `tools`, `skills`, `soul`, all types |
 | `@ghostpaw/codex/mcp` | `createCodexMcpServer`, `serveCodexMcp`, generic MCP server helpers |
-| `ghostpaw-codex` (bin) | CLI: tools, describe, call, per-tool flags, `mcp`, `skill` |
+| `ghostpaw-codex` (bin) | Noun-verb CLI, legacy tool forms, `mcp`, `skill`, shell completions |
 | `dist/mcp-server.js` | Standalone stdio MCP server entry (used by the MCP Bundle and the Dockerfile) |
 | `SKILL.md`, `skills/codex/` | Agent Skill with 17 workflow references |
 

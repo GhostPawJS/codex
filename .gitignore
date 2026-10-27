@@ -11,3 +11,5 @@ bench-results.json
 
 .mcpb-build/
 server.mcpb
+
+dist-sea/

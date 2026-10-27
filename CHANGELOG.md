@@ -6,6 +6,22 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Schema-derived noun-verb CLI commands, per-command help and bash/zsh/fish
+  completions, with JSON stdin, file values and global output flags.
+- Standalone binaries for linux-x64, linux-arm64, darwin-arm64, darwin-x64
+  and windows-x64, with SHA256SUMS and build attestations.
+- `install.sh` and `install.ps1` release installers and an external install
+  check on Linux, macOS and Windows.
+
+### Changed
+
+- Noun-verb commands use exit codes 0 (success), 1 (tool error), 2 (usage),
+  3 (clarification or not found), 4 (conflict) and 70 (internal error).
+  Existing CLI forms retain their output and exit codes.
+- npm and standalone CLI entries share their options and lazy MCP wiring.
+
 ## [0.3.2] - 2026-10-24
 
 ### Changed

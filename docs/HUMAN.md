@@ -462,3 +462,61 @@ Bad usage:
 - Use [`README.md`](README.md) for architecture and mechanics.
 - Use [`LLM.md`](LLM.md) when building a harness around `soul`, `tools`, and
   `skills`.
+
+## CLI Reference
+
+```text
+ghostpaw-codex search <query> [--limit N --min-score N --category C --source S]
+ghostpaw-codex review <flags|status|log|trends> [--limit N --now N]
+ghostpaw-codex belief add <claim> --source S --category C [--certainty N --provenance P]
+ghostpaw-codex belief show <beliefId>
+ghostpaw-codex belief retire <beliefId>
+ghostpaw-codex belief confirm|correct|forget|defer <beliefId> [flags]
+ghostpaw-codex belief merge <beliefIds...> [flags]
+ghostpaw-codex proximity dismiss <beliefA> <beliefB>
+ghostpaw-codex mcp|skill|tools|describe|call|completions|version|help
+```
+
+Global flags can appear anywhere: `--db <path>`, `--json`, `--quiet`,
+`--compact`, `--help`/`-h`, `--version`/`-V`/`-v`, `--no-color`.
+`NO_COLOR` is accepted; output uses no terminal colors.
+Noun-verb commands print the full tool result as JSON with `--json` or when
+stdout is piped. Terminal output shows the summary and payload.
+`--quiet` suppresses stdout. `--compact` removes JSON indentation.
+
+Use `help belief`, `belief --help` or `belief correct --help` for schema-derived
+help. Correction takes `--claim`; defer takes `--deferred-until` (timestamp).
+Array flags repeat, kebab-case flags map to schema properties, and `@path`
+reads a value from a file. `--` ends flags. A positional `-`, or piped stdin
+with no arguments, reads a JSON object; explicit flags override its fields.
+Database selection uses `--db`, `GHOSTPAW_CODEX_DB`, then `~/.ghostpaw/codex.db`.
+
+| Exit | Noun-verb result |
+|---|---|
+| 0 | Success, including no_op |
+| 1 | Tool error |
+| 2 | Usage or schema error |
+| 3 | Clarification needed or not found |
+| 4 | Conflict or version mismatch |
+| 70 | Internal error |
+
+Errors go to stderr. With `--json`, usage and internal errors also print
+`{ok:false,error:{code,message}}` to stdout. Tool results retain their full
+shape. Legacy `tools [--json]`, `describe <tool>`, `call <tool> [JSON|-]`
+and `<tool_name> --parameter value` keep their existing exit codes.
+`completions bash`, `completions zsh` and `completions fish` print shell scripts.
+
+```sh
+ghostpaw-codex belief add "Deploys go out on Tuesdays" --source explicit --category procedure
+```
+
+```sh
+ghostpaw-codex search "when do we deploy" --json | jq '.data.results'
+```
+
+```sh
+printf '%s' '{"beliefId":1}' | ghostpaw-codex belief show - --json
+```
+
+
+See [installation instructions](../README.md#install).

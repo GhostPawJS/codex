@@ -1,4 +1,5 @@
-import type { Readable, Writable } from 'node:stream';
+import { type Readable, Writable } from 'node:stream';
+import { runCliCommand } from './cli_commands.ts';
 import { isErrorResult, type JsonSchema, type SurfaceTool } from './surface_types.ts';
 import { validateInput } from './validate_input.ts';
 
@@ -21,14 +22,40 @@ export async function runToolCli<TCtx>(
 	argv: string[],
 	options: ToolCliOptions<TCtx>,
 ): Promise<number> {
+	const end = argv.indexOf('--');
+	if (
+		argv
+			.slice(0, end < 0 ? argv.length : end)
+			.some((arg) => ['--version', '-V', '-v'].includes(arg))
+	) {
+		if (!argv.includes('--quiet')) (options.stdout ?? process.stdout).write(`${options.version}\n`);
+		return 0;
+	}
+	const modern = await runCliCommand(argv, options);
+	if (modern !== undefined) return modern;
+	const quiet = argv.includes('--quiet');
+	const explicitJson = argv.includes('--json') && !argv.includes('tools');
+	if (quiet)
+		options = {
+			...options,
+			stdout: new Writable({
+				write(_chunk, _encoding, cb) {
+					cb();
+				},
+			}),
+		};
 	const stdout = options.stdout ?? process.stdout;
 	const stderr = options.stderr ?? process.stderr;
 	const stdin = options.stdin ?? process.stdin;
-	const args = [...argv];
+	const args = argv.filter(
+		(arg) => arg !== '--quiet' && arg !== '--no-color' && !(explicitJson && arg === '--json'),
+	);
 	let db: string | undefined;
 	let compact = false;
 	const fail = (message: string, code = 2) => {
 		stderr.write(`${message}\n`);
+		if (explicitJson)
+			stdout.write(`${JSON.stringify({ ok: false, error: { code: 'cli_error', message } })}\n`);
 		return code;
 	};
 	for (let i = 0; i < args.length; i++) {
@@ -52,7 +79,7 @@ export async function runToolCli<TCtx>(
 		);
 		return 0;
 	}
-	if (['--version', '-v'].includes(command)) {
+	if (['--version', '-V', '-v', 'version'].includes(command)) {
 		stdout.write(`${options.version}\n`);
 		return 0;
 	}
@@ -60,7 +87,7 @@ export async function runToolCli<TCtx>(
 		stdout.write(
 			args.includes('--json')
 				? `${JSON.stringify(
-						options.tools.map(({ handler: _handler, ...tool }) => tool),
+						options.tools.map(({ handler: _handler, cli: _cli, ...tool }) => tool),
 						null,
 						2,
 					)}\n`

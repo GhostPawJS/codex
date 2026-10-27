@@ -167,3 +167,97 @@ test('handler throws still close the context', async () => {
 	assert.equal(code, 1);
 	assert.equal(closed, true);
 });
+
+test('noun verb commands use schema parsing, help, JSON, quiet and stdin', async () => {
+	assert.equal((await invoke(['tool', 'test', '--some-value', '2', '--json'])).code, 0);
+	assert.deepEqual(
+		JSON.parse(
+			(await invoke(['tool', 'test', '-', '--some-value', '2'], '{"someValue":1,"enabled":true}'))
+				.out,
+		).input,
+		{ someValue: 2, enabled: true },
+	);
+	assert.equal((await invoke(['tool', 'test', '--some-value=2', '--quiet'])).out, '');
+	assert.match((await invoke(['tool', 'test', '--help'])).out, /--some-value/);
+	assert.match((await invoke(['help', 'tool'])).out, /tool test/);
+	for (const shell of ['bash', 'zsh', 'fish'])
+		assert.match((await invoke(['completions', shell])).out, /test/);
+	for (const [value, code] of [
+		[1, 0],
+		[0, 1],
+		[3, 3],
+	] as const)
+		assert.equal((await invoke(['tool', 'test', '--some-value', String(value)])).code, code);
+	const bad = await invoke(['tool', 'test', '--some-value=bad', '--json']);
+	assert.equal(bad.code, 2);
+	assert.equal(JSON.parse(bad.out).error.code, 'usage_error');
+	assert.equal((await invoke(['tool', 'test'], '{"someValue":1}')).code, 0);
+});
+test('noun verb handler exceptions return 70 and close context', async () => {
+	let closed = false;
+	let output = '';
+	const sink = new Writable({
+		write(chunk, _encoding, cb) {
+			output += String(chunk);
+			cb();
+		},
+	});
+	const code = await runToolCli(['tool', 'test', '--some-value=1'], {
+		bin: 'test',
+		version: '1',
+		description: '',
+		tools: [
+			{
+				...tool,
+				handler: () => {
+					throw new Error('failure');
+				},
+			},
+		],
+		openContext: () => 1,
+		closeContext: () => {
+			closed = true;
+		},
+		stdout: sink,
+		stderr: sink,
+	});
+	assert.equal(code, 70);
+	assert.equal(closed, true);
+	assert.match(output, /failure/);
+});
+
+test('noun verb error results preserve JSON and conflict exit codes', async () => {
+	for (const [errorCode, expected] of [
+		['not_found', 3],
+		['conflict', 4],
+		['other', 1],
+	] as const) {
+		let out = '';
+		let err = '';
+		const result = { ok: false, error: { code: errorCode, message: 'details' } };
+		const code = await runToolCli(['tool', 'test', '--some-value=1', '--json'], {
+			bin: 'test',
+			version: '1',
+			description: '',
+			tools: [{ ...tool, handler: () => result }],
+			openContext: () => 1,
+			stdout: new Writable({
+				write(chunk, _encoding, cb) {
+					out += String(chunk);
+					cb();
+				},
+			}),
+			stderr: new Writable({
+				write(chunk, _encoding, cb) {
+					err += String(chunk);
+					cb();
+				},
+			}),
+		});
+		assert.equal(code, expected);
+		assert.deepEqual(JSON.parse(out), result);
+		assert.match(err, /details/);
+	}
+	assert.equal((await invoke(['tool', 'test', '--some-value=1', '-'], '{bad')).code, 2);
+	assert.equal((await invoke(['tool', 'test', '--some-value=2', '-'], '{"someValue":1}')).code, 0);
+});
