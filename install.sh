@@ -3,6 +3,7 @@
 #
 #   curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh
 #   curl -fsSL .../install.sh | sh -s -- --version 0.4.0 --dir /usr/local/bin
+#   curl -fsSL .../install.sh | sh -s -- --target linux-x64
 #
 # Checks the archive against the release's SHA256SUMS before installing.
 # With the GitHub CLI installed and GHOSTPAW_VERIFY=attestation set, it also
@@ -13,11 +14,19 @@ set -eu
 LIB=codex
 REPO="GhostPawJS/$LIB"
 BIN="ghostpaw-$LIB"
+TARGET=""
 VERSION="${GHOSTPAW_VERSION:-}"
 DIR="${GHOSTPAW_INSTALL_DIR:-$HOME/.local/bin}"
 
 while [ $# -gt 0 ]; do
 	case "$1" in
+	--target)
+		TARGET="${2-}"
+		case "$TARGET" in
+		linux-x64 | linux-arm64 | darwin-arm64 | darwin-x64) ;;
+		*) echo "install.sh: unknown target $TARGET; choose linux-x64, linux-arm64, darwin-arm64, darwin-x64" >&2; exit 2 ;;
+		esac
+		shift 2 ;;
 	--version) VERSION="${2#v}"; shift 2 ;;
 	--dir) DIR="$2"; shift 2 ;;
 	-h | --help) sed -n '2,11p' "$0" 2>/dev/null || true; exit 0 ;;
@@ -42,6 +51,14 @@ x86_64 | amd64) ARCH=x64 ;;
 aarch64 | arm64) ARCH=arm64 ;;
 *) die "unsupported CPU $(uname -m)" ;;
 esac
+DETECTED="$OS-$ARCH"
+if [ -n "$TARGET" ] && [ "$TARGET" != "$DETECTED" ]; then
+	if [ "$DETECTED" = darwin-arm64 ] && [ "$TARGET" = darwin-x64 ]; then
+		ARCH=x64
+	else
+		die "this machine is $DETECTED; use the $DETECTED install line"
+	fi
+fi
 if [ "$OS" = linux ] && [ -e /etc/alpine-release ]; then
 	die "Alpine/musl is not supported: the binary needs glibc 2.28+. Use 'npx @ghostpaw/$LIB' instead."
 fi

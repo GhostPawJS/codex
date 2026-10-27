@@ -261,3 +261,12 @@ test('noun verb error results preserve JSON and conflict exit codes', async () =
 	assert.equal((await invoke(['tool', 'test', '--some-value=1', '-'], '{bad')).code, 2);
 	assert.equal((await invoke(['tool', 'test', '--some-value=2', '-'], '{"someValue":1}')).code, 0);
 });
+
+test('version flags and command print the human library variant', async () => {
+	for (const args of [['--version'], ['-V'], ['-v'], ['version']]) {
+		const result = await invoke(args);
+		assert.equal(result.code, 0);
+		assert.equal(result.out, 'codex 1.0 (library)\n');
+		assert.equal(result.opens, 0);
+	}
+});

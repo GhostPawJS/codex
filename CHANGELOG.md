@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Default installation instructions to the release binary in the README and generated skill, with npm and library alternatives.
+- Include binary target, npm or library variant in human CLI version output.
+- Accept explicit installer targets with host validation and the macOS Rosetta exception.
+- Accept CLI flag values starting with dashes unless they resemble a named flag.
+
 ## [0.4.1] - 2026-10-27
 
 ### Added

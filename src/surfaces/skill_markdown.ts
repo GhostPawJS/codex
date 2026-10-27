@@ -10,6 +10,7 @@ export interface SkillMarkdownSpec<TCtx> {
 	packageName?: string;
 	server: string;
 	about: string;
+	installation?: string;
 	tools: readonly SurfaceTool<TCtx>[];
 	workflows: readonly { name: string; description: string }[];
 	principles: readonly string[];
@@ -41,13 +42,14 @@ export function renderSkillMarkdown<TCtx>(
 		'',
 		`# ${spec.name}`,
 		'',
+		...(spec.installation ? [spec.installation, ''] : []),
 		spec.about,
 		'',
 		'## Calling tools',
 		'',
 		`MCP: connect to ${spec.server}, then call a tool by name with its JSON arguments.`,
 		'',
-		`CLI: \`${spec.bin} call <tool> '<JSON object>'\` or \`${spec.bin} <tool> --parameter value\`${spec.packageName ? ` (without a global install: \`npx -y ${spec.packageName} <tool> ...\`)` : ''}.`,
+		`CLI: \`${spec.bin} call <tool> '<JSON object>'\` or \`${spec.bin} <tool> --parameter value\`.`,
 		'',
 		`Inspect schemas with \`${spec.bin} describe <tool>\`. Use \`--db <path>\` to select a database.`,
 		'',
@@ -86,5 +88,14 @@ export function renderSkillMarkdown<TCtx>(
 		...spec.principles.map((principle) => `- ${principle}`),
 		'',
 	);
+	if (spec.packageName)
+		lines.push(
+			'## Without the binary',
+			'',
+			`For npm-based environments (Node 24+), run tools with \`npx -y ${spec.packageName} ...\`.`,
+			'',
+			`Harnesses embedding it in code can import \`${spec.packageName}\` as a library.`,
+			'',
+		);
 	return lines.join('\n');
 }

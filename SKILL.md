@@ -2,10 +2,28 @@
 name: codex
 description: "Store, search, and revise local beliefs with evidence and revision history. Use when recalling preferences, capturing knowledge, or maintaining agent memory."
 license: "MIT"
-compatibility: "Node.js 24 or newer. MCP stdio or ghostpaw-codex CLI."
+compatibility: "Release binary needs no runtime installation. npx requires Node.js 24+. MCP stdio or ghostpaw-codex CLI."
 ---
 
 # codex
+
+## Install
+
+Linux/macOS:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh
+```
+
+Installs `~/.local/bin/ghostpaw-codex` after checking SHA256SUMS.
+
+Windows x64 (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex
+```
+
+Run tools as `ghostpaw-codex ...`; use `~/.local/bin/ghostpaw-codex` if it is not on PATH.
 
 Codex is a local belief and memory engine that records claims, evidence, certainty, and revision history. Search before you remember to avoid duplicates and recover relevant context. Inspect before you revise; use revise for confirmation, correction, merging, forgetting, or deferral. Use retire only for permanent erasure. Certainty is not truth: confidence and derived flags guide attention, never prove a claim. Preserve honest lineage when understanding changes and ask for clarification when the intended action is ambiguous.
 
@@ -13,7 +31,7 @@ Codex is a local belief and memory engine that records claims, evidence, certain
 
 MCP: connect to ghostpaw-codex, then call a tool by name with its JSON arguments.
 
-CLI: `ghostpaw-codex call <tool> '<JSON object>'` or `ghostpaw-codex <tool> --parameter value` (without a global install: `npx -y @ghostpaw/codex <tool> ...`).
+CLI: `ghostpaw-codex call <tool> '<JSON object>'` or `ghostpaw-codex <tool> --parameter value`.
 
 Inspect schemas with `ghostpaw-codex describe <tool>`. Use `--db <path>` to select a database.
 
@@ -162,3 +180,9 @@ Writes: writes_state.
 - Read derived signals before prescribing action.
 - Choose the smallest honest mutation.
 - Maintenance is the value, not capture.
+
+## Without the binary
+
+For npm-based environments (Node 24+), run tools with `npx -y @ghostpaw/codex ...`.
+
+Harnesses embedding it in code can import `@ghostpaw/codex` as a library.

@@ -88,7 +88,7 @@ export function parseCliArgs(argv: string[], spec: CliSpec): Record<string, unkn
 		if (arg.type === 'boolean' && raw === undefined) raw = negative ? 'false' : 'true';
 		if (raw === undefined) {
 			const next = argv[i + 1];
-			if (next === undefined || next.startsWith('--'))
+			if (next === undefined || /^--[a-z]/i.test(next))
 				throw new CliUsageError(`Missing value: --${arg.name}`);
 			raw = next;
 			i++;

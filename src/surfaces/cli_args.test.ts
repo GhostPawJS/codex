@@ -62,3 +62,11 @@ test('generic parser reports typed usage errors and renders schema help', () => 
 		{ ids: [1, 2] },
 	);
 });
+
+test('flag values may start with dashes unless they look like a flag', () => {
+	const spec = { command: 'test', flags: [{ name: 'claim', type: 'string' as const }] };
+	for (const claim of ['---', '--', '--123', '--!', '-value'])
+		assert.deepEqual(parseCliArgs(['--claim', claim], spec), { claim });
+	for (const flag of ['--other', '--Other'])
+		assert.throws(() => parseCliArgs(['--claim', flag], spec), /Missing value: --claim/);
+});

@@ -1,5 +1,6 @@
 import { type Readable, Writable } from 'node:stream';
 import { runCliCommand } from './cli_commands.ts';
+import { cliVersion } from './cli_version.ts';
 import { isErrorResult, type JsonSchema, type SurfaceTool } from './surface_types.ts';
 import { validateInput } from './validate_input.ts';
 
@@ -28,7 +29,8 @@ export async function runToolCli<TCtx>(
 			.slice(0, end < 0 ? argv.length : end)
 			.some((arg) => ['--version', '-V', '-v'].includes(arg))
 	) {
-		if (!argv.includes('--quiet')) (options.stdout ?? process.stdout).write(`${options.version}\n`);
+		if (!argv.includes('--quiet'))
+			(options.stdout ?? process.stdout).write(`${cliVersion(options.version)}\n`);
 		return 0;
 	}
 	const modern = await runCliCommand(argv, options);
@@ -80,7 +82,7 @@ export async function runToolCli<TCtx>(
 		return 0;
 	}
 	if (['--version', '-V', '-v', 'version'].includes(command)) {
-		stdout.write(`${options.version}\n`);
+		stdout.write(`${cliVersion(options.version)}\n`);
 		return 0;
 	}
 	if (command === 'tools') {

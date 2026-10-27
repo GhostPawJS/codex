@@ -7,10 +7,10 @@
 **Agent memory as beliefs with a source, a certainty and a revision history.**
 
 ```bash
-npm install @ghostpaw/codex
+ghostpaw-codex --help
 ```
 
-Local, evidence-backed memory for AI agents. One SQLite file, zero runtime
+Local, evidence-backed memory for agents. One SQLite file, zero runtime
 dependencies.
 
 Codex stores what an agent believes as claims with a source, a certainty,
@@ -21,26 +21,47 @@ server, a CLI and an Agent Skill, all generated from the same seven tools.
 
 Website: [codex.ghostpaw.dev](https://codex.ghostpaw.dev/)
 
-Requires **Node.js 24+** (uses the built-in `node:sqlite`).
+The release binary includes its runtime. npm and library use require **Node.js 24+**.
 
 ## Install
 
-The [npm package](https://www.npmjs.com/package/@ghostpaw/codex) requires Node 24+:
+### Release binary (default)
+
+Each line downloads the latest release asset, checks it against the release's SHA256SUMS and installs it on the PATH (`~/.local/bin` on Linux/macOS; the Windows script adds its folder to the user PATH).
+
+linux-x64:
 
 ```sh
-npm install -g @ghostpaw/codex
-npx -y @ghostpaw/codex --help
+curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target linux-x64 && export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Standalone binaries are available from [GitHub Releases](https://github.com/GhostPawJS/codex/releases)
-for linux-x64, linux-arm64, darwin-arm64, darwin-x64 and windows-x64.
+linux-arm64:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target linux-arm64 && export PATH="$HOME/.local/bin:$PATH"
 ```
+
+darwin-arm64:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target darwin-arm64 && export PATH="$HOME/.local/bin:$PATH"
+```
+
+darwin-x64:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target darwin-x64 && export PATH="$HOME/.local/bin:$PATH"
+```
+
+windows-x64 (PowerShell):
 
 ```powershell
 irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex
+```
+
+```text
+$ ghostpaw-codex --version
+codex 0.4.1 (binary, linux-x64)
 ```
 
 A session with the 0.4.0 linux-x64 binary against a fresh database (output piped through `jq` to keep it short):
@@ -116,18 +137,43 @@ The npm package is 849 KB unpacked and needs Node 24+. Every release is
 installed and run on ubuntu-24.04, macos-15 and windows-2025 by the
 [install check](.github/workflows/install-check.yml).
 
+### npx / npm (for npm-based environments)
+
+The [npm package](https://www.npmjs.com/package/@ghostpaw/codex) requires Node 24+:
+
+```sh
+npm install -g @ghostpaw/codex
+npx -y @ghostpaw/codex --help
+```
+
+### Library (for harnesses embedding it in code)
+
+Requires Node 24+:
+
+```sh
+npm install @ghostpaw/codex
+```
+
+```ts
+import { initCodexTables, read, write } from '@ghostpaw/codex';
+```
+
+See [Library usage](#library).
+
 ## 30-second quickstart
 
 ### MCP server
 
-Every client below starts the same stdio server: `npx -y @ghostpaw/codex mcp`.
+Every client below starts the same stdio server: `ghostpaw-codex mcp`.
+Use the full executable path if its folder is not on PATH.
+For npm-based environments, use `npx -y @ghostpaw/codex mcp`.
 Beliefs live in `~/.ghostpaw/codex.db` unless the `GHOSTPAW_CODEX_DB`
 environment variable (absolute path) or `--db <path>` says otherwise.
 
 **Claude Code**
 
 ```bash
-claude mcp add ghostpaw-codex -- npx -y @ghostpaw/codex mcp
+claude mcp add ghostpaw-codex -- ghostpaw-codex mcp
 ```
 
 or as a plugin, which also installs the skill:
@@ -141,8 +187,8 @@ or as a plugin, which also installs the skill:
 
 ```toml
 [mcp_servers.ghostpaw-codex]
-command = "npx"
-args = ["-y", "@ghostpaw/codex", "mcp"]
+command = "ghostpaw-codex"
+args = ["mcp"]
 ```
 
 **Cursor** (`.cursor/mcp.json`), **Claude Desktop** (`claude_desktop_config.json`)
@@ -152,8 +198,8 @@ or a project `.mcp.json`:
 {
   "mcpServers": {
     "ghostpaw-codex": {
-      "command": "npx",
-      "args": ["-y", "@ghostpaw/codex", "mcp"]
+      "command": "ghostpaw-codex",
+      "args": ["mcp"]
     }
   }
 }
@@ -229,7 +275,7 @@ printf '%s' '{"beliefId":1}' | ghostpaw-codex belief show - --json
 Copy `skills/codex/` into your agent's skills folder, or print it:
 
 ```bash
-npx -y @ghostpaw/codex skill > SKILL.md
+ghostpaw-codex skill > SKILL.md
 ```
 
 ### Library
