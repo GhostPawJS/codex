@@ -130,15 +130,18 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.4.4",
 		"@types/node": "^25.3.0",
-		"esbuild": "^0.27.4",
+		"esbuild": "^0.28.1",
+		"fflate": "0.8.3",
 		"preact": "^10.29.0",
 		"sql.js-fts5": "^1.4.0",
 		"tsup": "^8.4.0",
-		"typescript": "^5.9.3",
-		"fflate": "0.8.3"
+		"typescript": "^5.9.3"
 	},
 	"bin": {
 		"ghostpaw-codex": "./dist/cli.js"
 	},
-	"mcpName": "io.github.GhostPawJS/codex"
+	"mcpName": "io.github.GhostPawJS/codex",
+	"overrides": {
+		"esbuild": "$esbuild"
+	}
 }
