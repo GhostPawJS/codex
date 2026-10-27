@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-10-28
+
 ### Removed
 
 - Built-in related-term query expansion introduced in 0.5.1. Search is lexical with IDF-like weighting; a query that shares only a very common word with stored beliefs returns at most three results and a low-signal warning.
@@ -127,7 +129,8 @@ All notable changes to this project are documented here. The format follows
 - CI runs on every push and pull request on Node 24 and 26. Releases publish
   through npm trusted publishing with provenance.
 
-[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/GhostPawJS/codex/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/GhostPawJS/codex/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/GhostPawJS/codex/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/GhostPawJS/codex/compare/v0.4.0...v0.4.1
