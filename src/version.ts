@@ -1,1 +1,1 @@
-export const codexVersion = '0.5.0';
+export const codexVersion = '0.5.1';
