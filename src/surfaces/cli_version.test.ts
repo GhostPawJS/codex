@@ -26,3 +26,18 @@ test('human version identifies binary, npm and library execution', () => {
 		'ghostpaw-codex 1.2.3 (library)',
 	);
 });
+
+test('version --short prints bare semver and --json prints name, version, variant and target', () => {
+	const binary = { sea: () => true, platform: 'darwin', arch: 'arm64' };
+	assert.equal(cliVersion('1.2.3', { ...binary, args: ['--version', '--short'] }), '1.2.3');
+	assert.deepEqual(JSON.parse(cliVersion('1.2.3', { ...binary, args: ['--version', '--json'] })), {
+		name: 'ghostpaw-codex',
+		version: '1.2.3',
+		variant: 'binary',
+		target: 'darwin-arm64',
+	});
+	assert.deepEqual(
+		JSON.parse(cliVersion('1.2.3', { sea: () => false, npm: true, args: ['version', '--json'] })),
+		{ name: 'ghostpaw-codex', version: '1.2.3', variant: 'npm', target: null },
+	);
+});

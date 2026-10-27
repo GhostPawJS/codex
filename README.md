@@ -27,7 +27,7 @@ The release binary includes its runtime. npm and library use require **Node.js 2
 
 ### Release binary (default)
 
-Each line downloads the latest release asset, checks it against the release's SHA256SUMS and installs it on the PATH (`~/.local/bin` on Linux/macOS; the Windows script adds its folder to the user PATH).
+Each line downloads the latest release asset, checks it against the release's SHA256SUMS and installs `ghostpaw-codex` into `~/.local/bin`. On Linux and macOS the trailing `export` puts that folder on PATH for the current shell only: neither the line nor `install.sh` edits `~/.profile` or any other shell startup file. The Windows script adds its folder to the user PATH (open a new terminal afterwards).
 
 linux-x64:
 
@@ -59,14 +59,32 @@ windows-x64 (PowerShell):
 irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex
 ```
 
-```text
-$ ghostpaw-codex --version
-ghostpaw-codex 0.5.1 (binary, linux-x64)
+To keep `~/.local/bin` on PATH in new shells, append it to `~/.profile` once (this is the only step that edits a startup file):
+
+```sh
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.profile
 ```
 
-A session with the 0.5.1 linux-x64 binary against a small database of five beliefs:
+To pin a release instead of taking the latest, pass `--version`:
 
-![ghostpaw-codex 0.5.1: version, belief add, search, search --quiet, belief defer, review flags and skill --list](https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.png)
+```sh
+curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target linux-x64 --version 0.5.2 && export PATH="$HOME/.local/bin:$PATH"
+```
+
+```text
+$ ghostpaw-codex --version
+ghostpaw-codex 0.5.2 (binary, linux-x64)
+$ ghostpaw-codex --version --short
+0.5.2
+$ ghostpaw-codex --version --json
+{"name":"ghostpaw-codex","version":"0.5.2","variant":"binary","target":"linux-x64"}
+```
+
+`variant` is `binary`, `npm` or `library`; `target` is `null` outside the release binary.
+
+A session with the 0.5.2 linux-x64 binary against a small database of five beliefs:
+
+![ghostpaw-codex 0.5.2: version, belief add, a low-signal search with its warning, a distinctive-word search, search --quiet, belief defer, review flags and skill --list](https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.png)
 
 The same session as an [animated GIF](https://raw.githubusercontent.com/GhostPawJS/codex/main/docs/assets/cli.gif).
 
@@ -87,7 +105,7 @@ registries:
     type: local
     path: codex-registry.yaml
 packages:
-  - name: GhostPawJS/codex@v0.5.1
+  - name: GhostPawJS/codex@v0.5.2
     registry: codex
 ```
 
@@ -123,7 +141,7 @@ download on macOS, remove quarantine with
 Linux binaries require glibc 2.28+; use npx on Alpine.
 See the [binary build workflow](.github/workflows/release-binaries.yml).
 
-Approximate sizes for 0.5.1 (Node 26.12.1 inside each binary):
+Approximate sizes for 0.5.2 (Node 26.12.1 inside each binary):
 
 | Target | Archive | Binary |
 |---|---|---|
@@ -355,7 +373,7 @@ A markdown memory file works until it doesn't:
 
 - **It only grows.** Agents append, rarely delete, and the file ends up in
   every prompt. Codex returns the few beliefs that match a query
-  (FTS5 plus local embeddings, fused by rank).
+  (FTS5 bm25 plus hashed character-trigram similarity, IDF-weighted with a 55% relative cutoff).
 - **Contradictions pile up.** "We use REST" and "REST was retired" sit side by
   side. Codex detects near-duplicates on every write, and corrections
   supersede the old belief while keeping the lineage.
@@ -375,7 +393,7 @@ No server, no API key, no network.
 
 | Tool | What it does |
 |---|---|
-| `search_codex` | Hybrid lexical and semantic recall across active beliefs |
+| `search_codex` | Lexical recall with FTS5 bm25 and character-trigram similarity |
 | `review_codex` | Dashboards: flags, status, trends, log |
 | `inspect_codex_item` | One belief in full: metrics, lineage, nearby beliefs |
 | `remember_belief` | Capture a claim with source, category and provenance |
@@ -414,9 +432,9 @@ by `npm run check`.
 | Concept | Purpose |
 |---|---|
 | **Belief** | A claim held with certainty, evidence, provenance, decay and revision lineage |
-| **Dismissal** | A record that two semantically close beliefs are intentionally distinct |
+| **Dismissal** | A record that two beliefs close by character-trigram vectors are intentionally distinct |
 | **Flag** | A derived attention signal: stale, fading, low-trust, single-evidence or gap |
-| **Proximity** | Semantic nearness between beliefs, detected on write |
+| **Proximity** | Lexical nearness between beliefs (character-trigram vectors), detected on write |
 | **Lineage** | The revision chain from corrections and supersessions, with version diffs |
 
 State is derived, never toggled: freshness, strength, review priority and flags
@@ -467,3 +485,27 @@ If this package helps your project, consider sponsoring its maintenance:
 ---
 
 **[Anonyfox](https://anonyfox.com) • [MIT License](LICENSE)**
+
+## Query aliases
+
+Search is lexical: FTS5 bm25 plus hashed character-trigram similarity, with
+IDF-like token weighting and a 55% relative cutoff. It does not provide semantic
+understanding. Queries matching only common terms return at most three results
+with a `partial_match` warning.
+
+Aliases are off by default (the table starts empty). Add directed, one-hop aliases
+when query vocabulary differs from stored claims:
+
+```sh
+ghostpaw-codex alias add class warrior
+ghostpaw-codex alias list
+ghostpaw-codex alias remove class warrior
+```
+
+The library equivalents are `write.addQueryAlias(db, term, alias, options?)`,
+`write.removeQueryAlias(db, term, alias)` (returns whether removed), and
+`read.listQueryAliases(db)` (sorted `{ term, alias, createdAt }` records).
+Both words are normalized with `normalizeClaim` and must be distinct single words.
+Adding an existing pair preserves its creation time; `options.now` sets the time
+on first insertion. Expansion is deduplicated and never follows alias chains;
+the query vector uses the original query.

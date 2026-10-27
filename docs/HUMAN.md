@@ -129,14 +129,15 @@ All queries are deterministic, require no LLM, and carry transparency metadata.
 
 | Function | Returns |
 |----------|---------|
-| `read.recall(db, query, options?)` | Ranked active beliefs by semantic + lexical match |
+| `read.recall(db, query, options?)` | Ranked active beliefs by IDF-weighted lexical match and character-trigram similarity |
+| `read.listQueryAliases(db)` | Query aliases sorted by term and alias, with creation times |
 | `read.getBeliefDetail(db, beliefId)` | One belief with certainty, freshness, strength, lineage depth, proximity, version diff |
 | `read.getBeliefLineage(db, beliefId)` | Full chain of predecessors and successors |
 | `read.listFlags(db, now?)` | Beliefs needing attention with reason codes and priority scores |
 | `read.getStatus(db, now?)` | Portfolio state: integrity, distributions, averages |
 | `read.listLog(db, limit?)` | Recent activity: remembers, confirms, revisions, forgets, merges |
 | `read.getTrends(db)` | Growing categories, calibration alerts, revision patterns |
-| `read.listBeliefProximity(db, beliefId)` | Active beliefs semantically near a given belief |
+| `read.listBeliefProximity(db, beliefId)` | Active beliefs near a given belief by character-trigram vectors |
 
 ### Recall options
 
@@ -154,10 +155,12 @@ Category and source filters narrow the candidate set before scoring. The
 
 ## The Write Surface
 
-Every write returns the mutated record with derived state already computed.
+Belief writes return the mutated record with derived state already computed.
 
 | Function | What it does |
 |----------|--------------|
+| `write.addQueryAlias(db, term, alias, options?)` | Add a directed query alias idempotently; optional `now` sets its creation time. Returns void. |
+| `write.removeQueryAlias(db, term, alias)` | Remove a query alias; returns whether a pair was removed. |
 | `write.remember(db, input, options?)` | Create a new belief. Returns the belief plus proximity matches. |
 | `write.confirmBelief(db, beliefId, options?)` | Reinforce an existing belief. Certainty rises via EMA, evidence increments, `verifiedAt` refreshes. |
 | `write.correctBelief(db, beliefId, input, options?)` | Create a successor belief and supersede the old one. Returns the new belief, the superseded id, and proximity. |
@@ -536,3 +539,27 @@ printf '%s' '{"beliefId":1}' | ghostpaw-codex belief show - --json
 
 
 See [installation instructions](../README.md#install).
+
+## Query aliases
+
+Search is lexical: FTS5 bm25 plus hashed character-trigram similarity, with
+IDF-like token weighting and a 55% relative cutoff. It does not provide semantic
+understanding. Queries matching only common terms return at most three results
+with a `partial_match` warning.
+
+Aliases are off by default (the table starts empty). Add directed, one-hop aliases
+when query vocabulary differs from stored claims:
+
+```sh
+ghostpaw-codex alias add class warrior
+ghostpaw-codex alias list
+ghostpaw-codex alias remove class warrior
+```
+
+The library equivalents are `write.addQueryAlias(db, term, alias, options?)`,
+`write.removeQueryAlias(db, term, alias)` (returns whether removed), and
+`read.listQueryAliases(db)` (sorted `{ term, alias, createdAt }` records).
+Both words are normalized with `normalizeClaim` and must be distinct single words.
+Adding an existing pair preserves its creation time; `options.now` sets the time
+on first insertion. Expansion is deduplicated and never follows alias chains;
+the query vector uses the original query.

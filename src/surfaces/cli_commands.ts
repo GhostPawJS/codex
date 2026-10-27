@@ -84,13 +84,15 @@ export async function runCliCommand<T>(
 			else if (flag === '--compact') compact = true;
 			else if (flag === '--help' || flag === '-h') help = true;
 			else if (['--version', '-V', '-v'].includes(flag ?? '')) {
-				if (!quiet) stdout.write(`${cliVersion(options.version, { bin: options.bin })}\n`);
+				if (!quiet)
+					stdout.write(`${cliVersion(options.version, { bin: options.bin, args: argv })}\n`);
 				return 0;
 			} else if (flag !== '--no-color') continue;
 			args.splice(i--, 1);
 		}
 		if (args[0] === 'version') {
-			if (!quiet) stdout.write(`${cliVersion(options.version, { bin: options.bin })}\n`);
+			if (!quiet)
+				stdout.write(`${cliVersion(options.version, { bin: options.bin, args: argv })}\n`);
 			return 0;
 		}
 		if (args[0] === 'help') {
@@ -142,6 +144,33 @@ export async function runCliCommand<T>(
 					})),
 			};
 		};
+		if (args[0] === 'alias' && options.commands?.alias) {
+			if (help) {
+				if (!quiet)
+					stdout.write(`${options.bin} alias add <term> <alias> | remove <term> <alias> | list\n`);
+				return 0;
+			}
+			const action = args[1];
+			if (
+				!(
+					(action === 'list' && args.length === 2) ||
+					(['add', 'remove'].includes(action ?? '') && args.length === 4)
+				)
+			)
+				throw new CliUsageError('Usage: alias add <term> <alias> | remove <term> <alias> | list');
+			const context = await options.openContext(db === undefined ? {} : { db });
+			try {
+				const result = options.commands.alias(context, args.slice(1));
+				if (result.code) stderr.write(`${result.text}\n`);
+				if (!quiet)
+					stdout.write(
+						json ? `${JSON.stringify(result.data)}\n` : result.code ? '' : `${result.text}\n`,
+					);
+				return result.code ?? 0;
+			} finally {
+				await options.closeContext?.(context);
+			}
+		}
 		if (help) {
 			const matches = tree.filter((command) => command.path.startsWith(args.join(' ')));
 			if (!matches.length) throw new CliUsageError(`Unknown command: ${args.join(' ')}`);
@@ -149,7 +178,7 @@ export async function runCliCommand<T>(
 				stdout.write(
 					entry
 						? renderCliHelp(specFor(entry))
-						: `${options.bin} ${options.version}\n${options.description}\n${options.describeDb ? `\n${options.describeDb(db === undefined ? {} : { db })}\n` : ''}\nCommands:\n${matches.map((command) => `  ${command.path}`).join('\n')}\n  mcp, skill, tools [--json], describe <tool>, call <tool> [JSON|-], completions <bash|zsh|fish>, version\nGlobal flags: --db <path>, --json, --quiet, --compact, --help/-h, --version/-V/-v, --no-color\n`,
+						: `${options.bin} ${options.version}\n${options.description}\n${options.describeDb ? `\n${options.describeDb(db === undefined ? {} : { db })}\n` : ''}\nCommands:\n${matches.map((command) => `  ${command.path}`).join('\n')}\n  alias add|remove|list\n  mcp, skill, tools [--json], describe <tool>, call <tool> [JSON|-], completions <bash|zsh|fish>, version\nGlobal flags: --db <path>, --json, --quiet, --compact, --help/-h, --version/-V/-v, --no-color\n`,
 				);
 			return 0;
 		}
@@ -159,6 +188,10 @@ export async function runCliCommand<T>(
 				throw new CliUsageError('Expected completion shell: bash, zsh or fish');
 			if (quiet) return 0;
 			const words = [...new Set(tree.flatMap((command) => command.path.split(' ')))].concat([
+				'alias',
+				'add',
+				'remove',
+				'list',
 				'mcp',
 				'skill',
 				'tools',

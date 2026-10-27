@@ -15,7 +15,7 @@ test('token weights distinguish active document frequency, stopwords and unmatch
 		assert.ok((query.weights.get('fox') ?? 1) < (query.weights.get('eat') ?? 0));
 		assert.ok((query.weights.get('does') ?? 1) < (query.weights.get('eat') ?? 0));
 		assert.equal(queryTokenWeights(db, 'fox warrior').commonOnly, false);
-		assert.equal(queryTokenWeights(db, 'what does fox play').commonOnly, false);
+		assert.equal(queryTokenWeights(db, 'what does fox play').commonOnly, true);
 		assert.equal(queryTokenWeights(db, 'zzzzzz').commonOnly, false);
 		forgetBelief(db, 1);
 		assert.equal(queryTokenWeights(db, 'warrior').weights.get('warrior'), 1 + Math.log(3));

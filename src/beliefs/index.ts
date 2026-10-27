@@ -1,3 +1,4 @@
+export { addQueryAlias } from './add_query_alias.ts';
 export { assertActiveBeliefExists } from './assert_active_belief_exists.ts';
 export { collectLineageIds } from './collect_lineage_ids.ts';
 export { confirmBelief } from './confirm_belief.ts';
@@ -15,11 +16,13 @@ export { initBeliefTables } from './init_belief_tables.ts';
 export { listBeliefProximity } from './list_belief_proximity.ts';
 export { listFlags } from './list_flags.ts';
 export { listLog } from './list_log.ts';
+export { listQueryAliases } from './list_query_aliases.ts';
 export { mapBeliefRow } from './map_belief_row.ts';
 export { mergeBeliefs } from './merge_beliefs.ts';
 export { normalizeClaim } from './normalize_claim.ts';
 export { prepareBeliefStorage } from './prepare_belief_storage.ts';
 export { recall } from './recall_beliefs.ts';
 export { remember } from './remember.ts';
+export { removeQueryAlias } from './remove_query_alias.ts';
 export { sourceInitialCertainty } from './source_initial_certainty.ts';
 export type * from './types.ts';

@@ -19,6 +19,7 @@ export interface ToolCliOptions<TCtx> {
 	openContext(opts: { db?: string }): TCtx | Promise<TCtx>;
 	closeContext?: (ctx: TCtx) => void | Promise<void>;
 	commands?: {
+		alias?: (ctx: TCtx, args: string[]) => { text: string; data: unknown; code?: number };
 		mcp?: (opts: { db?: string }) => unknown | Promise<unknown>;
 		skill?: (args: string[]) => string | Promise<string>;
 	};
@@ -38,7 +39,7 @@ export async function runToolCli<TCtx>(
 	) {
 		if (!argv.includes('--quiet'))
 			(options.stdout ?? process.stdout).write(
-				`${cliVersion(options.version, { bin: options.bin })}\n`,
+				`${cliVersion(options.version, { bin: options.bin, args: argv })}\n`,
 			);
 		return 0;
 	}
@@ -91,7 +92,7 @@ export async function runToolCli<TCtx>(
 		return 0;
 	}
 	if (['--version', '-V', '-v', 'version'].includes(command)) {
-		stdout.write(`${cliVersion(options.version, { bin: options.bin })}\n`);
+		stdout.write(`${cliVersion(options.version, { bin: options.bin, args: argv })}\n`);
 		return 0;
 	}
 	if (command === 'tools') {

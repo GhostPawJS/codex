@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Removed
+
+- Built-in related-term query expansion introduced in 0.5.1. Search is lexical with IDF-like weighting; a query that shares only a very common word with stored beliefs returns at most three results and a low-signal warning.
+
+### Added
+
+- Optional user-defined query aliases, managed with `alias add|remove|list` or `write.addQueryAlias`, `write.removeQueryAlias` and `read.listQueryAliases`. Aliases are empty by default.
+- `--version --short` prints the bare version; `--version --json` prints `name`, `version`, `variant` and `target`.
+
+### Changed
+
+- Install instructions state that the one-line installers change PATH for the current shell only and never edit `~/.profile`, with a separate line that persists it and a pinned-version example.
+
 ## [0.5.1] - 2026-10-27
 
 ### Fixed

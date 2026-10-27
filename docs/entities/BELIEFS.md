@@ -73,13 +73,13 @@ Flags allow a seven-day grace period from `createdAt`: `single_evidence`,
 
 ## Retrieval Notes
 
-Recall is hybrid by default: FTS5 preselection plus local vector reranking. Beliefs are prepared for recall automatically on writes.
+Recall is lexical: FTS5 bm25 preselection plus hashed character-trigram similarity, with IDF-like weighting and a 55% relative cutoff. It does not understand meaning. Beliefs are prepared for recall automatically on writes.
 
 Query tokens use document-frequency weighting over active beliefs. Common tokens
 (more than half the active set, when at least three beliefs exist) and English
-stopwords receive less weight in the query embedding and do not select lexical
+stopwords receive less weight in lexical coverage and do not select lexical
 candidates alone when informative matches exist. Results below 55% of the best
-weighted lexical coverage plus semantic similarity are dropped. If only common
+weighted lexical coverage plus character-trigram similarity are dropped. If only common
 terms match, at most three results are returned in lexical order, and the search
 tool reports a warning. Ranking is deterministic. `minScore` still filters the
 final fusion score and defaults to 0.01; the relative cutoff also applies.
@@ -110,3 +110,27 @@ final fusion score and defaults to 0.01; the relative cutoff also applies.
 - `read.listLog(db, limit?)`
 - `read.getTrends(db)`
 - `read.listBeliefProximity(db, beliefId, limit?, threshold?, now?)`
+
+## Query aliases
+
+Search is lexical: FTS5 bm25 plus hashed character-trigram similarity, with
+IDF-like token weighting and a 55% relative cutoff. It does not provide semantic
+understanding. Queries matching only common terms return at most three results
+with a `partial_match` warning.
+
+Aliases are off by default (the table starts empty). Add directed, one-hop aliases
+when query vocabulary differs from stored claims:
+
+```sh
+ghostpaw-codex alias add class warrior
+ghostpaw-codex alias list
+ghostpaw-codex alias remove class warrior
+```
+
+The library equivalents are `write.addQueryAlias(db, term, alias, options?)`,
+`write.removeQueryAlias(db, term, alias)` (returns whether removed), and
+`read.listQueryAliases(db)` (sorted `{ term, alias, createdAt }` records).
+Both words are normalized with `normalizeClaim` and must be distinct single words.
+Adding an existing pair preserves its creation time; `options.now` sets the time
+on first insertion. Expansion is deduplicated and never follows alias chains;
+the query vector uses the original query.

@@ -28,6 +28,13 @@ it('migrates a legacy beliefs table idempotently while preserving rows', async (
 	initBeliefTables(db);
 	initBeliefTables(db);
 	strictEqual(db.prepare('SELECT claim FROM beliefs WHERE id = 1').get()?.claim, 'Legacy');
+	strictEqual(db.prepare('SELECT COUNT(*) AS n FROM query_aliases').get()?.n, 0);
+	db.prepare('INSERT INTO query_aliases VALUES (?, ?, ?)').run('class', 'warrior', 1);
+	initBeliefTables(db);
+	strictEqual(
+		db.prepare('SELECT alias FROM query_aliases WHERE term = ?').get('class')?.alias,
+		'warrior',
+	);
 	strictEqual(
 		db.prepare('SELECT superseded_reason FROM beliefs WHERE id = 1').get()?.superseded_reason,
 		null,

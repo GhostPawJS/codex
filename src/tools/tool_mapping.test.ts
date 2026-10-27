@@ -7,8 +7,9 @@ import { codexToolMappings } from './tool_mapping.ts';
 import { codexTools } from './tool_registry.ts';
 
 describe('tool mapping', () => {
-	it('covers all read exports', () => {
-		const readExports = Object.keys(read);
+	it('covers read exports apart from CLI-only alias management', () => {
+		const readExports = Object.keys(read).filter((name) => name !== 'listQueryAliases');
+		strictEqual(typeof read.listQueryAliases, 'function');
 		for (const name of readExports) {
 			ok(
 				codexToolMappings.some((m) => m.source === name),
@@ -17,8 +18,12 @@ describe('tool mapping', () => {
 		}
 	});
 
-	it('covers all write exports', () => {
-		const writeExports = Object.keys(write);
+	it('covers write exports apart from CLI-only alias management', () => {
+		const writeExports = Object.keys(write).filter(
+			(name) => !['addQueryAlias', 'removeQueryAlias'].includes(name),
+		);
+		strictEqual(typeof write.addQueryAlias, 'function');
+		strictEqual(typeof write.removeQueryAlias, 'function');
 		for (const name of writeExports) {
 			ok(
 				codexToolMappings.some((m) => m.source === name),

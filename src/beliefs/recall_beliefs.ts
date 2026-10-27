@@ -73,7 +73,7 @@ export function recall(
 	const limit = options.limit ?? 20;
 	const minScore = options.minScore ?? 0.01;
 
-	const tokens = tokenizeQuery(expandQuery(query));
+	const tokens = tokenizeQuery(expandQuery(db, query));
 	if (tokens.length === 0) {
 		return [];
 	}

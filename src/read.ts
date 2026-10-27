@@ -6,5 +6,6 @@ export {
 	listBeliefProximity,
 	listFlags,
 	listLog,
+	listQueryAliases,
 	recall,
 } from './beliefs/index.ts';

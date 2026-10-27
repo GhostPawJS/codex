@@ -2,6 +2,13 @@ import type { CodexDb } from '../database.ts';
 
 export function initBeliefTables(db: CodexDb): void {
 	db.exec(`
+		CREATE TABLE IF NOT EXISTS query_aliases (
+			term TEXT NOT NULL,
+			alias TEXT NOT NULL,
+			created_at INTEGER NOT NULL,
+			PRIMARY KEY (term, alias)
+		);
+
 		CREATE TABLE IF NOT EXISTS beliefs (
 			id INTEGER PRIMARY KEY,
 			claim TEXT NOT NULL,

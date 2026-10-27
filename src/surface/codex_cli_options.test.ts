@@ -147,3 +147,71 @@ test('plain CLI output, quiet ids, per-action help, dates and guide commands', a
 		rmSync(dir, { recursive: true, force: true });
 	}
 });
+
+test('alias commands support text, JSON, quiet, help and usage errors', async () => {
+	const dir = mkdtempSync(join(tmpdir(), 'codex-alias-'));
+	const invoke = async (args: string[]) => {
+		let out = '',
+			err = '';
+		const stream = (append: (value: string) => void) =>
+			new Writable({
+				write(chunk, _encoding, cb) {
+					append(String(chunk));
+					cb();
+				},
+			});
+		const code = await runToolCli([...args, '--db', join(dir, 'test.db')], {
+			...codexCliOptions,
+			stdin: Readable.from([]),
+			stdout: stream((s) => {
+				out += s;
+			}),
+			stderr: stream((s) => {
+				err += s;
+			}),
+		});
+		return { code, out, err };
+	};
+	try {
+		assert.equal((await invoke(['alias', 'list'])).out, 'No aliases.\n');
+		assert.equal(
+			(await invoke(['alias', 'add', 'Class', 'Warrior'])).out,
+			'Added alias: class -> warrior\n',
+		);
+		assert.equal((await invoke(['alias', 'list'])).out, 'class  warrior\n');
+		const listed = await invoke(['alias', 'list', '--json']);
+		assert.equal(JSON.parse(listed.out)[0].term, 'class');
+		assert.equal(typeof JSON.parse(listed.out)[0].createdAt, 'number');
+		assert.equal(
+			JSON.parse((await invoke(['alias', 'add', 'class', 'warrior', '--json'])).out).ok,
+			true,
+		);
+		assert.equal((await invoke(['alias', 'list', '--quiet'])).out, '');
+		assert.equal(
+			(await invoke(['alias', 'remove', 'class', 'warrior'])).out,
+			'Removed alias: class -> warrior\n',
+		);
+		assert.equal(
+			JSON.parse((await invoke(['alias', 'remove', 'class', 'warrior', '--json'])).out).ok,
+			false,
+		);
+		const missing = await invoke(['alias', 'remove', 'class', 'warrior']);
+		assert.equal(missing.code, 3);
+		assert.match(missing.err, /alias list/);
+		for (const args of [
+			[],
+			['add'],
+			['add', 'class'],
+			['remove'],
+			['remove', 'class'],
+			['list', 'extra'],
+		])
+			assert.equal((await invoke(['alias', ...args])).code, 2);
+		assert.match((await invoke(['alias', '--help'])).out, /alias add <term> <alias>/);
+		assert.match((await invoke(['--help'])).out, /alias/);
+		for (const shell of ['bash', 'zsh', 'fish'])
+			assert.match((await invoke(['completions', shell])).out, /alias/);
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});

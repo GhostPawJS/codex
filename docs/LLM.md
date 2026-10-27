@@ -343,3 +343,27 @@ its evidence and gains the merged-in evidence. Unless explicitly overridden,
 merge certainty is the maximum of the selected source's initial certainty and
 all input certainties (including an existing successor). Calibration trends
 count corrections only, excluding merges and forgetting.
+
+## Query aliases
+
+Search is lexical: FTS5 bm25 plus hashed character-trigram similarity, with
+IDF-like token weighting and a 55% relative cutoff. It does not provide semantic
+understanding. Queries matching only common terms return at most three results
+with a `partial_match` warning.
+
+Aliases are off by default (the table starts empty). Add directed, one-hop aliases
+when query vocabulary differs from stored claims:
+
+```sh
+ghostpaw-codex alias add class warrior
+ghostpaw-codex alias list
+ghostpaw-codex alias remove class warrior
+```
+
+The library equivalents are `write.addQueryAlias(db, term, alias, options?)`,
+`write.removeQueryAlias(db, term, alias)` (returns whether removed), and
+`read.listQueryAliases(db)` (sorted `{ term, alias, createdAt }` records).
+Both words are normalized with `normalizeClaim` and must be distinct single words.
+Adding an existing pair preserves its creation time; `options.now` sets the time
+on first insertion. Expansion is deduplicated and never follows alias chains;
+the query vector uses the original query.

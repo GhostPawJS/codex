@@ -1,11 +1,14 @@
 import { strictEqual } from 'node:assert/strict';
 import { describe, it } from 'node:test';
-
 import { createInitializedCodexDb } from '../lib/test-db.ts';
+import { searchCodexToolHandler } from '../tools/search_codex_tool.ts';
+import { addQueryAlias } from './add_query_alias.ts';
 import { correctBelief } from './correct_belief.ts';
 import { forgetBelief } from './forget_belief.ts';
+import { queryTokenWeights } from './query_token_weights.ts';
 import { recall } from './recall_beliefs.ts';
 import { remember } from './remember.ts';
+import { removeQueryAlias } from './remove_query_alias.ts';
 
 describe('recall', () => {
 	it('returns ranked active beliefs for a query', async () => {
@@ -114,36 +117,40 @@ describe('recall', () => {
 });
 
 describe('recall relevance', () => {
-	it('downweights shared names and returns fewer results for the class repro', async () => {
-		const db = await createInitializedCodexDb();
-		for (const claim of [
-			'Fox mains a Warrior',
-			'Fox prefers prebuilt binaries',
-			'Fox lives in Germany',
-			'Fox writes TypeScript daily',
-			'Fox likes dark roast coffee',
-		])
-			remember(db, { claim, source: 'explicit', category: 'preference' }, { now: 1 });
-		const results = recall(db, 'what class does fox play', { now: 2 });
-		strictEqual(results[0]?.claim, 'Fox mains a Warrior');
-		strictEqual(results.length < 5, true);
-		const late = await createInitializedCodexDb();
-		for (const claim of [
-			'Fox prefers prebuilt binaries',
-			'Fox lives in Germany',
-			'Fox writes TypeScript daily',
-			'Fox likes dark roast coffee',
-			'Fox mains a Warrior',
-		])
-			remember(late, { claim, source: 'explicit', category: 'preference' }, { now: 1 });
-		const lateResults = recall(late, 'what class does fox play', { now: 2 });
-		strictEqual(lateResults[0]?.claim, 'Fox mains a Warrior');
-		strictEqual(lateResults.length < 5, true);
-		late.close();
-		const rare = recall(db, 'fox prebuilt', { now: 2 });
-		strictEqual(rare[0]?.claim, 'Fox prefers prebuilt binaries');
-		strictEqual(JSON.stringify(rare), JSON.stringify(recall(db, 'fox prebuilt', { now: 2 })));
-		strictEqual(recall(db, 'fox prebuilt', { now: 2, minScore: 100 }).length, 0);
-		db.close();
-	});
+	for (const warriorFirst of [true, false])
+		it(`lexical recall and optional aliases, warrior first: ${warriorFirst}`, async () => {
+			const db = await createInitializedCodexDb();
+			const claims = [
+				'Fox prefers prebuilt binaries',
+				'Fox lives in Germany',
+				'Fox writes TypeScript daily',
+				'Fox likes dark roast coffee',
+			];
+			if (warriorFirst) claims.unshift('Fox mains a Warrior');
+			else claims.push('Fox mains a Warrior');
+			for (const claim of claims)
+				remember(db, { claim, source: 'explicit', category: 'preference' }, { now: 1 });
+			const query = 'what class does fox play';
+			strictEqual(queryTokenWeights(db, query).commonOnly, true);
+			strictEqual(recall(db, query, { now: 2 }).length <= 3, true);
+			strictEqual(
+				searchCodexToolHandler(db, { query }).warnings?.some(
+					(warning) => warning.code === 'partial_match',
+				),
+				true,
+			);
+			const lexical = recall(db, 'which warrior does fox main', { now: 2 });
+			strictEqual(lexical[0]?.claim, 'Fox mains a Warrior');
+			strictEqual(lexical.length < 5, true);
+			addQueryAlias(db, 'class', 'warrior');
+			strictEqual(queryTokenWeights(db, query).commonOnly, false);
+			strictEqual(recall(db, query, { now: 2 })[0]?.claim, 'Fox mains a Warrior');
+			removeQueryAlias(db, 'class', 'warrior');
+			strictEqual(queryTokenWeights(db, query).commonOnly, true);
+			const rare = recall(db, 'fox prebuilt', { now: 2 });
+			strictEqual(rare[0]?.claim, 'Fox prefers prebuilt binaries');
+			strictEqual(JSON.stringify(rare), JSON.stringify(recall(db, 'fox prebuilt', { now: 2 })));
+			strictEqual(recall(db, 'fox prebuilt', { now: 2, minScore: 100 }).length, 0);
+			db.close();
+		});
 });

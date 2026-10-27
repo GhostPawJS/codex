@@ -35,6 +35,7 @@ Run tools as \`ghostpaw-codex ...\`; use \`~/.local/bin/ghostpaw-codex\` if it i
 Search before adding: \`ghostpaw-codex search "deployment schedule"\`.
 
 - \`ghostpaw-codex belief add "Deploys go out on Tuesdays." --source explicit --category fact\`
+- \`ghostpaw-codex alias add <term> <alias>\` adds an optional directed query alias.
 - \`ghostpaw-codex belief show <id>\`
 - \`ghostpaw-codex belief confirm <id>\`
 - \`ghostpaw-codex belief correct <id> --claim "Deploys go out on Wednesdays."\`
