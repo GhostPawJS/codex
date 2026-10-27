@@ -34,8 +34,8 @@
     },
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/GhostPawJS/codex/releases/download/v0.4.0/server.mcpb",
-      "fileSha256": "32a74f58d63226908e2ec1b3a8be7c522a2f69d4c9cc27a09e425de2c0487a6d",
+      "identifier": "https://github.com/GhostPawJS/codex/releases/download/v0.4.1/server.mcpb",
+      "fileSha256": "e18e899612d2d3d93b41dcb488f2299196dce8127a753b1bf3fbe45a76796837",
       "transport": {
         "type": "stdio"
       },
