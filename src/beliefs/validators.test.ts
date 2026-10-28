@@ -19,7 +19,9 @@ describe('belief validators', () => {
 	});
 
 	it('clamps certainty to the supported range', () => {
-		strictEqual(clampCertainty(5), 0.99);
-		strictEqual(clampCertainty(-5), 0.1);
+		throws(() => clampCertainty(5), /between 0 and 1/);
+		strictEqual(clampCertainty(1), 0.99);
+		throws(() => clampCertainty(-5), /between 0 and 1/);
+		strictEqual(clampCertainty(0), 0.1);
 	});
 });

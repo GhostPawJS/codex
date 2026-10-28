@@ -3,6 +3,7 @@ import type { CodexDb } from '../database.ts';
 import * as write from '../write.ts';
 import { translateToolError } from './tool_errors.ts';
 import {
+	booleanSchema,
 	defineCodexTool,
 	enumSchema,
 	numberSchema,
@@ -30,12 +31,25 @@ export function rememberBeliefToolHandler(
 		category: (typeof BELIEF_CATEGORIES)[number];
 		certainty?: number;
 		provenance?: string;
+		allowDuplicate?: boolean;
 	},
 ): RememberBeliefToolResult {
 	const invalid = validateToolInput(rememberBeliefTool.inputSchema, input);
 	if (invalid) return invalid;
 	try {
 		const result = write.remember(db, input);
+		if (result.duplicate)
+			return {
+				...toolSuccess(
+					`Belief already exists: ${result.id}.`,
+					{ belief: result },
+					{
+						entities: [toBeliefRef(result)],
+						warnings: [toolWarning('duplicate', 'An active belief has the same normalized claim.')],
+					},
+				),
+				outcome: 'no_op',
+			};
 		const entities = [toBeliefRef(result)];
 		const next: ToolNextStepHint[] = [inspectItemNext(result.id, result.claim)];
 		const warnings = [];
@@ -74,7 +88,7 @@ export const rememberBeliefTool = defineCodexTool<
 >({
 	name: rememberBeliefToolName,
 	description:
-		'Create a new belief from a claim, source, and category. Automatically detects nearby beliefs for duplicate awareness.',
+		'Capture a belief from a claim, source, and category. Reuses active normalized duplicates unless allowDuplicate is set, and detects nearby beliefs.',
 	whenToUse:
 		'Use this when a new proposition should enter the codex. Always search first to check whether the belief already exists — prefer confirming or correcting an existing belief over creating a duplicate.',
 	whenNotToUse:
@@ -93,7 +107,7 @@ export const rememberBeliefTool = defineCodexTool<
 		provenance: 'Optional origin reference (session id, URL, context).',
 	},
 	outputDescription:
-		'The created belief record with derived state, plus proximity matches showing nearby existing beliefs that may overlap.',
+		'The created or reused belief record with derived state, plus proximity matches showing nearby existing beliefs that may overlap.',
 	inputSchema: objectSchema(
 		{
 			claim: stringSchema('The proposition being asserted.'),
@@ -101,6 +115,9 @@ export const rememberBeliefTool = defineCodexTool<
 			category: enumSchema([...BELIEF_CATEGORIES], 'What kind of claim.'),
 			certainty: numberSchema('Optional initial certainty 0–1.'),
 			provenance: stringSchema('Optional origin reference.'),
+			allowDuplicate: booleanSchema(
+				'Create a separate belief even if the normalized claim exists.',
+			),
 		},
 		['claim', 'source', 'category'],
 		'Create a new belief.',

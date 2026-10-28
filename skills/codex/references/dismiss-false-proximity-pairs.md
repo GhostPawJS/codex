@@ -1,8 +1,8 @@
 # Dismiss False Proximity Pairs
 
 Primary tools:
-- `inspect_codex_item`
-- `dismiss_proximity`
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
+- `dismiss_proximity` (CLI: `ghostpaw-codex proximity dismiss`)
 
 Goal:
 - Clean up false positive proximity alerts so they do not clutter the maintenance queue, while allowing them to resurface if one belief changes.
@@ -17,9 +17,9 @@ When not to use:
 - One belief should supersede the other — use `direct-supersession-between-beliefs`.
 
 Step-by-step sequence:
-1. Use `inspect_codex_item` on one of the flagged beliefs to see its proximity matches.
+1. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on one of the flagged beliefs to see its proximity matches.
 2. Verify that the proximity pair is genuinely unrelated by comparing the claims semantically.
-3. Use `dismiss_proximity` with both belief ids to suppress the pair.
+3. Use `dismiss_proximity` (CLI: `ghostpaw-codex proximity dismiss`) with both belief ids to suppress the pair.
 4. Note that the dismissal uses exponential backoff — repeated dismissals of the same pair extend the suppression window.
 5. If the pair resurfaces after the backoff expires and the beliefs are still genuinely distinct, dismiss again.
 
@@ -39,8 +39,8 @@ Tips and tricks:
 - Bulk dismissal after batch ingestion is common; process all proximity flags in one pass.
 
 Tool calls to prefer:
-- `inspect_codex_item` for claim comparison
-- `dismiss_proximity` for the suppression
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) for claim comparison
+- `dismiss_proximity` (CLI: `ghostpaw-codex proximity dismiss`) for the suppression
 
 Related skills:
 - `resolve-near-duplicate-beliefs`

@@ -1,9 +1,9 @@
 # Diagnose Declining Integrity
 
 Primary tools:
-- `review_codex`
-- `inspect_codex_item`
-- `revise_belief`
+- `review_codex` (CLI: `ghostpaw-codex review`)
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`)
 
 Goal:
 - Identify and address the systemic cause of declining integrity rather than treating symptoms one belief at a time.
@@ -18,13 +18,13 @@ When not to use:
 - You have a specific belief to fix rather than a systemic concern.
 
 Step-by-step sequence:
-1. Use `review_codex` with `view: "status"` to see integrity, strength distribution, certainty distribution, and evidence distribution.
+1. Use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "status"` to see integrity, strength distribution, certainty distribution, and evidence distribution.
 2. Identify which area is dragging integrity down: low strength count, certainty skew, or evidence drought.
-3. Use `review_codex` with `view: "flags"` to see the flag queue and identify the dominant reason codes.
-4. Use `review_codex` with `view: "trends"` to check whether the problem is worsening over time (rising revisions, declining confirmations).
-5. For the top-priority flagged beliefs, use `inspect_codex_item` to understand why they are flagged and what they have in common.
+3. Use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "flags"` to see the flag queue and identify the dominant reason codes.
+4. Use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "trends"` to check whether the problem is worsening over time (rising revisions, declining confirmations).
+5. For the top-priority flagged beliefs, use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) to understand why they are flagged and what they have in common.
 6. Batch-process the highest-priority flags using the right verbs: confirm, correct, forget, or defer.
-7. After processing, use `review_codex` with `view: "status"` again to confirm integrity has recovered.
+7. After processing, use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "status"` again to confirm integrity has recovered.
 
 Validation checks:
 - The root cause was identified (staleness? single-evidence? low trust?) before mass action.
@@ -43,9 +43,9 @@ Tips and tricks:
 - If `unstable` is the dominant flag reason, beliefs are being revised too frequently — look for oscillating corrections.
 
 Tool calls to prefer:
-- `review_codex` with all three views: `status`, `flags`, `trends`
-- `inspect_codex_item` on representative flagged beliefs
-- `revise_belief` for batch resolution
+- `review_codex` (CLI: `ghostpaw-codex review`) with all three views: `status`, `flags`, `trends`
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on representative flagged beliefs
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) for batch resolution
 
 Related skills:
 - `review-flags-batch`

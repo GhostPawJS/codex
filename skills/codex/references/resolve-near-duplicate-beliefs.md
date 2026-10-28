@@ -1,16 +1,16 @@
 # Resolve Near Duplicate Beliefs
 
 Primary tools:
-- `inspect_codex_item`
-- `revise_belief`
-- `dismiss_proximity`
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`)
+- `dismiss_proximity` (CLI: `ghostpaw-codex proximity dismiss`)
 
 Goal:
 - Resolve every proximity pair into one of four outcomes: supersede, correct, merge, or dismiss.
 
 When to use:
-- A `partial_match` warning appeared after `remember_belief`.
-- `inspect_codex_item` shows proximity matches for a belief.
+- A `partial_match` warning appeared after `remember_belief` (CLI: `ghostpaw-codex belief add`).
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) shows proximity matches for a belief.
 - Two beliefs keep surfacing together in recall results for the same query.
 
 When not to use:
@@ -18,13 +18,13 @@ When not to use:
 - You are resolving a flag for reasons other than overlap.
 
 Step-by-step sequence:
-1. Use `inspect_codex_item` on the first belief to see its full detail and proximity list.
-2. Use `inspect_codex_item` on the second belief to compare claims, certainty, evidence, and source.
+1. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on the first belief to see its full detail and proximity list.
+2. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on the second belief to compare claims, certainty, evidence, and source.
 3. Decide which case applies:
-   - **Identical meaning**: use `revise_belief` with `action: "forget"` on the weaker one, setting `successorId` to the stronger one.
-   - **One replaces the other**: use `revise_belief` with `action: "correct"` on the older one, providing the updated claim.
-   - **Complementary details**: use `revise_belief` with `action: "merge"` passing both ids and a combined claim.
-   - **Genuinely distinct**: use `dismiss_proximity` to suppress the pair with exponential backoff.
+   - **Identical meaning**: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "forget"` on the weaker one, setting `successorId` to the stronger one.
+   - **One replaces the other**: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "correct"` on the older one, providing the updated claim.
+   - **Complementary details**: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "merge"` passing both ids and a combined claim.
+   - **Genuinely distinct**: use `dismiss_proximity` (CLI: `ghostpaw-codex proximity dismiss`) to suppress the pair with exponential backoff.
 4. After the action, verify the result: check that supersession landed correctly or that the dismissal was recorded.
 
 Validation checks:
@@ -44,9 +44,9 @@ Tips and tricks:
 - Dismiss is cheap — false positives in proximity cost one call with exponential backoff.
 
 Tool calls to prefer:
-- `inspect_codex_item` on both beliefs
-- `revise_belief` with `forget`, `correct`, or `merge` depending on the case
-- `dismiss_proximity` for genuinely distinct pairs
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on both beliefs
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `forget`, `correct`, or `merge` depending on the case
+- `dismiss_proximity` (CLI: `ghostpaw-codex proximity dismiss`) for genuinely distinct pairs
 
 Related skills:
 - `capture-beliefs-well`

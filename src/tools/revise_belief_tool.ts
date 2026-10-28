@@ -1,5 +1,6 @@
 import { BELIEF_CATEGORIES, BELIEF_SOURCES } from '../beliefs/types.ts';
 import type { CodexDb } from '../database.ts';
+import { CodexValidationError } from '../errors.ts';
 import * as write from '../write.ts';
 import { translateToolError } from './tool_errors.ts';
 import {
@@ -28,6 +29,7 @@ export interface ReviseBeliefToolInput {
 	source?: (typeof BELIEF_SOURCES)[number];
 	category?: (typeof BELIEF_CATEGORIES)[number];
 	certainty?: number;
+	provenance?: string;
 }
 
 export type ReviseBeliefToolResult = ToolResult<Record<string, unknown>>;
@@ -38,7 +40,7 @@ function handleConfirm(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefT
 			'beliefId',
 		]);
 	}
-	const belief = write.confirmBelief(db, input.beliefId);
+	const belief = write.confirmBelief(db, input.beliefId, { provenance: input.provenance });
 	return toolSuccess(
 		`Confirmed "${belief.claim}" — certainty now ${belief.certainty.toFixed(2)}, evidence ${belief.evidence}.`,
 		{ belief },
@@ -62,6 +64,7 @@ function handleCorrect(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefT
 		source: input.source,
 		category: input.category,
 		certainty: input.certainty,
+		provenance: input.provenance,
 	});
 	const entities: ToolEntityRef[] = [toBeliefRef(result), toBeliefIdRef(result.supersededId)];
 	const next: ToolNextStepHint[] = [inspectItemNext(result.id, result.claim)];
@@ -88,6 +91,7 @@ function handleMerge(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefToo
 			['beliefIds'],
 		);
 	}
+	if (!input.claim) throw new CodexValidationError('Merge requires --claim.');
 	const belief = write.mergeBeliefs(db, {
 		beliefIds: input.beliefIds,
 		claim: input.claim,
@@ -95,6 +99,7 @@ function handleMerge(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefToo
 		source: input.source,
 		category: input.category,
 		certainty: input.certainty,
+		provenance: input.provenance,
 	});
 	return toolSuccess(
 		`Merged ${input.beliefIds.length} beliefs into "${belief.claim}".`,
@@ -114,6 +119,7 @@ function handleForget(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefTo
 	}
 	const belief = write.forgetBelief(db, input.beliefId, {
 		successorId: input.successorId,
+		provenance: input.provenance,
 	});
 	return toolSuccess(
 		input.successorId
@@ -138,7 +144,9 @@ function handleDefer(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefToo
 			],
 		);
 	}
-	const belief = write.deferBelief(db, input.beliefId, input.deferredUntil);
+	const belief = write.deferBelief(db, input.beliefId, input.deferredUntil, {
+		provenance: input.provenance,
+	});
 	return toolSuccess(
 		`Deferred belief "${belief.claim}" until ${input.deferredUntil}.`,
 		{ belief },
@@ -189,7 +197,7 @@ export const reviseBeliefTool = defineCodexTool<ReviseBeliefToolInput, Record<st
 		action: 'The revision verb: confirm, correct, merge, forget, or defer.',
 		beliefId: 'The belief to revise. Required for confirm, correct, forget, defer.',
 		beliefIds: 'Two or more belief ids to merge. Required for merge.',
-		claim: 'Replacement claim text. Required for correct, optional for merge.',
+		claim: 'Replacement claim text. Required for correct and merge.',
 		successorId: 'Existing active belief to supersede to. Optional for merge and forget.',
 		deferredUntil: 'Timestamp until which the belief is excluded from flags. Required for defer.',
 		source: 'Optional replacement source for correct and merge.',
@@ -205,10 +213,15 @@ export const reviseBeliefTool = defineCodexTool<ReviseBeliefToolInput, Record<st
 			beliefIds: arraySchema(integerSchema('Belief id.'), 'Belief ids for merge.'),
 			claim: stringSchema('Replacement or merged claim.'),
 			successorId: integerSchema('Existing active successor belief id.'),
-			deferredUntil: integerSchema('Future timestamp for deferred review.'),
+			deferredUntil: integerSchema(
+				'Deferred review date: tomorrow, +3d, YYYY-MM-DD, DD.MM.YYYY, ISO with zone, or epoch ms. Calendar dates use the process time zone.',
+			),
 			source: enumSchema([...BELIEF_SOURCES], 'Optional replacement source.'),
 			category: enumSchema([...BELIEF_CATEGORIES], 'Optional replacement category.'),
 			certainty: numberSchema('Optional certainty override.'),
+			provenance: stringSchema(
+				'Optional origin reference; preserves the current origin when omitted.',
+			),
 		},
 		['action'],
 		'Revise an existing belief.',

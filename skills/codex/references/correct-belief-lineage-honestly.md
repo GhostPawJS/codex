@@ -1,8 +1,8 @@
 # Correct Belief Lineage Honestly
 
 Primary tools:
-- `inspect_codex_item`
-- `revise_belief`
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`)
 
 Goal:
 - Preserve epistemic history through lineage so future inspection shows what was believed before and what replaced it.
@@ -16,8 +16,8 @@ When not to use:
 - The belief should exit active recall entirely — use `forget` instead.
 
 Step-by-step sequence:
-1. Use `inspect_codex_item` on the belief to see the current claim, certainty, source, and existing lineage.
-2. Use `revise_belief` with `action: "correct"` and the replacement `claim`. Optionally update `source`, `category`, or `certainty` if those also changed.
+1. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on the belief to see the current claim, certainty, source, and existing lineage.
+2. Use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "correct"` and the replacement `claim`. Optionally update `source`, `category`, or `certainty` if those also changed.
 3. Check the response: the result includes the new belief id, the `supersededId`, and proximity matches for the corrected version.
 4. If the correction reveals new proximity conflicts, evaluate them before continuing.
 
@@ -33,13 +33,13 @@ Pitfalls:
 - Do not correct a belief that is already superseded; locate the current active version first.
 
 Tips and tricks:
-- The version diff in `inspect_codex_item` shows exactly what changed — useful for auditing later.
+- The version diff in `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) shows exactly what changed — useful for auditing later.
 - If only the source needs upgrading (same claim, stronger evidence), correct with the same claim text but a different source.
 - Lineage chains become valuable narrative artifacts over time.
 
 Tool calls to prefer:
-- `inspect_codex_item` before correction
-- `revise_belief` with `action: "correct"` for the actual change
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) before correction
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "correct"` for the actual change
 
 Related skills:
 - `upgrade-source-evidence`

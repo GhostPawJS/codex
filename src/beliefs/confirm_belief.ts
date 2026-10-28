@@ -11,10 +11,13 @@ export function confirmBelief(db: CodexDb, beliefId: number, options?: WriteOpti
 	return withTransaction(db, () => {
 		const current = assertActiveBeliefExists(db, beliefId);
 		const certainty = Math.min(0.99, 0.3 * 1 + 0.7 * current.certainty);
-		db.prepare('UPDATE beliefs SET certainty = ?, evidence = ?, verified_at = ? WHERE id = ?').run(
+		db.prepare(
+			'UPDATE beliefs SET certainty = ?, evidence = ?, verified_at = ?, provenance = ? WHERE id = ?',
+		).run(
 			certainty,
 			current.evidence + 1,
 			timestamp,
+			options?.provenance ?? current.provenance,
 			beliefId,
 		);
 		const row = assertActiveBeliefExists(db, beliefId);

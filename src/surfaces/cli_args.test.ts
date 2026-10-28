@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { spawn } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -28,7 +29,7 @@ test('generic parser supports flags, aliases, arrays, files and positionals', ()
 						{ name: 'min-score', type: 'number' },
 						{ name: 'enabled', type: 'boolean' },
 						{ name: 'tag', type: 'array' },
-						{ name: 'config', short: 'c', type: 'json' },
+						{ name: 'config', short: 'c', type: 'json', file: true },
 					],
 					positionals: [{ name: 'query', type: 'string' }],
 				},
@@ -69,4 +70,64 @@ test('flag values may start with dashes unless they look like a flag', () => {
 		assert.deepEqual(parseCliArgs(['--claim', claim], spec), { claim });
 	for (const flag of ['--other', '--Other'])
 		assert.throws(() => parseCliArgs(['--claim', flag], spec), /Missing value: --claim/);
+});
+
+test('file-capable arguments opt in; literal arguments retain every leading at sign', () => {
+	const dir = mkdtempSync(join(process.cwd(), '.file-values-'));
+	try {
+		const path = join(dir, 'value');
+		writeFileSync(path, 'long\nvalue\n');
+		const spec = {
+			command: 'test',
+			flags: [{ name: 'claim', type: 'string' as const, file: true }],
+		};
+		assert.equal(parseCliArgs(['--claim', `@${path}`], spec).claim, 'long\nvalue\n');
+		assert.equal(parseCliArgs(['--claim', '@@text'], spec).claim, '@text');
+		for (const value of ['@', `@${path}-missing`])
+			assert.throws(
+				() => parseCliArgs(['--claim', value], spec),
+				(error: unknown) => error instanceof CliUsageError && error.exitCode === 2,
+			);
+		const literal = { command: 'test', flags: [{ name: 'claim', type: 'string' as const }] };
+		for (const value of ['@fox said hi', '@@x', '@-', '@'])
+			assert.equal(parseCliArgs(['--claim', value], literal).claim, value);
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+test('file-capable @- reads stdin bytes', async () => {
+	const dir = mkdtempSync(join(process.cwd(), '.stdin-values-'));
+	const script = join(dir, 'stdin.mjs');
+	writeFileSync(
+		script,
+		"import {parseCliArgs} from '../src/surfaces/cli_args.ts';import {writeFileSync} from 'node:fs';writeFileSync(process.argv[2],JSON.stringify(parseCliArgs(['--claim','@-'],{command:'test',flags:[{name:'claim',type:'string',file:true}]})))",
+	);
+	const child = spawn(
+		process.execPath,
+		['--experimental-strip-types', script, join(dir, 'result.json')],
+		{
+			cwd: process.cwd(),
+			stdio: ['pipe', 'pipe', 'pipe'],
+		},
+	);
+	let err = '';
+	child.stdout.resume();
+	child.stderr.on('data', (s) => {
+		err += String(s);
+	});
+	const exited = new Promise<number | null>((resolve, reject) => {
+		child.on('error', reject);
+		child.on('close', resolve);
+	});
+	child.stdin.end('first\nsecond\n');
+	try {
+		assert.equal(await exited, 0, err);
+		assert.equal(
+			JSON.parse(readFileSync(join(dir, 'result.json'), 'utf8')).claim,
+			'first\nsecond\n',
+		);
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
 });

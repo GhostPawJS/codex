@@ -112,7 +112,7 @@ test('plain CLI output, quiet ids, per-action help, dates and guide commands', a
 			2,
 		);
 		const clarify = await invoke(['belief', 'correct', '1']);
-		assert.equal(clarify.code, 3);
+		assert.equal(clarify.code, 2);
 		assert.equal(clarify.out, '');
 		assert.match(clarify.err, /Missing: --claim/);
 		const missing = await invoke(['search']);
@@ -126,7 +126,7 @@ test('plain CLI output, quiet ids, per-action help, dates and guide commands', a
 			assert.equal(help.code, 0);
 			assert.equal(help.out.includes('--deferred-until'), action === 'defer');
 			assert.equal(help.out.includes('--claim'), ['correct', 'merge'].includes(action));
-			const invalid = await invoke(['belief', action, '--provenance', 'unused']);
+			const invalid = await invoke(['belief', action, '--unknown', 'unused']);
 			assert.equal(invalid.code, 2);
 			assert.match(invalid.err, /Allowed flags:/);
 		}
@@ -180,13 +180,13 @@ test('alias commands support text, JSON, quiet, help and usage errors', async ()
 		);
 		assert.equal((await invoke(['alias', 'list'])).out, 'class  warrior\n');
 		const listed = await invoke(['alias', 'list', '--json']);
-		assert.equal(JSON.parse(listed.out)[0].term, 'class');
-		assert.equal(typeof JSON.parse(listed.out)[0].createdAt, 'number');
+		assert.equal(JSON.parse(listed.out).data[0].term, 'class');
+		assert.equal(typeof JSON.parse(listed.out).data[0].createdAt, 'number');
 		assert.equal(
 			JSON.parse((await invoke(['alias', 'add', 'class', 'warrior', '--json'])).out).ok,
 			true,
 		);
-		assert.equal((await invoke(['alias', 'list', '--quiet'])).out, '');
+		assert.equal((await invoke(['alias', 'list', '--quiet'])).out, 'class warrior\n');
 		assert.equal(
 			(await invoke(['alias', 'remove', 'class', 'warrior'])).out,
 			'Removed alias: class -> warrior\n',

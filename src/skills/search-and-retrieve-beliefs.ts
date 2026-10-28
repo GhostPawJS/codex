@@ -25,7 +25,7 @@ When not to use:
 
 Step-by-step sequence:
 1. Use \`search_codex\` with a descriptive natural-language query. Add \`category\` or \`source\` filters when you know the belief type.
-2. If the result contains an \`empty_result\` warning, the Codex has nothing on this topic. Consider whether to capture a new belief or try a broader query.
+2. If the result contains an \`no_match\` warning, the Codex has nothing on this topic. Consider whether to capture a new belief or try a broader query.
 3. For each top candidate, read the recall score, certainty, evidence count, and strength tier to judge trustworthiness.
 4. Use \`inspect_codex_item\` on the highest-ranked result when you need full detail: lineage, proximity, version diff.
 5. Only drill into lineage or proximity when the detail reveals supersession history or nearby conflicts that affect the decision.

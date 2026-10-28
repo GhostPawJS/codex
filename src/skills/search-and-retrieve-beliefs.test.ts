@@ -73,10 +73,10 @@ describe('search-and-retrieve-beliefs skill', () => {
 		ok(statusResult.data.payload.view === 'status');
 	});
 
-	it('handles empty codex with empty_result warning', async () => {
+	it('handles empty codex with no_match warning', async () => {
 		const db = await createSkillTestDb();
 		const result = expectSuccess(searchCodexToolHandler(db, { query: 'anything' }));
-		ok(result.warnings?.some((w) => w.code === 'empty_result'));
+		ok(result.warnings?.some((w) => w.code === 'no_match'));
 	});
 
 	it('returns not_found for inspect on nonexistent belief', async () => {

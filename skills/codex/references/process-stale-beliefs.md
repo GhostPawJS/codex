@@ -1,9 +1,9 @@
 # Process Stale Beliefs
 
 Primary tools:
-- `review_codex`
-- `inspect_codex_item`
-- `revise_belief`
+- `review_codex` (CLI: `ghostpaw-codex review`)
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`)
 
 Goal:
 - Prevent beliefs from silently rotting by processing stale and fading flags before integrity degrades further.
@@ -18,13 +18,13 @@ When not to use:
 - You are looking for a specific belief — use search instead.
 
 Step-by-step sequence:
-1. Use `review_codex` with `view: "flags"` to load the current queue.
+1. Use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "flags"` to load the current queue.
 2. Filter attention to beliefs with `stale` or `fading` reason codes.
-3. For each stale belief, use `inspect_codex_item` to see the full detail and decide:
-   - If the claim is still valid: use `revise_belief` with `action: "confirm"` to refresh it.
-   - If the claim has changed: use `revise_belief` with `action: "correct"` with the updated claim.
-   - If the claim is no longer relevant: use `revise_belief` with `action: "forget"`.
-4. After processing, use `review_codex` with `view: "status"` to verify integrity has improved.
+3. For each stale belief, use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) to see the full detail and decide:
+   - If the claim is still valid: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "confirm"` to refresh it.
+   - If the claim has changed: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "correct"` with the updated claim.
+   - If the claim is no longer relevant: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "forget"`.
+4. After processing, use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "status"` to verify integrity has improved.
 
 Validation checks:
 - The processed beliefs no longer appear in the flag queue.
@@ -43,9 +43,9 @@ Tips and tricks:
 - Batch stale processing works well as a weekly ritual.
 
 Tool calls to prefer:
-- `review_codex` with `flags` and `status`
-- `inspect_codex_item` for detail before action
-- `revise_belief` with `confirm`, `correct`, or `forget`
+- `review_codex` (CLI: `ghostpaw-codex review`) with `flags` and `status`
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) for detail before action
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `confirm`, `correct`, or `forget`
 
 Related skills:
 - `review-flags-batch`

@@ -108,7 +108,13 @@ export interface StatusRecord {
 	averageFreshness: number;
 }
 
-export type LogRecordType = 'remembered' | 'confirmed' | 'revised' | 'forgotten' | 'merged';
+export type LogRecordType =
+	| 'deferred'
+	| 'remembered'
+	| 'confirmed'
+	| 'revised'
+	| 'forgotten'
+	| 'merged';
 
 export interface LogRecord {
 	id: number;
@@ -135,6 +141,7 @@ export interface BeliefDetailRecord extends BeliefRecord {
 }
 
 export interface WriteOptions {
+	provenance?: string | undefined;
 	now?: number | undefined;
 }
 
@@ -151,6 +158,7 @@ export interface ForgetOptions extends WriteOptions {
 }
 
 export interface RememberResult extends BeliefRecord {
+	duplicate?: boolean;
 	proximity: ProximityResultItem[];
 }
 
@@ -160,6 +168,7 @@ export interface CorrectResult extends BeliefRecord {
 }
 
 export interface RememberBeliefInput {
+	allowDuplicate?: boolean;
 	claim: string;
 	source: BeliefSource;
 	category: BeliefCategory;

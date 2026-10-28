@@ -1,10 +1,10 @@
 # Handle Ambiguous Belief Updates
 
 Primary tools:
-- `search_codex`
-- `inspect_codex_item`
-- `revise_belief`
-- `dismiss_proximity`
+- `search_codex` (CLI: `ghostpaw-codex search`)
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`)
+- `dismiss_proximity` (CLI: `ghostpaw-codex proximity dismiss`)
 
 Goal:
 - Pick the single least-distorted mutation when a new claim overlaps with something already in the Codex.
@@ -19,14 +19,14 @@ When not to use:
 - You already know exactly which verb to use.
 
 Step-by-step sequence:
-1. Use `search_codex` to find the existing belief that overlaps with the new information.
-2. Use `inspect_codex_item` on the existing belief to understand its full context: certainty, evidence, source, lineage, proximity.
+1. Use `search_codex` (CLI: `ghostpaw-codex search`) to find the existing belief that overlaps with the new information.
+2. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on the existing belief to understand its full context: certainty, evidence, source, lineage, proximity.
 3. Apply the decision tree:
-   - **Unchanged meaning**: use `revise_belief` with `action: "confirm"` to reinforce the existing belief.
-   - **Replacement**: use `revise_belief` with `action: "correct"` providing the updated claim.
-   - **Overlapping details**: use `revise_belief` with `action: "merge"` to consolidate both into a richer successor.
-   - **Outdated old belief**: use `revise_belief` with `action: "forget"` and `successorId` pointing to the better active belief.
-   - **Genuinely unrelated**: use `dismiss_proximity` if the overlap is only topical, not semantic.
+   - **Unchanged meaning**: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "confirm"` to reinforce the existing belief.
+   - **Replacement**: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "correct"` providing the updated claim.
+   - **Overlapping details**: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "merge"` to consolidate both into a richer successor.
+   - **Outdated old belief**: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "forget"` and `successorId` pointing to the better active belief.
+   - **Genuinely unrelated**: use `dismiss_proximity` (CLI: `ghostpaw-codex proximity dismiss`) if the overlap is only topical, not semantic.
 4. After acting, verify the result matches the intended outcome.
 
 Validation checks:
@@ -46,10 +46,10 @@ Tips and tricks:
 - The decision tree is not about the new information alone — it depends on the existing belief's state too.
 
 Tool calls to prefer:
-- `search_codex` for finding the overlap
-- `inspect_codex_item` for full context
-- `revise_belief` with the appropriate action
-- `dismiss_proximity` for false overlaps
+- `search_codex` (CLI: `ghostpaw-codex search`) for finding the overlap
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) for full context
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with the appropriate action
+- `dismiss_proximity` (CLI: `ghostpaw-codex proximity dismiss`) for false overlaps
 
 Related skills:
 - `resolve-near-duplicate-beliefs`

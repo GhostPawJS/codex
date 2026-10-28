@@ -1,9 +1,9 @@
 # Defer Beliefs Pending Outcomes
 
 Primary tools:
-- `review_codex`
-- `revise_belief`
-- `inspect_codex_item`
+- `review_codex` (CLI: `ghostpaw-codex review`)
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`)
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
 
 Goal:
 - Legitimately pause flag processing for beliefs whose truth depends on a future event, without clearing the flag dishonestly.
@@ -18,11 +18,11 @@ When not to use:
 - Deferral would be used to indefinitely postpone maintenance.
 
 Step-by-step sequence:
-1. Use `review_codex` with `view: "flags"` to identify flagged beliefs pending outcomes.
-2. Use `inspect_codex_item` on the belief to confirm it genuinely depends on a future event.
-3. Use `revise_belief` with `action: "defer"` and a `deferUntil` timestamp set to when the outcome is expected.
+1. Use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "flags"` to identify flagged beliefs pending outcomes.
+2. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on the belief to confirm it genuinely depends on a future event.
+3. Use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "defer"` and a `deferUntil` timestamp set to when the outcome is expected.
 4. When the deferral period expires, the belief will resurface in the flag queue.
-5. At that point, use `inspect_codex_item` again and decide: `confirm` if the belief held, `correct` if the outcome changed it, or `forget` if it is no longer relevant.
+5. At that point, use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) again and decide: `confirm` if the belief held, `correct` if the outcome changed it, or `forget` if it is no longer relevant.
 
 Validation checks:
 - The deferred belief no longer appears in the flag queue until its deferral expires.
@@ -40,9 +40,9 @@ Tips and tricks:
 - Combine with pre-registration: capture a prediction, defer until the outcome date, then correct or confirm.
 
 Tool calls to prefer:
-- `review_codex` with `flags` to find candidates
-- `revise_belief` with `action: "defer"` and `deferUntil`
-- `inspect_codex_item` before and after deferral
+- `review_codex` (CLI: `ghostpaw-codex review`) with `flags` to find candidates
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "defer"` and `deferUntil`
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) before and after deferral
 
 Related skills:
 - `review-flags-batch`

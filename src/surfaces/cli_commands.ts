@@ -42,8 +42,8 @@ export async function runCliCommand<T>(
 	const stdin = options.stdin ?? process.stdin;
 	const args = [...argv];
 	const tree = cliCommands(options.tools);
-	let json = argv.includes('--json'),
-		quiet = argv.includes('--quiet'),
+	let json = argv.includes('--json') || argv.includes('-j'),
+		quiet = argv.includes('--quiet') || argv.includes('-q'),
 		compact = false,
 		help = false;
 	let db: string | undefined;
@@ -51,7 +51,7 @@ export async function runCliCommand<T>(
 		stderr.write(`${message}\n`);
 		if (json && !quiet)
 			stdout.write(
-				`${JSON.stringify({ ok: false, error: { code: code === 2 ? 'usage_error' : 'internal_error', message } })}\n`,
+				`${JSON.stringify({ ok: false, error: { code: code === 2 ? 'usage_error' : code === 3 ? 'not_found' : 'internal_error', message } })}\n`,
 			);
 		return code;
 	};
@@ -79,8 +79,8 @@ export async function runCliCommand<T>(
 			if (flag === '--db' || flag?.startsWith('--db=')) {
 				db = flag === '--db' ? args.splice(i + 1, 1)[0] : flag.slice(5);
 				if (!db || /^--[a-z]/i.test(db)) throw new CliUsageError('--db requires a path');
-			} else if (flag === '--json') json = true;
-			else if (flag === '--quiet') quiet = true;
+			} else if (flag === '--json' || flag === '-j') json = true;
+			else if (flag === '--quiet' || flag === '-q') quiet = true;
 			else if (flag === '--compact') compact = true;
 			else if (flag === '--help' || flag === '-h') help = true;
 			else if (['--version', '-V', '-v'].includes(flag ?? '')) {
@@ -106,6 +106,7 @@ export async function runCliCommand<T>(
 		const specFor = (command: (typeof tree)[number]): CliSpec => {
 			const argument = (name: string, schema: JsonSchema): CliArgument => ({
 				name,
+				...(name === 'claim' ? { short: 'c' } : {}),
 				type:
 					schema.type === 'object' || !schema.type ? 'json' : (schema.type as CliArgument['type']),
 				description: schema.description,
@@ -114,12 +115,19 @@ export async function runCliCommand<T>(
 					command.tool.cli?.valueParsers?.[
 						name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
 					],
+				...(command.tool.cli?.fileArgs?.includes(
+					name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase()),
+				)
+					? { file: true }
+					: {}),
 				...(schema.items?.type ? { itemType: schema.items.type as CliArgument['type'] } : {}),
 			});
 			const properties = command.tool.inputSchema.properties ?? {};
 			return {
 				command: `${options.bin} ${command.path}`,
-				description: command.tool.description,
+				description: command.fixed.action
+					? `${String(command.fixed.action)[0]?.toUpperCase()}${String(command.fixed.action).slice(1)} a belief.`
+					: command.tool.description,
 				positionals: command.positionals.map((name) => ({
 					...argument(name, properties[name] ?? {}),
 					...(properties[name]?.type === 'array'
@@ -162,6 +170,10 @@ export async function runCliCommand<T>(
 			try {
 				const result = options.commands.alias(context, args.slice(1));
 				if (result.code) stderr.write(`${result.text}\n`);
+				if (quiet && action === 'list')
+					stdout.write(
+						`${result.text === 'No aliases.' ? '' : result.text.replace(/ {2}/g, ' ')}${result.text === 'No aliases.' ? '' : '\n'}`,
+					);
 				if (!quiet)
 					stdout.write(
 						json ? `${JSON.stringify(result.data)}\n` : result.code ? '' : `${result.text}\n`,
@@ -177,8 +189,8 @@ export async function runCliCommand<T>(
 			if (!quiet)
 				stdout.write(
 					entry
-						? renderCliHelp(specFor(entry))
-						: `${options.bin} ${options.version}\n${options.description}\n${options.describeDb ? `\n${options.describeDb(db === undefined ? {} : { db })}\n` : ''}\nCommands:\n${matches.map((command) => `  ${command.path}`).join('\n')}\n  alias add|remove|list\n  mcp, skill, tools [--json], describe <tool>, call <tool> [JSON|-], completions <bash|zsh|fish>, version\nGlobal flags: --db <path>, --json, --quiet, --compact, --help/-h, --version/-V/-v, --no-color\n`,
+						? `${renderCliHelp(specFor(entry))}Global flags: --json/-j, --quiet/-q, --help/-h, --db <path>\n`
+						: `${options.bin} ${options.version}\n${options.description}\n${options.describeDb ? `\n${options.describeDb(db === undefined ? {} : { db })}\n` : ''}\nCommands:\n${matches.map((command) => `  ${command.path}`).join('\n')}\n  alias add|remove|list\n  mcp, skill, tools [--json], describe <tool>, call <tool> [JSON|-], completions <bash|zsh|fish>, version\nGlobal flags: --db <path>, --json/-j, --quiet/-q, --compact, --claim/-c, --help/-h, --version/-V/-v, --no-color\n`,
 				);
 			return 0;
 		}
@@ -220,8 +232,10 @@ export async function runCliCommand<T>(
 				ended = true;
 				continue;
 			}
-			if (!ended && token.startsWith('--')) {
-				const flag = spec.flags?.find((arg) => `--${arg.name}` === token);
+			if (!ended && token.startsWith('-') && token !== '-') {
+				const flag = spec.flags?.find(
+					(arg) => `--${arg.name}` === token || `-${arg.short}` === token,
+				);
 				if (!token.includes('=') && flag && flag.type !== 'boolean') i++;
 			} else positionalIndexes.push(i);
 		}
@@ -263,13 +277,15 @@ export async function runCliCommand<T>(
 				data?: unknown;
 			};
 			const code =
-				record.outcome === 'needs_clarification' || record.error?.code === 'not_found'
-					? 3
-					: ['conflict', 'version_mismatch'].includes(record.error?.code ?? '')
-						? 4
-						: record.ok === false
-							? 1
-							: 0;
+				record.error?.code === 'invalid_input' || record.outcome === 'needs_clarification'
+					? 2
+					: record.error?.code === 'not_found'
+						? 3
+						: ['conflict', 'version_mismatch'].includes(record.error?.code ?? '')
+							? 4
+							: record.ok === false
+								? 1
+								: 0;
 			if (code) {
 				const missing = record.clarification?.missing.map(
 					(name) => `--${name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
@@ -285,7 +301,8 @@ export async function runCliCommand<T>(
 				const warnings = (result as { warnings?: { code?: string; message?: string }[] }).warnings;
 				if (!quiet)
 					for (const warning of warnings ?? [])
-						if (warning.code !== 'empty_result') stderr.write(`warning: ${warning.message}\n`);
+						if (warning.code !== 'empty_result' && warning.code !== 'no_match')
+							stderr.write(`warning: ${warning.message}\n`);
 			} else if (!quiet && !code)
 				stdout.write(`${JSON.stringify(result, null, compact ? undefined : 2)}\n`);
 			return code;
@@ -295,7 +312,11 @@ export async function runCliCommand<T>(
 	} catch (error) {
 		return fail(
 			error instanceof Error ? error.message : String(error),
-			error instanceof CliUsageError ? 2 : 70,
+			error instanceof CliUsageError || (error as { code?: string }).code === 'validation'
+				? 2
+				: (error as { code?: string }).code === 'not_found'
+					? 3
+					: 70,
 		);
 	}
 }

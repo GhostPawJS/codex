@@ -26,8 +26,8 @@ export function assertBeliefCategory(category: string): asserts category is Beli
 }
 
 export function clampCertainty(certainty: number, maxCertainty = 0.99): number {
-	if (!Number.isFinite(certainty)) {
-		throw new CodexValidationError('Certainty must be a finite number.');
+	if (!Number.isFinite(certainty) || certainty < 0 || certainty > 1) {
+		throw new CodexValidationError('Certainty must be a finite number between 0 and 1.');
 	}
 	return Math.min(maxCertainty, Math.max(0.1, certainty));
 }

@@ -21,7 +21,10 @@ export function mapBeliefRow(row: BeliefRow, now: number): BeliefRecord {
 		provenance: row.provenance,
 		deferredUntil: row.deferred_until,
 		freshness: computeFreshness(row.verified_at, now, row.evidence),
-		strength: getStrengthTier(row.certainty),
+		strength:
+			row.certainty >= 0.4 && computeFreshness(row.verified_at, now, row.evidence) >= 0.7
+				? 'strong'
+				: getStrengthTier(row.certainty),
 		isActive: row.superseded_by === null,
 		lastChangedAt: Math.max(row.created_at, row.verified_at),
 	};

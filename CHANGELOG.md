@@ -6,6 +6,34 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Optional provenance on every belief revision verb. Search and belief detail text include stored provenance.
+- Short CLI flags: -q for --quiet, -j for --json, -c for --claim, and -h for --help.
+- llms-install.md: binary install per OS and CPU with checksum verification, a Cline MCP configuration with absolute command paths and a test call. The README MCP section has a Cline entry.
+- --allow-duplicate permits creating a separate belief with an existing normalized claim.
+
+### Changed
+
+- CLI values are literal unless an argument explicitly supports file input. No Codex argument enables file input; leading @ and @@ remain unchanged. Use JSON stdin for long input.
+- Adding an active normalized duplicate returns its existing id with outcome no_op and a duplicate warning. Detection runs inside an immediate transaction, including concurrent writes and databases with pre-existing duplicates.
+- Search requires a lexical token match or a bounded token spelling match. Unrelated queries return an empty result with one no_match warning and text “No matching beliefs.”
+- Search weights derive from smoothed corpus document frequency without word lists. The three-result common-term cap applies only when all matched terms occur in nearly every document of a sufficiently large corpus.
+- CLI merge requires --claim instead of concatenating source claims. The library fallback remains available for compatibility.
+- Invalid claims, aliases, certainty outside [0,1] and missing revision input return usage exit code 2. Explicit database paths with a missing parent directory return exit code 3 without creating the directory.
+- Alias JSON lists use the {ok, data} envelope; quiet lists print one term and alias per line. Repeated adds report “Alias exists”.
+- Text timestamps include the process time zone label. Deferral help lists accepted forms and explains the process time zone for calendar dates.
+- Fresh moderate-certainty beliefs display fading strength only after freshness decays.
+
+### Fixed
+
+- Correct and confirm preserve provenance when omitted. Merges preserve provenance when all inputs agree, including an existing successor, and otherwise clear it unless explicitly supplied.
+- Newly merged beliefs receive a grace period before inherited lineage produces an unstable flag.
+- Revising a superseded belief reports its successor id; belief detail text identifies supersession.
+- Deferred log entries are labelled deferred and entries sort by last change.
+- Each revision command has its own help description. Guides and generated skill documentation pair tool names with CLI commands.
+- Database startup installs the busy timeout before enabling WAL for concurrent cold starts.
+
 ## [0.5.2] - 2026-10-28
 
 ### Removed

@@ -14,12 +14,10 @@ export function deferBelief(
 ): BeliefRecord {
 	const timestamp = resolveNow(options?.now);
 	return withTransaction(db, () => {
-		assertActiveBeliefExists(db, beliefId);
-		db.prepare('UPDATE beliefs SET deferred_until = ?, verified_at = ? WHERE id = ?').run(
-			deferredUntil,
-			timestamp,
-			beliefId,
-		);
+		const current = assertActiveBeliefExists(db, beliefId);
+		db.prepare(
+			'UPDATE beliefs SET deferred_until = ?, verified_at = ?, provenance = ? WHERE id = ?',
+		).run(deferredUntil, timestamp, options?.provenance ?? current.provenance, beliefId);
 		return mapBeliefRow(assertActiveBeliefExists(db, beliefId), timestamp);
 	});
 }

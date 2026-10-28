@@ -1,9 +1,9 @@
 # Search And Retrieve Beliefs
 
 Primary tools:
-- `search_codex`
-- `inspect_codex_item`
-- `review_codex`
+- `search_codex` (CLI: `ghostpaw-codex search`)
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
+- `review_codex` (CLI: `ghostpaw-codex review`)
 
 Goal:
 - Retrieve current beliefs about a topic efficiently, using ranked recall instead of loading everything.
@@ -14,16 +14,16 @@ When to use:
 - A user or agent asks a question that stored beliefs might answer.
 
 When not to use:
-- You already have a specific belief id and just need its detail — go straight to `inspect_codex_item`.
-- You need a structured maintenance surface — use `review_codex` instead.
+- You already have a specific belief id and just need its detail — go straight to `inspect_codex_item` (CLI: `ghostpaw-codex belief show`).
+- You need a structured maintenance surface — use `review_codex` (CLI: `ghostpaw-codex review`) instead.
 
 Step-by-step sequence:
-1. Use `search_codex` with a descriptive natural-language query. Add `category` or `source` filters when you know the belief type.
-2. If the result contains an `empty_result` warning, the Codex has nothing on this topic. Consider whether to capture a new belief or try a broader query.
+1. Use `search_codex` (CLI: `ghostpaw-codex search`) with a descriptive natural-language query. Add `category` or `source` filters when you know the belief type.
+2. If the result contains an `no_match` warning, the Codex has nothing on this topic. Consider whether to capture a new belief or try a broader query.
 3. For each top candidate, read the recall score, certainty, evidence count, and strength tier to judge trustworthiness.
-4. Use `inspect_codex_item` on the highest-ranked result when you need full detail: lineage, proximity, version diff.
+4. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on the highest-ranked result when you need full detail: lineage, proximity, version diff.
 5. Only drill into lineage or proximity when the detail reveals supersession history or nearby conflicts that affect the decision.
-6. If the search results feel incomplete, use `review_codex` with `view: "status"` to see how large the codex is and whether the query topic is underrepresented.
+6. If the search results feel incomplete, use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "status"` to see how large the codex is and whether the query topic is underrepresented.
 
 Validation checks:
 - The recall results include beliefs you expected to find.
@@ -41,9 +41,9 @@ Tips and tricks:
 - The `next` hints in the search result suggest which beliefs to inspect first.
 
 Tool calls to prefer:
-- `search_codex` for discovery
-- `inspect_codex_item` for exact detail
-- `review_codex` with `status` when context about overall codex size is needed
+- `search_codex` (CLI: `ghostpaw-codex search`) for discovery
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) for exact detail
+- `review_codex` (CLI: `ghostpaw-codex review`) with `status` when context about overall codex size is needed
 
 Related skills:
 - `capture-beliefs-well`

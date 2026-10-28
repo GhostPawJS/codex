@@ -1,8 +1,8 @@
 # Direct Supersession Between Beliefs
 
 Primary tools:
-- `inspect_codex_item`
-- `revise_belief`
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`)
 
 Goal:
 - Remove a redundant belief by pointing it to its better counterpart, preserving the supersession record in lineage.
@@ -18,11 +18,11 @@ When not to use:
 - You want to create a new combined belief — use merge or correct.
 
 Step-by-step sequence:
-1. Use `inspect_codex_item` on both beliefs to compare their claims, certainty, evidence, and lineage.
+1. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on both beliefs to compare their claims, certainty, evidence, and lineage.
 2. Identify the stronger belief (higher evidence, certainty, recency, or source quality).
-3. Use `revise_belief` with `action: "forget"` on the weaker belief, setting `successorId` to the stronger belief's id.
+3. Use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "forget"` on the weaker belief, setting `successorId` to the stronger belief's id.
 4. Verify the response confirms the supersession was recorded.
-5. Use `inspect_codex_item` on the surviving belief to confirm the lineage shows the supersession.
+5. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on the surviving belief to confirm the lineage shows the supersession.
 
 Validation checks:
 - The weaker belief no longer appears in active recall results.
@@ -40,8 +40,8 @@ Tips and tricks:
 - This is the preferred resolution for proximity pairs where one is strictly better.
 
 Tool calls to prefer:
-- `inspect_codex_item` on both beliefs
-- `revise_belief` with `action: "forget"` and `successorId`
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on both beliefs
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "forget"` and `successorId`
 
 Related skills:
 - `resolve-near-duplicate-beliefs`

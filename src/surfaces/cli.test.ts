@@ -123,10 +123,10 @@ test('CLI JSON args and stdin, errors, clarification and usage exit codes', asyn
 	])
 		assert.equal((await invoke(args, '{"someValue":1}')).code, 0);
 	assert.equal((await invoke(['call', 'test_tool', '{"someValue":0}'])).code, 1);
-	assert.equal((await invoke(['call', 'test_tool', '{"someValue":3}'])).code, 3);
+	assert.equal((await invoke(['call', 'test_tool', '{"someValue":3}'])).code, 2);
 	for (const value of ['[]', '{}', '{"someValue":"wrong"}', '{']) {
 		const result = await invoke(['call', 'test_tool', value]);
-		assert.equal(result.code, 1);
+		assert.equal(result.code, 2);
 		assert.equal(result.opens, 0);
 		assert.ok(result.err);
 		assert.equal(result.out, '');
@@ -164,7 +164,7 @@ test('handler throws still close the context', async () => {
 			},
 		}),
 	});
-	assert.equal(code, 1);
+	assert.equal(code, 70);
 	assert.equal(closed, true);
 });
 
@@ -185,7 +185,7 @@ test('noun verb commands use schema parsing, help, JSON, quiet and stdin', async
 	for (const [value, code] of [
 		[1, 0],
 		[0, 1],
-		[3, 3],
+		[3, 2],
 	] as const)
 		assert.equal((await invoke(['tool', 'test', '--some-value', String(value)])).code, code);
 	const bad = await invoke(['tool', 'test', '--some-value=bad', '--json']);

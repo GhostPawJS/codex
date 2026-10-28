@@ -56,7 +56,7 @@ export function searchCodexToolHandler(
 					];
 		const warnings =
 			results.length === 0
-				? [toolWarning('empty_result', 'No beliefs matched the query.')]
+				? [toolWarning('no_match', 'No belief matches the query terms.')]
 				: queryTokenWeights(db, input.query).commonOnly
 					? [
 							toolWarning(
@@ -67,7 +67,7 @@ export function searchCodexToolHandler(
 					: undefined;
 		return toolSuccess(
 			results.length === 0
-				? 'No beliefs matched.'
+				? 'No matching beliefs.'
 				: `Found ${results.length} belief${results.length === 1 ? '' : 's'}.`,
 			{ results },
 			{

@@ -58,7 +58,7 @@ export function renderSkillMarkdown<TCtx>(
 	);
 	for (const tool of spec.tools) {
 		lines.push(
-			`## ${tool.name}`,
+			`## ${tool.name}${tool.cli ? ` (CLI: ${spec.bin} ${[tool.cli.noun, tool.cli.action ? tool.inputSchema.properties?.[tool.cli.action.property]?.enum?.[0] : tool.cli.verb].filter(Boolean).join(' ')})` : ''}`,
 			'',
 			tool.description,
 			'',

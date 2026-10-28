@@ -31,6 +31,9 @@ export async function runToolCli<TCtx>(
 	argv: string[],
 	options: ToolCliOptions<TCtx>,
 ): Promise<number> {
+	argv = argv.map((arg, i) =>
+		argv.slice(0, i).includes('--') ? arg : ({ '-q': '--quiet', '-j': '--json' }[arg] ?? arg),
+	);
 	const end = argv.indexOf('--');
 	if (
 		argv
@@ -199,15 +202,15 @@ export async function runToolCli<TCtx>(
 			input = values;
 		}
 	} catch (cause) {
-		return fail(`Invalid input: ${cause instanceof Error ? cause.message : String(cause)}`, 1);
+		return fail(`Invalid input: ${cause instanceof Error ? cause.message : String(cause)}`, 2);
 	}
 	const errors = validateInput(tool.inputSchema, input);
-	if (errors.length) return fail(errors.join('\n'), 1);
+	if (errors.length) return fail(errors.join('\n'), 2);
 	let context: TCtx;
 	try {
 		context = await options.openContext(ctxOptions);
 	} catch (cause) {
-		return fail(String(cause), 1);
+		return fail(String(cause), (cause as { code?: string }).code === 'not_found' ? 3 : 70);
 	}
 	try {
 		const result = await tool.handler(context, input as Record<string, unknown>);
@@ -218,10 +221,14 @@ export async function runToolCli<TCtx>(
 			'outcome' in result &&
 			result.outcome === 'needs_clarification'
 		)
-			return 3;
+			return 2;
+		const errorCode = (result as { error?: { code?: string } }).error?.code;
+		if (errorCode === 'invalid_input') return 2;
+		if (errorCode === 'not_found') return 3;
+		if (errorCode === 'conflict' || errorCode === 'version_mismatch') return 4;
 		return isErrorResult(result) ? 1 : 0;
 	} catch (cause) {
-		return fail(String(cause), 1);
+		return fail(String(cause), 70);
 	} finally {
 		await options.closeContext?.(context);
 	}

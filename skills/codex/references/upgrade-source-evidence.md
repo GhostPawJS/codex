@@ -1,8 +1,8 @@
 # Upgrade Source Evidence
 
 Primary tools:
-- `inspect_codex_item`
-- `revise_belief`
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`)
 
 Goal:
 - Strengthen a belief's foundation by recording when indirect evidence is replaced by direct evidence, preserving the promotion in lineage.
@@ -16,13 +16,13 @@ When not to use:
 - The belief is already at the strongest appropriate source level.
 
 Step-by-step sequence:
-1. Use `inspect_codex_item` on the current belief to see its claim, source, certainty, and evidence count.
-2. Use `revise_belief` with `action: "correct"` providing:
+1. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on the current belief to see its claim, source, certainty, and evidence count.
+2. Use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "correct"` providing:
    - The same claim text (unchanged).
    - The upgraded source (e.g., from `inferred` to `observed`, or from `distilled` to `explicit`).
    - Optionally a higher certainty if the stronger source warrants it.
 3. Verify the response shows the new belief with the upgraded source.
-4. Use `inspect_codex_item` on the new belief to confirm lineage shows the source promotion in the version diff.
+4. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on the new belief to confirm lineage shows the source promotion in the version diff.
 
 Validation checks:
 - The new belief has the upgraded source.
@@ -40,8 +40,8 @@ Tips and tricks:
 - Combine with calibration: if inferred beliefs are frequently upgraded, future ingestion should start at higher certainty.
 
 Tool calls to prefer:
-- `inspect_codex_item` before and after
-- `revise_belief` with `action: "correct"` and upgraded source
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) before and after
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "correct"` and upgraded source
 
 Related skills:
 - `correct-belief-lineage-honestly`

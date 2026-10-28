@@ -9,14 +9,14 @@ import type { BeliefRecord, BeliefRow, ForgetOptions } from './types.ts';
 export function forgetBelief(db: CodexDb, beliefId: number, options?: ForgetOptions): BeliefRecord {
 	const timestamp = resolveNow(options?.now);
 	return withTransaction(db, () => {
-		assertActiveBeliefExists(db, beliefId);
+		const current = assertActiveBeliefExists(db, beliefId);
 		if (options?.successorId !== undefined) {
 			assertActiveBeliefExists(db, options.successorId);
 		}
 		const next = options?.successorId ?? beliefId;
 		db.prepare(
-			`UPDATE beliefs SET superseded_by = ?, superseded_reason = 'forgotten', verified_at = ? WHERE id = ?`,
-		).run(next, timestamp, beliefId);
+			`UPDATE beliefs SET superseded_by = ?, superseded_reason = 'forgotten', verified_at = ?, provenance = ? WHERE id = ?`,
+		).run(next, timestamp, options?.provenance ?? current.provenance, beliefId);
 		const row = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(beliefId);
 		if (!row) {
 			throw new Error('Forgotten belief could not be reloaded.');

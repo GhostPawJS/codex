@@ -48,12 +48,18 @@ export function mergeBeliefs(
 						...beliefs.map((belief) => belief.certainty),
 					),
 			);
-			db.prepare('UPDATE beliefs SET evidence = ?, certainty = ? WHERE id = ?').run(
+			const provenance =
+				input.provenance ??
+				([successor, ...beliefs].every((belief) => belief.provenance === successor.provenance)
+					? successor.provenance
+					: null);
+			db.prepare('UPDATE beliefs SET evidence = ?, certainty = ?, provenance = ? WHERE id = ?').run(
 				evidence,
 				certainty,
+				provenance,
 				successor.id,
 			);
-			return mapBeliefRow({ ...successor, evidence, certainty }, timestamp);
+			return mapBeliefRow({ ...successor, evidence, certainty, provenance }, timestamp);
 		}
 		const primary = beliefs[0];
 		if (!primary) {
@@ -84,7 +90,10 @@ export function mergeBeliefs(
 				timestamp,
 				timestamp,
 				null,
-				input.provenance ?? null,
+				input.provenance ??
+					(beliefs.every((belief) => belief.provenance === primary.provenance)
+						? primary.provenance
+						: null),
 				null,
 				prepared.embedding,
 				prepared.embeddingNorm,

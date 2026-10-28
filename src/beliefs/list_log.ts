@@ -24,6 +24,7 @@ function classifyLogType(
 		if (mergeTargets.has(row.superseded_by)) return 'merged';
 		return 'revised';
 	}
+	if (row.deferred_until !== null) return 'deferred';
 	if (row.evidence > 1 && row.verified_at > row.created_at) return 'confirmed';
 	return 'remembered';
 }
@@ -31,7 +32,7 @@ function classifyLogType(
 export function listLog(db: CodexDb, limit = 20): LogRecord[] {
 	const mergeTargets = buildMergeTargetSet(db);
 	return db
-		.prepare('SELECT * FROM beliefs ORDER BY verified_at DESC, created_at DESC LIMIT ?')
+		.prepare('SELECT * FROM beliefs ORDER BY MAX(created_at, verified_at) DESC, id DESC LIMIT ?')
 		.all<BeliefRow & { superseded_reason: string | null }>(limit)
 		.map((row) => ({
 			id: row.id,

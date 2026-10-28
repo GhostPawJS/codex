@@ -85,7 +85,7 @@
     },
     {
       "name": "remember_belief",
-      "description": "Create a new belief from a claim, source, and category. Automatically detects nearby beliefs for duplicate awareness."
+      "description": "Capture a belief from a claim, source, and category. Reuses active normalized duplicates unless allowDuplicate is set, and detects nearby beliefs."
     },
     {
       "name": "revise_belief",

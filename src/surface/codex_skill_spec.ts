@@ -32,7 +32,7 @@ irm https://raw.githubusercontent.com/GhostPawJS/codex/main/install.ps1 | iex
 Run tools as \`ghostpaw-codex ...\`; use \`~/.local/bin/ghostpaw-codex\` if it is not on PATH.`,
 	cheatSheet: `## Quick reference
 
-Search before adding: \`ghostpaw-codex search "deployment schedule"\`.
+Search before adding with \`search_codex\` (CLI: \`ghostpaw-codex search\`): \`ghostpaw-codex search "deployment schedule"\`.
 
 - \`ghostpaw-codex belief add "Deploys go out on Tuesdays." --source explicit --category fact\`
 - \`ghostpaw-codex alias add <term> <alias>\` adds an optional directed query alias.
@@ -41,12 +41,12 @@ Search before adding: \`ghostpaw-codex search "deployment schedule"\`.
 - \`ghostpaw-codex belief correct <id> --claim "Deploys go out on Wednesdays."\`
 - \`ghostpaw-codex belief forget <id>\`
 - \`ghostpaw-codex belief defer <id> --deferred-until +7d\`
-- \`ghostpaw-codex belief merge <id> <id>\`
+- \`ghostpaw-codex belief merge <id> <id> --claim "Combined claim"\`
 - \`ghostpaw-codex review flags|status|log|trends\`
 - \`--json\` prints full results; \`--quiet\` prints ids only.
 - \`ghostpaw-codex skill --list\` lists guides; \`ghostpaw-codex skill <guide>\` reads one.
 
-Exit codes: 0 success, 1 operation failure, 2 usage, 3 clarification or missing belief, 4 conflict, 70 internal failure.
+Exit codes: 0 success, 1 operation failure, 2 usage, 3 missing belief, 4 conflict, 70 internal failure.
 
 Database: \`~/.ghostpaw/codex.db\`. Override with \`--db <path>\` or \`GHOSTPAW_CODEX_DB\`.`,
 	tools: codexSurfaceTools,

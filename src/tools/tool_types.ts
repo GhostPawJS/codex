@@ -7,7 +7,12 @@ export type ToolErrorCode =
 	| 'not_found'
 	| 'system_error';
 export type ToolErrorKind = 'domain' | 'protocol' | 'system';
-export type ToolWarningCode = 'empty_result' | 'partial_match' | 'unchanged';
+export type ToolWarningCode =
+	| 'empty_result'
+	| 'partial_match'
+	| 'unchanged'
+	| 'no_match'
+	| 'duplicate';
 export type ToolClarificationCode =
 	| 'ambiguous_action'
 	| 'ambiguous_target'

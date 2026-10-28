@@ -1,9 +1,9 @@
 # Capture Beliefs Well
 
 Primary tools:
-- `search_codex`
-- `remember_belief`
-- `revise_belief`
+- `search_codex` (CLI: `ghostpaw-codex search`)
+- `remember_belief` (CLI: `ghostpaw-codex belief add`)
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`)
 
 Goal:
 - Add new beliefs that are atomic, correctly classified, and not duplicates of existing knowledge.
@@ -13,16 +13,16 @@ When to use:
 - A user states a preference, a fact is observed, a procedure is distilled, or a conclusion is inferred.
 
 When not to use:
-- The information reinforces something already held — use `revise_belief` with `confirm` instead.
-- The information corrects something already held — use `revise_belief` with `correct` instead.
+- The information reinforces something already held — use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `confirm` instead.
+- The information corrects something already held — use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `correct` instead.
 
 Step-by-step sequence:
 1. Split compound claims into separate atomic propositions. Each belief should carry one testable assertion.
 2. Choose the strongest honest source: `explicit` if stated, `observed` if seen, `distilled` if extracted, `inferred` if concluded.
 3. Choose the narrowest fitting category: `preference`, `fact`, `procedure`, `capability`, or `custom`.
-4. Use `search_codex` with the candidate claim as the query to check for existing beliefs on the same topic.
-5. If a strong match exists: use `revise_belief` with `confirm` (same meaning) or `correct` (updated meaning) instead of creating a duplicate.
-6. If no match exists: use `remember_belief` with the claim, source, and category.
+4. Use `search_codex` (CLI: `ghostpaw-codex search`) with the candidate claim as the query to check for existing beliefs on the same topic.
+5. If a strong match exists: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `confirm` (same meaning) or `correct` (updated meaning) instead of creating a duplicate.
+6. If no match exists: use `remember_belief` (CLI: `ghostpaw-codex belief add`) with the claim, source, and category.
 7. Check the `partial_match` warning in the response. If nearby beliefs are flagged, inspect them before proceeding.
 8. If the proximity match is a genuine near-duplicate, consider merging or dismissing the pair immediately.
 
@@ -43,9 +43,9 @@ Tips and tricks:
 - After capturing, the `next` hints in the result guide you to inspect the new belief or search for overlap.
 
 Tool calls to prefer:
-- `search_codex` before capture
-- `remember_belief` for the actual creation
-- `revise_belief` with `confirm` or `correct` when an existing belief already covers the topic
+- `search_codex` (CLI: `ghostpaw-codex search`) before capture
+- `remember_belief` (CLI: `ghostpaw-codex belief add`) for the actual creation
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `confirm` or `correct` when an existing belief already covers the topic
 
 Related skills:
 - `search-and-retrieve-beliefs`

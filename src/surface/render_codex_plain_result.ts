@@ -55,11 +55,11 @@ export function renderCodexPlainResult(
 	const date = (value: number) => {
 		const d = new Date(value);
 		const pad = (n: number) => String(n).padStart(2, '0');
-		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())} ${new Intl.DateTimeFormat(undefined, { timeZoneName: 'short' }).formatToParts(d).find((part) => part.type === 'timeZoneName')?.value ?? ''}`;
 	};
 	const claim = (text: string) => text.replace(/\s+/g, ' ').trim();
 	const line = (belief: BeliefRecord & { reasonCodes?: string[] }) =>
-		`${belief.id}  ${claim(belief.claim)}  [${belief.certainty.toFixed(2)} ${belief.source} ${belief.strength}]${belief.reasonCodes ? ` flags: ${belief.reasonCodes.join(',')}` : ''}`;
+		`${belief.id}  ${claim(belief.claim)}  [${belief.certainty.toFixed(2)} ${belief.source} ${belief.strength}]${belief.provenance ? ` provenance: ${belief.provenance}` : ''}${belief.reasonCodes ? ` flags: ${belief.reasonCodes.join(',')}` : ''}`;
 	const list =
 		data.results ??
 		(Array.isArray(data.payload?.data)
@@ -100,6 +100,9 @@ export function renderCodexPlainResult(
 					? claim(belief.claim)
 					: String(belief[key as keyof BeliefRecord]),
 		]);
+		if (belief.provenance) pairs.push(['provenance', belief.provenance]);
+		if (belief.supersededBy !== null)
+			pairs.push(['status', `superseded by ${belief.supersededBy}`]);
 		pairs.push(['created', date(belief.createdAt)]);
 		if (data.lineage) pairs.push(['lineage', data.lineage.map((entry) => entry.id).join(', ')]);
 		if (data.detail?.deferredUntil) pairs.push(['deferred until', date(data.detail.deferredUntil)]);

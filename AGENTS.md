@@ -58,3 +58,7 @@ Release with `npm run release:patch` or `npm run release:minor`; the tag
 triggers npm trusted publishing with provenance, the GitHub release with
 `server.mcpb`, and the MCP Registry update.
 Maintainers run releases after review; leave task changes uncommitted.
+
+CLI values are literal, including leading `@`. Use JSON stdin (`-`) for long
+input. Belief additions reuse active normalized duplicates unless
+`--allow-duplicate` is set; CLI merges require `--claim`.

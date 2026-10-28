@@ -27,7 +27,7 @@ Run tools as `ghostpaw-codex ...`; use `~/.local/bin/ghostpaw-codex` if it is no
 
 ## Quick reference
 
-Search before adding: `ghostpaw-codex search "deployment schedule"`.
+Search before adding with `search_codex` (CLI: `ghostpaw-codex search`): `ghostpaw-codex search "deployment schedule"`.
 
 - `ghostpaw-codex belief add "Deploys go out on Tuesdays." --source explicit --category fact`
 - `ghostpaw-codex alias add <term> <alias>` adds an optional directed query alias.
@@ -36,12 +36,12 @@ Search before adding: `ghostpaw-codex search "deployment schedule"`.
 - `ghostpaw-codex belief correct <id> --claim "Deploys go out on Wednesdays."`
 - `ghostpaw-codex belief forget <id>`
 - `ghostpaw-codex belief defer <id> --deferred-until +7d`
-- `ghostpaw-codex belief merge <id> <id>`
+- `ghostpaw-codex belief merge <id> <id> --claim "Combined claim"`
 - `ghostpaw-codex review flags|status|log|trends`
 - `--json` prints full results; `--quiet` prints ids only.
 - `ghostpaw-codex skill --list` lists guides; `ghostpaw-codex skill <guide>` reads one.
 
-Exit codes: 0 success, 1 operation failure, 2 usage, 3 clarification or missing belief, 4 conflict, 70 internal failure.
+Exit codes: 0 success, 1 operation failure, 2 usage, 3 missing belief, 4 conflict, 70 internal failure.
 
 Database: `~/.ghostpaw/codex.db`. Override with `--db <path>` or `GHOSTPAW_CODEX_DB`.
 
@@ -55,7 +55,7 @@ CLI: `ghostpaw-codex call <tool> '<JSON object>'` or `ghostpaw-codex <tool> --pa
 
 Inspect schemas with `ghostpaw-codex describe <tool>`. Use `--db <path>` to select a database.
 
-## search_codex
+## search_codex (CLI: ghostpaw-codex search)
 
 Search active beliefs by natural language query. Returns ranked matches with recall scores and transparency metadata.
 
@@ -75,7 +75,7 @@ Read-only.
 
 Example: `ghostpaw-codex call search_codex '{"query":"deployment schedule"}'`
 
-## review_codex
+## review_codex (CLI: ghostpaw-codex review)
 
 Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, or trends for time-based patterns.
 
@@ -93,7 +93,7 @@ Read-only.
 
 Example: `ghostpaw-codex call review_codex '{"view":"flags"}'`
 
-## inspect_codex_item
+## inspect_codex_item (CLI: ghostpaw-codex belief show)
 
 Inspect one belief in full detail: certainty, freshness, strength, source, category, lineage chain, proximity to similar beliefs, and version diff when applicable.
 
@@ -109,9 +109,9 @@ Read-only.
 
 Example: `ghostpaw-codex call inspect_codex_item '{"beliefId":1}'`
 
-## remember_belief
+## remember_belief (CLI: ghostpaw-codex belief add)
 
-Create a new belief from a claim, source, and category. Automatically detects nearby beliefs for duplicate awareness.
+Capture a belief from a claim, source, and category. Reuses active normalized duplicates unless allowDuplicate is set, and detects nearby beliefs.
 
 Use when: Use this when a new proposition should enter the codex. Always search first to check whether the belief already exists — prefer confirming or correcting an existing belief over creating a duplicate.
 
@@ -126,10 +126,11 @@ Writes: writes_state.
 | category | string | yes | preference, fact, procedure, capability, custom. What kind of claim. |
 | certainty | number | no | Optional initial certainty 0–1. |
 | provenance | string | no | Optional origin reference. |
+| allowDuplicate | boolean | no | Create a separate belief even if the normalized claim exists. |
 
 Example: `ghostpaw-codex call remember_belief '{"claim":"Deploys go out on Tuesdays.","source":"explicit","category":"procedure"}'`
 
-## revise_belief
+## revise_belief (CLI: ghostpaw-codex belief confirm)
 
 Revise an existing belief: confirm it still holds, correct it with a new claim, merge multiple beliefs into one, forget it from active recall, or defer its next flag review.
 
@@ -146,14 +147,15 @@ Writes: writes_state.
 | beliefIds | array of integer | no | Belief ids for merge. |
 | claim | string | no | Replacement or merged claim. |
 | successorId | integer | no | Existing active successor belief id. |
-| deferredUntil | integer | no | Future timestamp for deferred review. |
+| deferredUntil | integer | no | Deferred review date: tomorrow, +3d, YYYY-MM-DD, DD.MM.YYYY, ISO with zone, or epoch ms. Calendar dates use the process time zone. |
 | source | string | no | explicit, observed, distilled, inferred. Optional replacement source. |
 | category | string | no | preference, fact, procedure, capability, custom. Optional replacement category. |
 | certainty | number | no | Optional certainty override. |
+| provenance | string | no | Optional origin reference; preserves the current origin when omitted. |
 
 Example: `ghostpaw-codex call revise_belief '{"action":"confirm","beliefId":1}'`
 
-## retire_belief
+## retire_belief (CLI: ghostpaw-codex belief retire)
 
 Permanently delete a belief and its entire lineage chain. No trace remains. This is for privacy and hard erasure, not normal revision.
 
@@ -169,7 +171,7 @@ Writes: writes_state.
 
 Example: `ghostpaw-codex call retire_belief '{"beliefId":1}'`
 
-## dismiss_proximity
+## dismiss_proximity (CLI: ghostpaw-codex proximity dismiss)
 
 Record that two beliefs are not meaningfully related despite proximity detection. Uses exponential backoff — the pair will resurface less frequently with each dismissal.
 

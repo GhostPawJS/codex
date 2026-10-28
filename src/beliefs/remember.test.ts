@@ -29,7 +29,12 @@ describe('remember', () => {
 		);
 		const result = remember(
 			db,
-			{ claim: 'GraphQL powers the API', source: 'observed', category: 'fact' },
+			{
+				claim: 'GraphQL powers the API',
+				source: 'observed',
+				category: 'fact',
+				allowDuplicate: true,
+			},
 			{ now: 2 },
 		);
 		strictEqual(Array.isArray(result.proximity), true);
@@ -88,7 +93,7 @@ describe('remember', () => {
 		const db = await createInitializedCodexDb();
 		const result = remember(
 			db,
-			{ claim: 'Max certainty', source: 'explicit', category: 'fact', certainty: 1.5 },
+			{ claim: 'Max certainty', source: 'explicit', category: 'fact', certainty: 1 },
 			{ now: 1 },
 		);
 		strictEqual(result.certainty, 0.99);
@@ -103,7 +108,7 @@ describe('remember', () => {
 		);
 		const b = remember(
 			db,
-			{ claim: 'Same claim', source: 'observed', category: 'fact' },
+			{ claim: 'Same claim', source: 'observed', category: 'fact', allowDuplicate: true },
 			{ now: 2 },
 		);
 		strictEqual(a.id !== b.id, true);

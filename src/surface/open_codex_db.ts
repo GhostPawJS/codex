@@ -28,7 +28,7 @@ export async function openCodexDb(path: string): Promise<CodexDb> {
 	if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
 	const db = new sqlite.DatabaseSync(path);
 	try {
-		db.exec('PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;');
+		db.exec('PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL;');
 		const context = db as unknown as CodexDb;
 		initCodexTables(context);
 		return context;

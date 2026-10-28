@@ -27,7 +27,19 @@ export function remember(
 	const prepared = prepareBeliefStorage(input.claim);
 	const certainty = clampCertainty(input.certainty ?? sourceInitialCertainty(input.source));
 	const snapshot = currentProximitySnapshot(db);
+	let duplicate = false;
 	const record = withTransaction(db, () => {
+		if (!input.allowDuplicate) {
+			const existing = db
+				.prepare(
+					'SELECT * FROM beliefs WHERE claim_normalized = ? AND superseded_by IS NULL ORDER BY id LIMIT 1',
+				)
+				.get<BeliefRow>(prepared.claimNormalized);
+			if (existing) {
+				duplicate = true;
+				return mapBeliefRow(existing, timestamp);
+			}
+		}
 		const result = db
 			.prepare(
 				`
@@ -62,6 +74,7 @@ export function remember(
 		}
 		return mapBeliefRow(row, timestamp);
 	});
+	if (duplicate) return { ...record, proximity: [], duplicate: true };
 	appendProximityVector(db, snapshot, record.id, prepared.embedding);
 	const proximity =
 		options?.skipProximity === true ? [] : listBeliefProximity(db, record.id, 3, 0.7, timestamp);

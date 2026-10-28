@@ -373,7 +373,7 @@
 	},
 	".:exports.skills.searchAndRetrieveBeliefsSkill.content": {
 		"kind": "string",
-		"value": "# Search And Retrieve Beliefs\n\nPrimary tools:\n- `search_codex`\n- `inspect_codex_item`\n- `review_codex`\n\nGoal:\n- Retrieve current beliefs about a topic efficiently, using ranked recall instead of loading everything.\n\nWhen to use:\n- You need to know what the Codex already holds about a topic before acting.\n- You want to check whether a belief already exists before creating a new one.\n- A user or agent asks a question that stored beliefs might answer.\n\nWhen not to use:\n- You already have a specific belief id and just need its detail — go straight to `inspect_codex_item`.\n- You need a structured maintenance surface — use `review_codex` instead.\n\nStep-by-step sequence:\n1. Use `search_codex` with a descriptive natural-language query. Add `category` or `source` filters when you know the belief type.\n2. If the result contains an `empty_result` warning, the Codex has nothing on this topic. Consider whether to capture a new belief or try a broader query.\n3. For each top candidate, read the recall score, certainty, evidence count, and strength tier to judge trustworthiness.\n4. Use `inspect_codex_item` on the highest-ranked result when you need full detail: lineage, proximity, version diff.\n5. Only drill into lineage or proximity when the detail reveals supersession history or nearby conflicts that affect the decision.\n6. If the search results feel incomplete, use `review_codex` with `view: \"status\"` to see how large the codex is and whether the query topic is underrepresented.\n\nValidation checks:\n- The recall results include beliefs you expected to find.\n- High-confidence well-confirmed beliefs rank above single-evidence inferred ones.\n- Inspected detail matches what the recall score suggested about the belief's reliability.\n\nPitfalls:\n- Do not rely on search alone when the codex is empty or very small — check status first.\n- Do not skip inspection when a recalled belief is about to drive an important decision.\n- Do not assume recall results are exhaustive; the scoring threshold filters weak matches.\n\nTips and tricks:\n- Use `minScore: 0` during exploration to see everything, then tighten the threshold for production queries.\n- Category-filtered search is powerful for use cases like retrieving all active preferences or procedures.\n- The `next` hints in the search result suggest which beliefs to inspect first.\n\nTool calls to prefer:\n- `search_codex` for discovery\n- `inspect_codex_item` for exact detail\n- `review_codex` with `status` when context about overall codex size is needed\n\nRelated skills:\n- `capture-beliefs-well`\n- `handle-ambiguous-belief-updates`"
+		"value": "# Search And Retrieve Beliefs\n\nPrimary tools:\n- `search_codex`\n- `inspect_codex_item`\n- `review_codex`\n\nGoal:\n- Retrieve current beliefs about a topic efficiently, using ranked recall instead of loading everything.\n\nWhen to use:\n- You need to know what the Codex already holds about a topic before acting.\n- You want to check whether a belief already exists before creating a new one.\n- A user or agent asks a question that stored beliefs might answer.\n\nWhen not to use:\n- You already have a specific belief id and just need its detail — go straight to `inspect_codex_item`.\n- You need a structured maintenance surface — use `review_codex` instead.\n\nStep-by-step sequence:\n1. Use `search_codex` with a descriptive natural-language query. Add `category` or `source` filters when you know the belief type.\n2. If the result contains an `no_match` warning, the Codex has nothing on this topic. Consider whether to capture a new belief or try a broader query.\n3. For each top candidate, read the recall score, certainty, evidence count, and strength tier to judge trustworthiness.\n4. Use `inspect_codex_item` on the highest-ranked result when you need full detail: lineage, proximity, version diff.\n5. Only drill into lineage or proximity when the detail reveals supersession history or nearby conflicts that affect the decision.\n6. If the search results feel incomplete, use `review_codex` with `view: \"status\"` to see how large the codex is and whether the query topic is underrepresented.\n\nValidation checks:\n- The recall results include beliefs you expected to find.\n- High-confidence well-confirmed beliefs rank above single-evidence inferred ones.\n- Inspected detail matches what the recall score suggested about the belief's reliability.\n\nPitfalls:\n- Do not rely on search alone when the codex is empty or very small — check status first.\n- Do not skip inspection when a recalled belief is about to drive an important decision.\n- Do not assume recall results are exhaustive; the scoring threshold filters weak matches.\n\nTips and tricks:\n- Use `minScore: 0` during exploration to see everything, then tighten the threshold for production queries.\n- Category-filtered search is powerful for use cases like retrieving all active preferences or procedures.\n- The `next` hints in the search result suggest which beliefs to inspect first.\n\nTool calls to prefer:\n- `search_codex` for discovery\n- `inspect_codex_item` for exact detail\n- `review_codex` with `status` when context about overall codex size is needed\n\nRelated skills:\n- `capture-beliefs-well`\n- `handle-ambiguous-belief-updates`"
 	},
 	".:exports.skills.searchAndRetrieveBeliefsSkill.description": {
 		"kind": "string",
@@ -683,7 +683,7 @@
 	},
 	".:exports.tools.rememberBeliefTool.description": {
 		"kind": "string",
-		"value": "Create a new belief from a claim, source, and category. Automatically detects nearby beliefs for duplicate awareness."
+		"value": "Capture a belief from a claim, source, and category. Reuses active normalized duplicates unless allowDuplicate is set, and detects nearby beliefs."
 	},
 	".:exports.tools.rememberBeliefTool.handler": {
 		"kind": "function"
@@ -700,7 +700,7 @@
 	},
 	".:exports.tools.rememberBeliefTool.outputDescription": {
 		"kind": "string",
-		"value": "The created belief record with derived state, plus proximity matches showing nearby existing beliefs that may overlap."
+		"value": "The created or reused belief record with derived state, plus proximity matches showing nearby existing beliefs that may overlap."
 	},
 	".:exports.tools.rememberBeliefTool.readOnly": {
 		"kind": "boolean"
@@ -2478,7 +2478,7 @@
 	},
 	".:public.codexTools": {
 		"kind": "value",
-		"type": "(CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]",
+		"type": "(CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]",
 		"references": {
 			"CodexToolDefinition": ".:public.CodexToolDefinition",
 			"DismissProximityToolData": ".:public.DismissProximityToolData",
@@ -2522,6 +2522,10 @@
 				"type": "number | undefined",
 				"optional": true
 			},
+			"provenance": {
+				"type": "string | undefined",
+				"optional": true
+			},
 			"source": {
 				"type": "\"explicit\" | \"observed\" | \"distilled\" | \"inferred\" | undefined",
 				"optional": true
@@ -2531,7 +2535,7 @@
 				"optional": true
 			}
 		},
-		"definition": "interface ReviseBeliefToolInput { action: 'confirm' | 'correct' | 'merge' | 'forget' | 'defer'; beliefId?: number; beliefIds?: number[]; claim?: string; successorId?: number; deferredUntil?: number; source?: (typeof BELIEF_SOURCES)[number]; category?: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; }"
+		"definition": "interface ReviseBeliefToolInput { action: 'confirm' | 'correct' | 'merge' | 'forget' | 'defer'; beliefId?: number; beliefIds?: number[]; claim?: string; successorId?: number; deferredUntil?: number; source?: (typeof BELIEF_SOURCES)[number]; category?: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; }"
 	},
 	".:public.CodexValidationError": {
 		"kind": "class",
@@ -3374,7 +3378,7 @@
 	},
 	".:public.getCodexToolByName": {
 		"kind": "value",
-		"type": "(name: string) => CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData> | null",
+		"type": "(name: string) => CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData> | null",
 		"references": {
 			"CodexToolDefinition": ".:public.CodexToolDefinition",
 			"DismissProximityToolData": ".:public.DismissProximityToolData",
@@ -3751,7 +3755,7 @@
 	},
 	".:public.listCodexToolDefinitions": {
 		"kind": "value",
-		"type": "() => (CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]",
+		"type": "() => (CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]",
 		"references": {
 			"CodexToolDefinition": ".:public.CodexToolDefinition",
 			"DismissProximityToolData": ".:public.DismissProximityToolData",
@@ -4009,7 +4013,7 @@
 				"optional": false
 			}
 		},
-		"definition": "type LogRecordType = 'remembered' | 'confirmed' | 'revised' | 'forgotten' | 'merged';"
+		"definition": "type LogRecordType = 'deferred' | 'remembered' | 'confirmed' | 'revised' | 'forgotten' | 'merged';"
 	},
 	".:public.MergeBeliefsInput": {
 		"kind": "type",
@@ -4360,6 +4364,10 @@
 		"kind": "type",
 		"type": "RememberBeliefInput",
 		"members": {
+			"allowDuplicate": {
+				"type": "boolean | undefined",
+				"optional": true
+			},
 			"category": {
 				"type": "\"preference\" | \"fact\" | \"procedure\" | \"capability\" | \"custom\"",
 				"optional": false
@@ -4381,7 +4389,7 @@
 				"optional": false
 			}
 		},
-		"definition": "interface RememberBeliefInput { claim: string; source: BeliefSource; category: BeliefCategory; certainty?: number | undefined; provenance?: string | null | undefined; }",
+		"definition": "interface RememberBeliefInput { allowDuplicate?: boolean; claim: string; source: BeliefSource; category: BeliefCategory; certainty?: number | undefined; provenance?: string | null | undefined; }",
 		"references": {
 			"BeliefCategory": ".:public.BeliefCategory",
 			"BeliefSource": ".:public.BeliefSource"
@@ -4389,7 +4397,7 @@
 	},
 	".:public.rememberBeliefTool": {
 		"kind": "value",
-		"type": "CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; }, RememberBeliefToolData>",
+		"type": "CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData>",
 		"references": {
 			"CodexToolDefinition": ".:public.CodexToolDefinition",
 			"RememberBeliefToolData": ".:public.RememberBeliefToolData"
@@ -4437,6 +4445,10 @@
 				"type": "number | null",
 				"optional": false
 			},
+			"duplicate": {
+				"type": "boolean | undefined",
+				"optional": true
+			},
 			"evidence": {
 				"type": "number",
 				"optional": false
@@ -4482,7 +4494,7 @@
 				"optional": false
 			}
 		},
-		"definition": "interface RememberResult extends BeliefRecord { proximity: ProximityResultItem[]; }",
+		"definition": "interface RememberResult extends BeliefRecord { duplicate?: boolean; proximity: ProximityResultItem[]; }",
 		"references": {
 			"BeliefRecord": ".:public.BeliefRecord",
 			"ProximityResultItem": ".:public.ProximityResultItem"
@@ -4490,7 +4502,7 @@
 	},
 	".:public.rememberBeliefToolHandler": {
 		"kind": "value",
-		"type": "(db: CodexDb, input: { claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; }) => RememberBeliefToolResult",
+		"type": "(db: CodexDb, input: { claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }) => RememberBeliefToolResult",
 		"references": {
 			"CodexDb": ".:public.CodexDb",
 			"RememberBeliefToolResult": ".:public.RememberBeliefToolResult"
@@ -7997,7 +8009,7 @@
 	},
 	".:public.tools.codexTools": {
 		"kind": "value",
-		"type": "(CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]"
+		"type": "(CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]"
 	},
 	".:public.tools.defineCodexTool": {
 		"kind": "value",
@@ -8073,7 +8085,7 @@
 	},
 	".:public.tools.getCodexToolByName": {
 		"kind": "value",
-		"type": "(name: string) => CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData> | null"
+		"type": "(name: string) => CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData> | null"
 	},
 	".:public.tools.inspectCodexItemTool": {
 		"kind": "value",
@@ -8405,7 +8417,7 @@
 	},
 	".:public.tools.listCodexToolDefinitions": {
 		"kind": "value",
-		"type": "() => (CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]"
+		"type": "() => (CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\"; limit?: number; now?: number; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]"
 	},
 	".:public.tools.literalSchema": {
 		"kind": "value",
@@ -8429,7 +8441,7 @@
 	},
 	".:public.tools.rememberBeliefTool": {
 		"kind": "value",
-		"type": "CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; }, RememberBeliefToolData>"
+		"type": "CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData>"
 	},
 	".:public.tools.RememberBeliefToolData": {
 		"kind": "type",
@@ -8447,7 +8459,7 @@
 	},
 	".:public.tools.rememberBeliefToolHandler": {
 		"kind": "value",
-		"type": "(db: CodexDb, input: { claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; }) => RememberBeliefToolResult"
+		"type": "(db: CodexDb, input: { claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }) => RememberBeliefToolResult"
 	},
 	".:public.tools.rememberBeliefToolName": {
 		"kind": "value",
@@ -11758,7 +11770,7 @@
 				"optional": false
 			}
 		},
-		"definition": "type ToolWarningCode = 'empty_result' | 'partial_match' | 'unchanged';"
+		"definition": "type ToolWarningCode = 'empty_result' | 'partial_match' | 'unchanged' | 'no_match' | 'duplicate';"
 	},
 	".:public.translateToolError": {
 		"kind": "value",
@@ -13407,6 +13419,10 @@
 		"kind": "type",
 		"type": "RememberBeliefInput",
 		"members": {
+			"allowDuplicate": {
+				"type": "boolean | undefined",
+				"optional": true
+			},
 			"category": {
 				"type": "\"preference\" | \"fact\" | \"procedure\" | \"capability\" | \"custom\"",
 				"optional": false
@@ -15102,7 +15118,7 @@
 		"type": "SurfaceTool<TCtx>",
 		"members": {
 			"cli": {
-				"type": "{ noun?: string; verb: string; positionals?: string[]; valueParsers?: Record<string, (raw: string) => unknown>; action?: { property: string; verbs?: Record<string, string>; positionals?: Record<string, string[]>; flags?: Record<string, string[]>; }; } | undefined",
+				"type": "{ noun?: string; verb: string; positionals?: string[]; valueParsers?: Record<string, (raw: string) => unknown>; fileArgs?: readonly string[]; action?: { property: string; verbs?: Record<string, string>; positionals?: Record<string, string[]>; flags?: Record<string, string[]>; }; } | undefined",
 				"optional": true
 			},
 			"description": {
@@ -15146,7 +15162,7 @@
 				"optional": true
 			}
 		},
-		"definition": "interface SurfaceTool<TCtx> { name: string; cli?: { noun?: string; verb: string; positionals?: string[]; valueParsers?: Record<string, (raw: string) => unknown>; action?: { property: string; verbs?: Record<string, string>; positionals?: Record<string, string[]>; flags?: Record<string, string[]>; }; }; example?: Record<string, unknown> | undefined; title?: string; description: string; inputSchema: JsonSchema & { type: 'object'; }; whenToUse?: string; whenNotToUse?: string; readOnly?: boolean; sideEffects?: string; handler(ctx: TCtx, input: Record<string, unknown>): unknown | Promise<unknown>; }",
+		"definition": "interface SurfaceTool<TCtx> { name: string; cli?: { noun?: string; verb: string; positionals?: string[]; valueParsers?: Record<string, (raw: string) => unknown>; fileArgs?: readonly string[]; action?: { property: string; verbs?: Record<string, string>; positionals?: Record<string, string[]>; flags?: Record<string, string[]>; }; }; example?: Record<string, unknown> | undefined; title?: string; description: string; inputSchema: JsonSchema & { type: 'object'; }; whenToUse?: string; whenNotToUse?: string; readOnly?: boolean; sideEffects?: string; handler(ctx: TCtx, input: Record<string, unknown>): unknown | Promise<unknown>; }",
 		"references": {
 			"JsonSchema": "./mcp:public.JsonSchema",
 			"TCtx": "./mcp:public.SurfaceTool.types.TCtx"

@@ -1,10 +1,10 @@
 # Pre-Register Beliefs Before Decisions
 
 Primary tools:
-- `remember_belief`
-- `revise_belief`
-- `review_codex`
-- `inspect_codex_item`
+- `remember_belief` (CLI: `ghostpaw-codex belief add`)
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`)
+- `review_codex` (CLI: `ghostpaw-codex review`)
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
 
 Goal:
 - Record what you believe before you know the outcome, enabling honest calibration and preventing hindsight bias.
@@ -19,14 +19,14 @@ When not to use:
 - The belief does not have a clear resolution point in the future.
 
 Step-by-step sequence:
-1. Use `remember_belief` with the prediction claim, an honest certainty reflecting your current confidence, and `provenance` noting what outcome will verify this.
-2. Use `revise_belief` with `action: "defer"` and `deferUntil` set to the expected outcome date.
+1. Use `remember_belief` (CLI: `ghostpaw-codex belief add`) with the prediction claim, an honest certainty reflecting your current confidence, and `provenance` noting what outcome will verify this.
+2. Use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "defer"` and `deferUntil` set to the expected outcome date.
 3. When the outcome arrives and the belief resurfaces in flags:
-   a. Use `review_codex` with `view: "flags"` to find the resurfaced belief.
-   b. Use `inspect_codex_item` to see the original version and its certainty.
-   c. If the belief held: use `revise_belief` with `action: "confirm"`.
-   d. If the belief was wrong: use `revise_belief` with `action: "correct"` with what actually happened.
-4. Use `review_codex` with `view: "trends"` to check whether the calibration pattern improved.
+   a. Use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "flags"` to find the resurfaced belief.
+   b. Use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) to see the original version and its certainty.
+   c. If the belief held: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "confirm"`.
+   d. If the belief was wrong: use `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `action: "correct"` with what actually happened.
+4. Use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "trends"` to check whether the calibration pattern improved.
 
 Validation checks:
 - The pre-registered belief was entered before the outcome was known.
@@ -46,9 +46,9 @@ Tips and tricks:
 - Multiple pre-registered beliefs can be entered for competing hypotheses about the same outcome.
 
 Tool calls to prefer:
-- `remember_belief` with honest certainty and provenance
-- `revise_belief` with `defer` initially, then `confirm` or `correct` at resolution
-- `review_codex` with `trends` for calibration tracking
+- `remember_belief` (CLI: `ghostpaw-codex belief add`) with honest certainty and provenance
+- `revise_belief` (CLI: `ghostpaw-codex belief confirm|correct|merge|forget|defer`) with `defer` initially, then `confirm` or `correct` at resolution
+- `review_codex` (CLI: `ghostpaw-codex review`) with `trends` for calibration tracking
 
 Related skills:
 - `defer-beliefs-pending-outcomes`

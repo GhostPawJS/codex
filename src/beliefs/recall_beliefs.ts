@@ -14,11 +14,29 @@ function tokenizeQuery(query: string): string[] {
 	return normalizeClaim(query).split(/\s+/).filter(Boolean);
 }
 
+function nearToken(a: string, b: string): boolean {
+	if (a.length < 4 || b.length < 4) return false;
+	const bound = Math.min(2, Math.floor(Math.max(a.length, b.length) / 4));
+	if (Math.abs(a.length - b.length) > bound) return false;
+	let previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+	for (let i = 1; i <= a.length; i++) {
+		const current = [i];
+		for (let j = 1; j <= b.length; j++)
+			current[j] = Math.min(
+				(current[j - 1] ?? 0) + 1,
+				(previous[j] ?? 0) + 1,
+				(previous[j - 1] ?? 0) + (a[i - 1] === b[j - 1] ? 0 : 1),
+			);
+		previous = current;
+	}
+	return (previous[b.length] ?? Infinity) <= bound;
+}
+
 function safeFtsQuery(db: CodexDb, ftsExpr: string, limit: number): { id: number }[] {
 	try {
 		return db
 			.prepare(
-				`SELECT rowid AS id FROM beliefs_fts WHERE beliefs_fts MATCH ? ORDER BY bm25(beliefs_fts) LIMIT ?`,
+				`SELECT beliefs_fts.rowid AS id FROM beliefs_fts CROSS JOIN beliefs ON beliefs.id = beliefs_fts.rowid WHERE beliefs_fts MATCH ? AND beliefs.superseded_by IS NULL ORDER BY bm25(beliefs_fts) LIMIT ?`,
 			)
 			.all<{ id: number }>(ftsExpr, limit);
 	} catch {
@@ -53,9 +71,7 @@ function fetchLexicalCandidateIds(
 function loadActiveBeliefRows(db: CodexDb, ids?: readonly number[]): BeliefRow[] {
 	if (!ids) {
 		return db
-			.prepare(
-				'SELECT * FROM beliefs WHERE superseded_by IS NULL ORDER BY verified_at DESC LIMIT 300',
-			)
+			.prepare('SELECT * FROM beliefs WHERE superseded_by IS NULL ORDER BY verified_at DESC')
 			.all<BeliefRow>();
 	}
 	const placeholders = ids.map(() => '?').join(', ');
@@ -89,7 +105,9 @@ export function recall(
 	);
 	let rows =
 		lexicalRanks.size === 0
-			? loadActiveBeliefRows(db)
+			? loadActiveBeliefRows(db).filter((row) =>
+					tokens.some((token) => tokenizeQuery(row.claim).some((word) => nearToken(token, word))),
+				)
 			: loadActiveBeliefRows(db, [...lexicalRanks.keys()]);
 	rows = rows.filter(
 		(row) =>

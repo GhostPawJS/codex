@@ -28,12 +28,12 @@ describe('searchCodexToolHandler', () => {
 		}
 	});
 
-	it('returns empty_result warning for no matches', async () => {
+	it('returns no_match warning for no matches', async () => {
 		const db = await createInitializedCodexDb();
 		const result = searchCodexToolHandler(db, { query: 'nonexistent', minScore: 0 });
 		strictEqual(result.ok, true);
 		if (result.ok) {
-			ok(result.warnings?.some((w) => w.code === 'empty_result'));
+			ok(result.warnings?.some((w) => w.code === 'no_match'));
 		}
 	});
 

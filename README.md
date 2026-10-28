@@ -223,6 +223,24 @@ or a project `.mcp.json`:
 }
 ```
 
+**Cline** (MCP Servers → Configure MCP Servers, `cline_mcp_settings.json`).
+VS Code often starts without `~/.local/bin` on PATH, so use the absolute path:
+`/home/<user>/.local/bin/ghostpaw-codex` (macOS `/Users/<user>/...`, Windows
+`C:\Users\<user>\AppData\Local\Programs\ghostpaw\bin\ghostpaw-codex.exe`).
+Step-by-step install and a test call: [llms-install.md](llms-install.md).
+
+```json
+{
+  "mcpServers": {
+    "ghostpaw-codex": {
+      "command": "/home/<user>/.local/bin/ghostpaw-codex",
+      "args": ["mcp"],
+      "env": { "GHOSTPAW_CODEX_DB": "/home/<user>/.ghostpaw/codex.db" }
+    }
+  }
+}
+```
+
 Claude Desktop users can also install `server.mcpb` from the
 [latest GitHub release](https://github.com/GhostPawJS/codex/releases/latest).
 A Dockerfile is included for container hosts:
@@ -263,8 +281,7 @@ help. Each revision verb accepts only the flags it uses. Correction takes
 `--deferred-until` as YYYY-MM-DD, DD.MM.YYYY, today, tomorrow, +3d, an ISO
 date-time with timezone, or epoch milliseconds. Calendar dates resolve to local
 end of day and must be in the future.
-Array flags repeat, kebab-case flags map to schema properties, and `@path`
-reads a value from a file. `--` ends flags. A positional `-`, or piped stdin
+Array flags repeat, kebab-case flags map to schema properties, and values are literal, including leading `@`. Use JSON stdin (`-`) for long input. `--` ends flags. A positional `-`, or piped stdin
 with no arguments, reads a JSON object; explicit flags override its fields.
 Database selection uses `--db`, `GHOSTPAW_CODEX_DB`, then `~/.ghostpaw/codex.db`.
 Top-level help shows the resolved path. Version output starts with

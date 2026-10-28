@@ -1,14 +1,14 @@
 # Run Calibration Pass
 
 Primary tools:
-- `review_codex`
-- `inspect_codex_item`
+- `review_codex` (CLI: `ghostpaw-codex review`)
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
 
 Goal:
 - Determine whether certainty estimates are systematically too high by analyzing how often high-certainty beliefs get revised.
 
 When to use:
-- `review_codex` with `view: "trends"` shows calibration alerts.
+- `review_codex` (CLI: `ghostpaw-codex review`) with `view: "trends"` shows calibration alerts.
 - High-certainty beliefs are frequently being corrected after short periods.
 - You want to assess whether source weights or certainty defaults need adjustment.
 
@@ -17,9 +17,9 @@ When not to use:
 - You need to fix a specific belief rather than assess a systemic pattern.
 
 Step-by-step sequence:
-1. Use `review_codex` with `view: "trends"` to load calibration alerts and revision statistics.
+1. Use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "trends"` to load calibration alerts and revision statistics.
 2. Read `revisedHighCertaintyCount` and `repeatedlyRevisedCount` to assess the scope of the problem.
-3. For each calibration alert, use `inspect_codex_item` on the revised beliefs to see the version diff: what was the original claim and certainty, and what replaced it?
+3. For each calibration alert, use `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) on the revised beliefs to see the version diff: what was the original claim and certainty, and what replaced it?
 4. Look for patterns: are overconfident beliefs concentrated in a specific source (e.g., all `inferred`) or category (e.g., all `capability`)?
 5. Adjust future capture behavior: enter beliefs at lower certainty for the problematic source/category combinations.
 6. If a currently active belief still has inflated certainty from the old pattern, correct it with a more honest certainty estimate.
@@ -40,8 +40,8 @@ Tips and tricks:
 - Calibration passes are most valuable when done quarterly or after large ingestion batches.
 
 Tool calls to prefer:
-- `review_codex` with `trends`
-- `inspect_codex_item` for version diffs on revised beliefs
+- `review_codex` (CLI: `ghostpaw-codex review`) with `trends`
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) for version diffs on revised beliefs
 
 Related skills:
 - `monitor-portfolio-health`

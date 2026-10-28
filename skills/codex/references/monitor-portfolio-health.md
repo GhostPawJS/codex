@@ -1,8 +1,8 @@
 # Monitor Portfolio Health
 
 Primary tools:
-- `review_codex`
-- `inspect_codex_item`
+- `review_codex` (CLI: `ghostpaw-codex review`)
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`)
 
 Goal:
 - Perform a lightweight health check on the entire codex, identifying emerging issues before they degrade integrity.
@@ -13,14 +13,14 @@ When to use:
 - After a batch ingestion or large correction pass.
 
 When not to use:
-- You need to find a specific belief — use `search_codex`.
+- You need to find a specific belief — use `search_codex` (CLI: `ghostpaw-codex search`).
 - You are already in the middle of flag processing — continue with that skill.
 
 Step-by-step sequence:
-1. Use `review_codex` with `view: "status"` to see integrity, total beliefs, strength distribution, certainty distribution, and evidence distribution.
+1. Use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "status"` to see integrity, total beliefs, strength distribution, certainty distribution, and evidence distribution.
 2. Check integrity: above 0.7 is healthy, 0.5-0.7 needs attention, below 0.5 requires immediate diagnosis.
 3. Check strength counts: a high ratio of weak beliefs suggests many unverified entries.
-4. Use `review_codex` with `view: "trends"` to see if metrics are improving or declining.
+4. Use `review_codex` (CLI: `ghostpaw-codex review`) with `view: "trends"` to see if metrics are improving or declining.
 5. Check calibration alerts: rising revised high-certainty counts signal overconfidence.
 6. If flags are accumulating, note the backlog size and dominant reason codes.
 7. If anything needs attention, switch to the appropriate skill: `diagnose-declining-integrity`, `process-stale-beliefs`, `run-calibration-pass`, or `review-flags-batch`.
@@ -41,8 +41,8 @@ Tips and tricks:
 - If integrity is high but trends show rising revisions, calibration may be off.
 
 Tool calls to prefer:
-- `review_codex` with `status` and `trends`
-- `inspect_codex_item` for spot-checking beliefs that represent anomalies
+- `review_codex` (CLI: `ghostpaw-codex review`) with `status` and `trends`
+- `inspect_codex_item` (CLI: `ghostpaw-codex belief show`) for spot-checking beliefs that represent anomalies
 
 Related skills:
 - `diagnose-declining-integrity`
