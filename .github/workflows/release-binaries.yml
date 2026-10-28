@@ -1,8 +1,9 @@
 name: Release binaries
 
 # Builds the ghostpaw-codex single executable (Node SEA) on each platform,
-# smoke-tests it, and on a v* tag attaches the archives, SHA256SUMS and build
-# provenance attestations to the GitHub Release that publish.yml creates.
+# smoke-tests it, and on a v* tag attaches the archives, SHA256SUMS (archives
+# and server.mcpb) and build provenance attestations to the GitHub Release
+# that publish.yml creates.
 # Branch pushes, pull requests and manual runs only build and test; nothing
 # is uploaded outside the run's own artifacts.
 
@@ -116,10 +117,26 @@ jobs:
           path: upload
           merge-multiple: true
 
+      # publish.yml creates the release after npm publish and attaches server.mcpb;
+      # wait for it so the bundle is covered by SHA256SUMS and the attestation.
+      - name: Wait for the GitHub Release and its server.mcpb
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          for _ in $(seq 1 120); do
+            if gh release download "$GITHUB_REF_NAME" -p server.mcpb -D upload --clobber >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::Release $GITHUB_REF_NAME with server.mcpb did not appear within 30 minutes"
+          exit 1
+
       - name: SHA256SUMS
         working-directory: upload
         run: |
-          sha256sum ghostpaw-codex-* > SHA256SUMS
+          sha256sum ghostpaw-codex-* server.mcpb > SHA256SUMS
           cat SHA256SUMS
 
       # SLSA build provenance, signed through Sigstore, verifiable with
@@ -128,20 +145,11 @@ jobs:
         with:
           subject-path: |
             upload/ghostpaw-codex-*
+            upload/server.mcpb
             upload/SHA256SUMS
 
-      # publish.yml creates the release after npm publish; wait for it.
       - name: Upload to the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: |
-          for _ in $(seq 1 120); do
-            if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-              gh release upload "$GITHUB_REF_NAME" upload/* --clobber
-              exit 0
-            fi
-            sleep 15
-          done
-          echo "::error::Release $GITHUB_REF_NAME did not appear within 30 minutes"
-          exit 1
+        run: gh release upload "$GITHUB_REF_NAME" upload/ghostpaw-codex-* upload/SHA256SUMS --clobber
