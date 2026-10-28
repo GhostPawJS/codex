@@ -224,18 +224,19 @@ or a project `.mcp.json`:
 ```
 
 **Cline** (MCP Servers → Configure MCP Servers, `cline_mcp_settings.json`).
-VS Code often starts without `~/.local/bin` on PATH, so use the absolute path:
-`/home/<user>/.local/bin/ghostpaw-codex` (macOS `/Users/<user>/...`, Windows
-`C:\Users\<user>\AppData\Local\Programs\ghostpaw\bin\ghostpaw-codex.exe`).
-Step-by-step install and a test call: [llms-install.md](llms-install.md).
+VS Code often starts without `~/.local/bin` on PATH, so use the absolute path
+that `echo "$HOME/.local/bin/ghostpaw-codex"` prints (PowerShell:
+`"$env:LOCALAPPDATA\Programs\ghostpaw\bin\ghostpaw-codex.exe"`). Merge the
+entry into the existing `mcpServers`. Settings file locations, the
+`cline mcp add` form and a test call: [llms-install.md](llms-install.md).
 
 ```json
 {
   "mcpServers": {
     "ghostpaw-codex": {
-      "command": "/home/<user>/.local/bin/ghostpaw-codex",
+      "command": "/absolute/path/to/ghostpaw-codex",
       "args": ["mcp"],
-      "env": { "GHOSTPAW_CODEX_DB": "/home/<user>/.ghostpaw/codex.db" }
+      "env": { "GHOSTPAW_CODEX_DB": "/absolute/path/to/.ghostpaw/codex.db" }
     }
   }
 }
