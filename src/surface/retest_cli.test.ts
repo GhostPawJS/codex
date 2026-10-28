@@ -133,7 +133,7 @@ test('twenty concurrent CLI adds serialize duplicate detection on a cold databas
 				() =>
 					new Promise<{ code: number | null; err: string }>((resolve, reject) => {
 						const child = spawn(
-							'/opt/node24/bin/node',
+							process.execPath,
 							[
 								'--experimental-strip-types',
 								'src/cli.ts',
