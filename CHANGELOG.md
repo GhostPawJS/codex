@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-28
+
 ### Added
 
 - Optional provenance on every belief revision verb. Search and belief detail text include stored provenance.
@@ -157,7 +159,8 @@ All notable changes to this project are documented here. The format follows
 - CI runs on every push and pull request on Node 24 and 26. Releases publish
   through npm trusted publishing with provenance.
 
-[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/GhostPawJS/codex/compare/v0.5.2...v0.6.0
 [0.5.2]: https://github.com/GhostPawJS/codex/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/GhostPawJS/codex/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/GhostPawJS/codex/compare/v0.4.1...v0.5.0
