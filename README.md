@@ -68,16 +68,16 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.profile
 To pin a release instead of taking the latest, pass `--version`:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target linux-x64 --version 0.5.2 && export PATH="$HOME/.local/bin:$PATH"
+curl -fsSL https://raw.githubusercontent.com/GhostPawJS/codex/main/install.sh | sh -s -- --target linux-x64 --version 0.6.0 && export PATH="$HOME/.local/bin:$PATH"
 ```
 
 ```text
 $ ghostpaw-codex --version
-ghostpaw-codex 0.5.2 (binary, linux-x64)
+ghostpaw-codex 0.6.0 (binary, linux-x64)
 $ ghostpaw-codex --version --short
-0.5.2
+0.6.0
 $ ghostpaw-codex --version --json
-{"name":"ghostpaw-codex","version":"0.5.2","variant":"binary","target":"linux-x64"}
+{"name":"ghostpaw-codex","version":"0.6.0","variant":"binary","target":"linux-x64"}
 ```
 
 `variant` is `binary`, `npm` or `library`; `target` is `null` outside the release binary.
@@ -105,7 +105,7 @@ registries:
     type: local
     path: codex-registry.yaml
 packages:
-  - name: GhostPawJS/codex@v0.5.2
+  - name: GhostPawJS/codex@v0.6.0
     registry: codex
 ```
 
