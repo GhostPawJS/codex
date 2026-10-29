@@ -19,6 +19,11 @@ export function mapBeliefRow(row: BeliefRow, now: number): BeliefRecord {
 		verifiedAt: row.verified_at,
 		supersededBy: row.superseded_by,
 		provenance: row.provenance,
+		provenanceSources: row.provenance_sources
+			? JSON.parse(row.provenance_sources)
+			: row.provenance === null
+				? []
+				: [row.provenance],
 		deferredUntil: row.deferred_until,
 		freshness: computeFreshness(row.verified_at, now, row.evidence),
 		strength:

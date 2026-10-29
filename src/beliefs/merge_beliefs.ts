@@ -2,8 +2,8 @@ import type { CodexDb } from '../database.ts';
 import { CodexValidationError } from '../errors.ts';
 import { resolveNow } from '../resolve_now.ts';
 import { withTransaction } from '../with_transaction.ts';
-
 import { assertActiveBeliefExists } from './assert_active_belief_exists.ts';
+import { inheritProvenance } from './inherit_provenance.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
 import { prepareBeliefStorage } from './prepare_belief_storage.ts';
 import { sourceInitialCertainty } from './source_initial_certainty.ts';
@@ -59,7 +59,15 @@ export function mergeBeliefs(
 				provenance,
 				successor.id,
 			);
-			return mapBeliefRow({ ...successor, evidence, certainty, provenance }, timestamp);
+			inheritProvenance(
+				db,
+				successor.id,
+				mergedIn.map((belief) => belief.id),
+			);
+			return mapBeliefRow(
+				db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(successor.id) as BeliefRow,
+				timestamp,
+			);
 		}
 		const primary = beliefs[0];
 		if (!primary) {
@@ -106,6 +114,7 @@ export function mergeBeliefs(
 				`UPDATE beliefs SET superseded_by = ?, superseded_reason = 'merged', verified_at = ? WHERE id = ?`,
 			).run(successorId, timestamp, belief.id);
 		}
+		inheritProvenance(db, successorId, uniqueIds);
 		const row = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(successorId);
 		if (!row) {
 			throw new Error('Merged belief could not be reloaded.');

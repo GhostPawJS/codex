@@ -1,8 +1,8 @@
 import type { CodexDb } from '../database.ts';
 import { resolveNow } from '../resolve_now.ts';
 import { withTransaction } from '../with_transaction.ts';
-
 import { assertActiveBeliefExists } from './assert_active_belief_exists.ts';
+import { inheritProvenance } from './inherit_provenance.ts';
 import { listBeliefProximity } from './list_belief_proximity.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
 import { prepareBeliefStorage } from './prepare_belief_storage.ts';
@@ -22,6 +22,22 @@ export function correctBelief(
 		const nextSource = input.source ?? current.source;
 		const nextCategory = input.category ?? current.category;
 		const prepared = prepareBeliefStorage(input.claim);
+		if (
+			prepared.claimNormalized === current.claim_normalized &&
+			nextSource === current.source &&
+			nextCategory === current.category &&
+			(input.certainty === undefined || input.certainty === current.certainty)
+		) {
+			if (input.provenance != null)
+				db.prepare('UPDATE beliefs SET provenance = ? WHERE id = ?').run(
+					input.provenance,
+					beliefId,
+				);
+			return mapBeliefRow(
+				db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(beliefId) as BeliefRow,
+				timestamp,
+			);
+		}
 		const certainty = clampCertainty(input.certainty ?? sourceInitialCertainty(nextSource));
 		const result = db
 			.prepare(`
@@ -51,6 +67,7 @@ export function correctBelief(
 		db.prepare(
 			`UPDATE beliefs SET superseded_by = ?, superseded_reason = 'corrected', verified_at = ? WHERE id = ?`,
 		).run(newId, timestamp, beliefId);
+		inheritProvenance(db, newId, [beliefId]);
 		const row = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(newId);
 		if (!row) {
 			throw new Error('Corrected belief could not be reloaded.');

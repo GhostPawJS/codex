@@ -41,3 +41,24 @@ it('migrates a legacy beliefs table idempotently while preserving rows', async (
 	);
 	db.close();
 });
+
+it('schema initialization composes with a caller-owned transaction', async () => {
+	const db = await openTestDatabase();
+	try {
+		db.exec('BEGIN');
+		initBeliefTables(db);
+		initBeliefTables(db);
+		db.exec('ROLLBACK');
+		strictEqual(
+			db.prepare("SELECT name FROM sqlite_master WHERE name = 'beliefs'").get(),
+			undefined,
+		);
+		initBeliefTables(db);
+		strictEqual(
+			db.prepare("SELECT name FROM sqlite_master WHERE name = 'beliefs'").get()?.name,
+			'beliefs',
+		);
+	} finally {
+		db.close();
+	}
+});

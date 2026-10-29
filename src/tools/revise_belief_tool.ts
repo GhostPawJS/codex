@@ -16,7 +16,7 @@ import { reviseBeliefToolName } from './tool_names.ts';
 import { dismissNext, inspectItemNext, reviewViewNext } from './tool_next.ts';
 import { toBeliefIdRef, toBeliefRef } from './tool_ref.ts';
 import type { ToolEntityRef, ToolNextStepHint, ToolResult } from './tool_types.ts';
-import { toolNeedsClarification, toolSuccess } from './tool_types.ts';
+import { toolNeedsClarification, toolNoOp, toolSuccess } from './tool_types.ts';
 import { validateToolInput } from './validate_tool_input.ts';
 
 export interface ReviseBeliefToolInput {
@@ -66,6 +66,12 @@ function handleCorrect(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefT
 		certainty: input.certainty,
 		provenance: input.provenance,
 	});
+	if (result.id === input.beliefId)
+		return toolNoOp(
+			`Belief ${result.id} already has the same normalized claim.`,
+			{ belief: result },
+			{ entities: [toBeliefRef(result)] },
+		);
 	const entities: ToolEntityRef[] = [toBeliefRef(result), toBeliefIdRef(result.supersededId)];
 	const next: ToolNextStepHint[] = [inspectItemNext(result.id, result.claim)];
 	for (const prox of result.proximity.slice(0, 2)) {
@@ -91,7 +97,8 @@ function handleMerge(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefToo
 			['beliefIds'],
 		);
 	}
-	if (!input.claim) throw new CodexValidationError('Merge requires --claim.');
+	if (!input.claim && input.successorId === undefined)
+		throw new CodexValidationError('Merge requires --claim.');
 	const belief = write.mergeBeliefs(db, {
 		beliefIds: input.beliefIds,
 		claim: input.claim,
@@ -197,7 +204,8 @@ export const reviseBeliefTool = defineCodexTool<ReviseBeliefToolInput, Record<st
 		action: 'The revision verb: confirm, correct, merge, forget, or defer.',
 		beliefId: 'The belief to revise. Required for confirm, correct, forget, defer.',
 		beliefIds: 'Two or more belief ids to merge. Required for merge.',
-		claim: 'Replacement claim text. Required for correct and merge.',
+		claim:
+			'Replacement claim text. Required for correct and for merge without an existing successor.',
 		successorId: 'Existing active belief to supersede to. Optional for merge and forget.',
 		deferredUntil: 'Timestamp until which the belief is excluded from flags. Required for defer.',
 		source: 'Optional replacement source for correct and merge.',
@@ -220,7 +228,7 @@ export const reviseBeliefTool = defineCodexTool<ReviseBeliefToolInput, Record<st
 			category: enumSchema([...BELIEF_CATEGORIES], 'Optional replacement category.'),
 			certainty: numberSchema('Optional certainty override.'),
 			provenance: stringSchema(
-				'Optional origin reference; preserves the current origin when omitted.',
+				'Optional origin reference appended to provenanceSources; the legacy provenance view is preserved when omitted.',
 			),
 		},
 		['action'],

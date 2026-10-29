@@ -107,8 +107,13 @@ export async function runCliCommand<T>(
 			const argument = (name: string, schema: JsonSchema): CliArgument => ({
 				name,
 				...(name === 'claim' ? { short: 'c' } : {}),
-				type:
-					schema.type === 'object' || !schema.type ? 'json' : (schema.type as CliArgument['type']),
+				type: command.tool.cli?.valueParsers?.[
+					name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
+				]
+					? 'string'
+					: schema.type === 'object' || !schema.type
+						? 'json'
+						: (schema.type as CliArgument['type']),
 				description: schema.description,
 				enum: schema.enum,
 				parseValue:
@@ -190,7 +195,7 @@ export async function runCliCommand<T>(
 				stdout.write(
 					entry
 						? `${renderCliHelp(specFor(entry))}Global flags: --json/-j, --quiet/-q, --help/-h, --db <path>\n`
-						: `${options.bin} ${options.version}\n${options.description}\n${options.describeDb ? `\n${options.describeDb(db === undefined ? {} : { db })}\n` : ''}\nCommands:\n${matches.map((command) => `  ${command.path}`).join('\n')}\n  alias add|remove|list\n  mcp, skill, tools [--json], describe <tool>, call <tool> [JSON|-], completions <bash|zsh|fish>, version\nGlobal flags: --db <path>, --json/-j, --quiet/-q, --compact, --claim/-c, --help/-h, --version/-V/-v, --no-color\n`,
+						: `${options.bin} ${options.version}\n${options.description}\n${options.describeDb ? `\n${options.describeDb(db === undefined ? {} : { db })}\n` : ''}\nCommands:\n${matches.map((command) => `  ${command.path}`).join('\n')}${args.length ? '' : '\n  alias add|remove|list\n  mcp, skill, tools [--json], describe <tool>, call <tool> [JSON|-], completions <bash|zsh|fish>, version'}\nGlobal flags: --db <path>, --json/-j, --quiet/-q, --compact, --claim/-c, --help/-h, --version/-V/-v, --no-color\n`,
 				);
 			return 0;
 		}

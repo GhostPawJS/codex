@@ -6,6 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Append-only `provenanceSources` on belief records, retaining origin references across duplicate additions, confirmations, corrections, merges, deferrals and forgetting. The legacy `provenance` field remains readable.
+- Active successor ids in belief details and full-chain successor hints in revision errors and CLI output.
+
+### Fixed
+
+- Belief group help lists only belief verbs; deferral help shows a date string type. Review `--now` accepts relative days, calendar dates, zoned timestamps and epoch milliseconds, including historical values.
+- Merge into an existing successor accepts an omitted claim. Unchanged normalized corrections reuse the current belief and return a tool no-op.
+- Small corpora avoid the common-term search cap; merge fan-in alone no longer produces instability flags after the grace period.
+- Legacy active normalized duplicates consolidate once on schema upgrade, retaining evidence, sources and lineage while preserving subsequent explicit duplicates.
+- New CLI and MCP database files use mode 0600 and newly created parent directories use mode 0700, preserving existing permissions.
+- Regression coverage includes dash-leading CLI values already supported by the parser.
+
 ## [0.6.0] - 2026-10-28
 
 ### Added

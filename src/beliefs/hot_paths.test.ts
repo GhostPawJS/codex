@@ -41,7 +41,7 @@ it('preserves remember, inspect and review outputs on a mixed belief history', (
 	};
 	strictEqual(
 		createHash('sha256').update(JSON.stringify(result)).digest('hex'),
-		'aadd2d3b46c09c0bf5a56e8d46e08919b1ad6130fae939bea5f949bc7f071295',
+		'6a0d28306983105aec1fa110459efa3ebded328f56b0c614e3f67f7e167d803e',
 	);
 	db.close();
 });

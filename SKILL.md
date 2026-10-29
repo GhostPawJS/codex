@@ -151,7 +151,7 @@ Writes: writes_state.
 | source | string | no | explicit, observed, distilled, inferred. Optional replacement source. |
 | category | string | no | preference, fact, procedure, capability, custom. Optional replacement category. |
 | certainty | number | no | Optional certainty override. |
-| provenance | string | no | Optional origin reference; preserves the current origin when omitted. |
+| provenance | string | no | Optional origin reference appended to provenanceSources; the legacy provenance view is preserved when omitted. |
 
 Example: `ghostpaw-codex call revise_belief '{"action":"confirm","beliefId":1}'`
 

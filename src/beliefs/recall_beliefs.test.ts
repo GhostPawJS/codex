@@ -130,6 +130,9 @@ describe('recall relevance', () => {
 			else claims.push('Fox mains a Warrior');
 			for (const claim of claims)
 				remember(db, { claim, source: 'explicit', category: 'preference' }, { now: 1 });
+			// Exercise the common-term cap on a corpus large enough for reliable frequency estimates.
+			for (let i = 0; i < 15; i++)
+				remember(db, { claim: `Fox note ${i}`, source: 'explicit', category: 'fact' }, { now: 1 });
 			const query = 'what class does fox play';
 			strictEqual(queryTokenWeights(db, query).commonOnly, true);
 			strictEqual(recall(db, query, { now: 2 }).length <= 3, true);

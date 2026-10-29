@@ -348,7 +348,7 @@ count corrections only, excluding merges and forgetting.
 
 Search is lexical: FTS5 bm25 plus hashed character-trigram similarity, with
 IDF-like token weighting and a 55% relative cutoff. It does not provide semantic
-understanding. Queries matching only common terms return at most three results
+understanding. In corpora of at least 20 active beliefs, queries matching only common terms return at most three results
 with a `partial_match` warning.
 
 Aliases are off by default (the table starts empty). Add directed, one-hop aliases

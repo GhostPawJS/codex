@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { chmodSync, mkdtempSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -16,6 +16,14 @@ test('opens nested paths, initializes schema and configures WAL and timeout', as
 			);
 			assert.equal(db.prepare('PRAGMA busy_timeout').get<{ timeout: number }>()?.timeout, 5000);
 			assert.ok(db.prepare("SELECT name FROM sqlite_master WHERE name = 'beliefs'").get());
+			if (process.platform !== 'win32') {
+				assert.equal(statSync(join(directory, 'nested', 'codex.db')).mode & 0o777, 0o600);
+				assert.equal(statSync(join(directory, 'nested')).mode & 0o777, 0o700);
+				chmodSync(join(directory, 'nested', 'codex.db'), 0o640);
+				const reopened = await openCodexDb(join(directory, 'nested', 'codex.db'));
+				reopened.close();
+				assert.equal(statSync(join(directory, 'nested', 'codex.db')).mode & 0o777, 0o640);
+			}
 		} finally {
 			db.close();
 		}

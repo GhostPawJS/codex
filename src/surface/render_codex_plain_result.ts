@@ -13,7 +13,7 @@ export function renderCodexPlainResult(
 			results?: BeliefRecord[];
 			payload?: { view: string; data: unknown };
 			belief?: BeliefRecord & { proximity?: BeliefRecord[] };
-			detail?: BeliefRecord & { proximity?: BeliefRecord[] };
+			detail?: BeliefRecord & { proximity?: BeliefRecord[]; activeSuccessorId?: number | null };
 			lineage?: BeliefRecord[];
 			proximity?: BeliefRecord[];
 			deletedIds?: number[];
@@ -100,9 +100,14 @@ export function renderCodexPlainResult(
 					? claim(belief.claim)
 					: String(belief[key as keyof BeliefRecord]),
 		]);
+		if (belief.provenanceSources?.length)
+			pairs.push(['sources', belief.provenanceSources.join(', ')]);
 		if (belief.provenance) pairs.push(['provenance', belief.provenance]);
 		if (belief.supersededBy !== null)
-			pairs.push(['status', `superseded by ${belief.supersededBy}`]);
+			pairs.push([
+				'status',
+				`superseded by ${data.detail?.activeSuccessorId ?? belief.supersededBy}`,
+			]);
 		pairs.push(['created', date(belief.createdAt)]);
 		if (data.lineage) pairs.push(['lineage', data.lineage.map((entry) => entry.id).join(', ')]);
 		if (data.detail?.deferredUntil) pairs.push(['deferred until', date(data.detail.deferredUntil)]);

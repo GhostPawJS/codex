@@ -1,4 +1,4 @@
-import { mkdirSync } from 'node:fs';
+import { closeSync, mkdirSync, openSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { CodexDb } from '../database.ts';
 import { initCodexTables } from '../init_codex_tables.ts';
@@ -25,7 +25,14 @@ export async function openCodexDb(path: string): Promise<CodexDb> {
 	} finally {
 		process.emitWarning = original;
 	}
-	if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
+	if (path !== ':memory:') {
+		mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
+		try {
+			closeSync(openSync(path, 'wx', 0o600));
+		} catch (error) {
+			if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
+		}
+	}
 	const db = new sqlite.DatabaseSync(path);
 	try {
 		db.exec('PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL;');

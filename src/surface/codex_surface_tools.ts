@@ -2,10 +2,11 @@ import type { CodexDb } from '../database.ts';
 import type { SurfaceTool } from '../surfaces/surface_types.ts';
 import { codexTools } from '../tools/tool_registry.ts';
 import { parseDeferralDate } from './parse_deferral_date.ts';
+import { parseReviewDate } from './parse_review_date.ts';
 
 const mapping: Record<string, NonNullable<SurfaceTool<CodexDb>['cli']>> = {
 	search_codex: { verb: 'search', positionals: ['query'] },
-	review_codex: { verb: 'review', positionals: ['view'] },
+	review_codex: { verb: 'review', positionals: ['view'], valueParsers: { now: parseReviewDate } },
 	remember_belief: { noun: 'belief', verb: 'add', positionals: ['claim'] },
 	inspect_codex_item: { noun: 'belief', verb: 'show', positionals: ['beliefId'] },
 	retire_belief: { noun: 'belief', verb: 'retire', positionals: ['beliefId'] },

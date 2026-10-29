@@ -98,10 +98,11 @@ test('duplicate normalization, opt-out, inactive rows and provenance lineage', a
 		);
 		assert.equal(merged.provenance, 'chat:1');
 		assert.deepEqual(listFlags(db, 3), []);
-		assert.ok(
+		assert.equal(
 			listFlags(db, 3 + FLAG_GRACE_MS).some(
 				(r) => r.id === merged.id && r.reasonCodes.includes('unstable'),
 			),
+			false,
 		);
 		assert.throws(
 			() => correctBelief(db, a.id, { claim: 'changed' }),

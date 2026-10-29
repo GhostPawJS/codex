@@ -37,7 +37,15 @@ export function remember(
 				.get<BeliefRow>(prepared.claimNormalized);
 			if (existing) {
 				duplicate = true;
-				return mapBeliefRow(existing, timestamp);
+				if (input.provenance != null)
+					db.prepare('UPDATE beliefs SET provenance = ? WHERE id = ?').run(
+						input.provenance,
+						existing.id,
+					);
+				return mapBeliefRow(
+					db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(existing.id) as BeliefRow,
+					timestamp,
+				);
 			}
 		}
 		const result = db

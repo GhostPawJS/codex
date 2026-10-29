@@ -543,7 +543,7 @@ See [installation instructions](../README.md#install).
 
 Search is lexical: FTS5 bm25 plus hashed character-trigram similarity, with
 IDF-like token weighting and a 55% relative cutoff. It does not provide semantic
-understanding. Queries matching only common terms return at most three results
+understanding. In corpora of at least 20 active beliefs, queries matching only common terms return at most three results
 with a `partial_match` warning.
 
 Aliases are off by default (the table starts empty). Add directed, one-hop aliases
@@ -562,3 +562,18 @@ Both words are normalized with `normalizeClaim` and must be distinct single word
 Adding an existing pair preserves its creation time; `options.now` sets the time
 on first insertion. Expansion is deduplicated and never follows alias chains;
 the query vector uses the original query.
+
+### Retest compatibility details
+
+`ghostpaw-codex belief --help` lists only belief commands. Deferral help displays
+its CLI value as a string date, while MCP and library timestamps remain numbers.
+`review flags --now +8d`, `--now 2026-11-10` and `--now 0` work; review accepts
+historical dates too. Calendar dates mean local end of day. Merging into an
+existing `--successor-id` does not require a redundant claim.
+
+New database files opened by the CLI or MCP use mode `0600`; newly created
+parent directories use `0700`. Existing file permissions remain unchanged.
+Belief detail and JSON output include the accumulated `provenanceSources` list.
+Use it instead of the legacy single `provenance` field to inspect all origins.
+See [source history and upgrades](entities/BELIEFS.md#source-history-and-upgrades)
+for correction, merge and legacy duplicate migration behavior.

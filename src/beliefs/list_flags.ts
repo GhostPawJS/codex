@@ -11,7 +11,6 @@ function collectReasons(
 	row: BeliefRow,
 	recordFreshness: number,
 	lineageDepth: number,
-	merged: boolean,
 	categoryCount: number,
 	totalActive: number,
 	now: number,
@@ -19,7 +18,7 @@ function collectReasons(
 	return [
 		recordFreshness < 0.4 ? 'stale' : recordFreshness < 0.7 ? 'fading' : null,
 		now - row.created_at >= FLAG_GRACE_MS && row.evidence === 1 ? 'single_evidence' : null,
-		lineageDepth > 2 && (!merged || now - row.created_at >= FLAG_GRACE_MS) ? 'unstable' : null,
+		lineageDepth > 2 ? 'unstable' : null,
 		now - row.created_at >= FLAG_GRACE_MS &&
 		(row.source === 'distilled' || row.source === 'inferred')
 			? 'low_trust'
@@ -28,9 +27,11 @@ function collectReasons(
 	].filter((reason): reason is FlagReasonCode => reason !== null);
 }
 
-function buildLineageDepthMap(db: CodexDb): Map<number, number> {
+function buildLineageDepthMap(db: CodexDb, correctionsOnly = false): Map<number, number> {
 	const edges = db
-		.prepare('SELECT id, superseded_by FROM beliefs WHERE superseded_by IS NOT NULL')
+		.prepare(
+			`SELECT id, superseded_by FROM beliefs WHERE superseded_by IS NOT NULL ${correctionsOnly ? "AND (superseded_reason = 'corrected' OR superseded_reason IS NULL)" : ''}`,
+		)
 		.all<{ id: number; superseded_by: number }>();
 	const groups = new Map<number, Set<number>>();
 	function group(id: number): Set<number> {
@@ -62,14 +63,7 @@ export function listFlags(db: CodexDb, now?: number): FlagResultItem[] {
 		categoryCounts.set(row.category, (categoryCounts.get(row.category) ?? 0) + 1);
 	}
 	const lineageDepths = buildLineageDepthMap(db);
-	const mergedIds = new Set(
-		db
-			.prepare(
-				"SELECT DISTINCT superseded_by AS id FROM beliefs WHERE superseded_reason = 'merged'",
-			)
-			.all<{ id: number }>()
-			.map((row) => row.id),
-	);
+	const correctionDepths = buildLineageDepthMap(db, true);
 	return rows
 		.filter((row) => row.deferred_until === null || row.deferred_until <= timestamp)
 		.map((row) => {
@@ -78,8 +72,7 @@ export function listFlags(db: CodexDb, now?: number): FlagResultItem[] {
 			const reasons = collectReasons(
 				row,
 				record.freshness,
-				lineageDepth,
-				mergedIds.has(row.id),
+				correctionDepths.get(row.id) ?? 1,
 				categoryCounts.get(row.category) ?? 0,
 				rows.length,
 				timestamp,

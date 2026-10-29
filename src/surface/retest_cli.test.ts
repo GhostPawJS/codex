@@ -111,6 +111,32 @@ test('CLI literal values, provenance, duplicate, aliases, validation and superse
 			(await invoke(['belief', 'defer', '--help'])).out,
 			/tomorrow.*\+3d.*YYYY-MM-DD.*process time zone/,
 		);
+		const nounHelp = await invoke(['belief', '--help']);
+		assert.match(nounHelp.out, /belief add/);
+		assert.match(nounHelp.out, /belief correct/);
+		assert.doesNotMatch(nounHelp.out, /alias add|mcp, skill| {2}search/);
+		assert.match((await invoke(['belief', 'defer', '--help'])).out, /--deferred-until {2}string/);
+		for (const now of ['+8d', '2026-11-10', '2000-01-01', '0'])
+			assert.equal((await invoke(['review', 'flags', '--now', now])).code, 0, now);
+		assert.equal((await invoke(['review', 'flags', '--now', 'bad-date'])).code, 2);
+		assert.equal(
+			(
+				await invoke([
+					'belief',
+					'add',
+					'Extra greeting',
+					'--source',
+					'explicit',
+					'--category',
+					'fact',
+				])
+			).code,
+			0,
+		);
+		assert.equal((await invoke(['belief', 'merge', '6', '--successor-id', '4'])).code, 0);
+		assert.equal((await invoke(['belief', 'correct', '4', '-c', 'Fox waves again'])).code, 0);
+		assert.match((await invoke(['belief', 'confirm', '1'])).err, /superseded by 7; use 7/);
+		assert.match((await invoke(['belief', 'show', '1'])).out, /superseded by 7/);
 		assert.equal((await invoke(['alias', 'add', 'class', 'warrior'])).code, 0);
 		assert.equal(
 			(await invoke(['alias', 'add', 'class', 'warrior'])).out,

@@ -508,7 +508,7 @@ If this package helps your project, consider sponsoring its maintenance:
 
 Search is lexical: FTS5 bm25 plus hashed character-trigram similarity, with
 IDF-like token weighting and a 55% relative cutoff. It does not provide semantic
-understanding. Queries matching only common terms return at most three results
+understanding. In corpora of at least 20 active beliefs, queries matching only common terms return at most three results
 with a `partial_match` warning.
 
 Aliases are off by default (the table starts empty). Add directed, one-hop aliases
@@ -527,3 +527,26 @@ Both words are normalized with `normalizeClaim` and must be distinct single word
 Adding an existing pair preserves its creation time; `options.now` sets the time
 on first insertion. Expansion is deduplicated and never follows alias chains;
 the query vector uses the original query.
+
+### Provenance and revision compatibility
+
+Belief records include `provenanceSources`, an append-only list of distinct origin
+references. Every write with `--provenance` adds a reference, including duplicate
+adds and unchanged corrections. Corrections and merges carry all sources forward.
+The legacy `provenance` field remains readable with its existing single-value
+behavior; use `provenanceSources` for the complete history.
+
+Superseded-belief errors and `belief show` identify the current active successor.
+Library details also expose `activeSuccessorId`, while `supersededBy` retains the
+immediate lineage link. Correcting to the same normalized claim and metadata
+returns `no_op`. A merge into `--successor-id` can omit `--claim`.
+
+`belief --help` lists belief verbs. `review flags --now +8d` and
+`review flags --now 2026-11-10` accept the same date formats as deferral, including
+historical dates and epoch milliseconds. Calendar dates use local end of day.
+
+New CLI and MCP database files use mode `0600`; newly created parent directories
+use `0700`. Existing permissions are preserved. On first upgrade, legacy active
+normalized duplicates consolidate into the oldest id, preserving summed evidence,
+source references and lineage. Later `--allow-duplicate` additions remain separate.
+Merge fan-in alone does not trigger `unstable`; repeated corrections still do.

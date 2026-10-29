@@ -115,7 +115,7 @@ final fusion score and defaults to 0.01; the relative cutoff also applies.
 
 Search is lexical: FTS5 bm25 plus hashed character-trigram similarity, with
 IDF-like token weighting and a 55% relative cutoff. It does not provide semantic
-understanding. Queries matching only common terms return at most three results
+understanding. In corpora of at least 20 active beliefs, queries matching only common terms return at most three results
 with a `partial_match` warning.
 
 Aliases are off by default (the table starts empty). Add directed, one-hop aliases
@@ -134,3 +134,24 @@ Both words are normalized with `normalizeClaim` and must be distinct single word
 Adding an existing pair preserves its creation time; `options.now` sets the time
 on first insertion. Expansion is deduplicated and never follows alias chains;
 the query vector uses the original query.
+
+## Source history and upgrades
+
+`provenanceSources` contains distinct source references accumulated by writes.
+Adding an existing normalized claim also appends its supplied source. Confirm,
+defer and forget preserve previous references; corrections and merges inherit
+references from their inputs. `provenance` remains the legacy single-value view,
+including its previous merge behavior when origins differ. Prefer the list for
+complete provenance. Hard retirement still deletes the belief and its history.
+
+`read.getBeliefDetail()` exposes `activeSuccessorId` for inactive beliefs (null
+when no active successor exists), in addition to the immediate `supersededBy`.
+Revision errors resolve the full chain and handle forgotten ends and cycles.
+An unchanged normalized correction with unchanged metadata reuses the original
+id and appends any supplied provenance without creating a version.
+
+Schema initialization performs a one-time consolidation of legacy active
+normalized duplicates into the oldest id. Evidence is summed, origins are
+retained, and other rows become merged predecessors. This migration does not
+repeat for later deliberate duplicates. Merge fan-in contributes to displayed
+lineage depth, but only correction depth triggers the instability flag.

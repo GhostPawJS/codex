@@ -22,8 +22,8 @@ export function queryTokenWeights(
 					`SELECT COUNT(*) AS n FROM beliefs_fts CROSS JOIN beliefs ON beliefs.id = beliefs_fts.rowid WHERE beliefs_fts MATCH ? AND beliefs.superseded_by IS NULL`,
 				)
 				.get<{ n: number }>(`${token}*`)?.n ?? 0;
-		// A term is corpus-wide only with at least five documents and at most one exception.
-		const common = total >= 5 && df >= total - 1;
+		// A term is corpus-wide only with at least twenty documents and at most one exception.
+		const common = total >= 20 && df >= total - 1;
 		weights.set(token, Math.log(1 + (total + 1) / (df + 1)));
 		if (common && df) commonMatch = true;
 		if (!common) {

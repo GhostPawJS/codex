@@ -1,6 +1,7 @@
 import type { CodexDb } from '../database.ts';
 import { computeVersionDiff } from '../lib/version_diff.ts';
 import { resolveNow } from '../resolve_now.ts';
+import { activeSuccessorId } from './active_successor_id.ts';
 
 import { getBeliefLineage } from './get_belief_lineage.ts';
 import { listBeliefProximity } from './list_belief_proximity.ts';
@@ -22,6 +23,7 @@ export function getBeliefDetail(
 	const predecessor = lineage.find((entry) => entry.supersededBy === record.id) ?? null;
 	return {
 		...record,
+		activeSuccessorId: record.isActive ? null : activeSuccessorId(db, beliefId),
 		lineageDepth: lineage.length,
 		proximity: record.isActive ? listBeliefProximity(db, beliefId, 3, 0.7, timestamp) : [],
 		versionDiff: predecessor ? computeVersionDiff(predecessor.claim, record.claim) : null,

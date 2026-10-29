@@ -104,7 +104,8 @@ export const rememberBeliefTool = defineCodexTool<
 			'Where the belief came from: explicit (stated), observed (behavior), distilled (extracted), or inferred (concluded).',
 		category: 'What kind of claim: preference, fact, procedure, capability, or custom.',
 		certainty: 'Optional initial certainty 0–1. Defaults to source-weighted value.',
-		provenance: 'Optional origin reference (session id, URL, context).',
+		provenance:
+			'Optional origin reference (session id, URL, context), appended even on duplicate adds.',
 	},
 	outputDescription:
 		'The created or reused belief record with derived state, plus proximity matches showing nearby existing beliefs that may overlap.',

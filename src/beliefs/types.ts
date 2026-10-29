@@ -33,6 +33,7 @@ export interface BeliefRow {
 	verified_at: number;
 	superseded_by: number | null;
 	provenance: string | null;
+	provenance_sources?: string;
 	deferred_until: number | null;
 	embedding: unknown;
 	embedding_norm: number | null;
@@ -51,7 +52,10 @@ export interface BeliefRecord {
 	createdAt: number;
 	verifiedAt: number;
 	supersededBy: number | null;
+	/** @deprecated Use provenanceSources for the complete origin history. */
 	provenance: string | null;
+	/** Append-only origin references; provenance is the legacy single-value view. */
+	provenanceSources?: string[];
 	deferredUntil: number | null;
 	freshness: number;
 	strength: StrengthTier;
@@ -135,6 +139,7 @@ export interface ProximityResultItem extends BeliefRecord {
 }
 
 export interface BeliefDetailRecord extends BeliefRecord {
+	activeSuccessorId?: number | null;
 	lineageDepth: number;
 	proximity: ProximityResultItem[];
 	versionDiff: { before: string; after: string } | null;
