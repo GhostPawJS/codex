@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-10-29
+
 ### Added
 
 - Append-only `provenanceSources` on belief records, retaining origin references across duplicate additions, confirmations, corrections, merges, deferrals and forgetting. The legacy `provenance` field remains readable.
@@ -18,7 +20,6 @@ All notable changes to this project are documented here. The format follows
 - Small corpora avoid the common-term search cap; merge fan-in alone no longer produces instability flags after the grace period.
 - Legacy active normalized duplicates consolidate once on schema upgrade, retaining evidence, sources and lineage while preserving subsequent explicit duplicates.
 - New CLI and MCP database files use mode 0600 and newly created parent directories use mode 0700, preserving existing permissions.
-- Regression coverage includes dash-leading CLI values already supported by the parser.
 
 ## [0.6.0] - 2026-10-28
 
