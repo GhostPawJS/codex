@@ -3,7 +3,7 @@
   "name": "io.github.GhostPawJS/codex",
   "description": "Local belief and memory engine with evidence, certainty, and honest revision history.",
   "title": "GhostPaw Codex",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "repository": {
     "url": "https://github.com/GhostPawJS/codex.git",
     "source": "github"
@@ -14,7 +14,7 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@ghostpaw/codex",
-      "version": "0.6.1",
+      "version": "0.6.2",
       "transport": {
         "type": "stdio"
       },

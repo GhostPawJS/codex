@@ -6,7 +6,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@ghostpaw/codex@0.6.1",
+        "@ghostpaw/codex@0.6.2",
         "mcp"
       ]
     }
