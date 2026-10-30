@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `belief correct` on a belief that 0.6.0 stored with provenance failed with "database disk image is malformed". The update trigger now fires only when the claim changes, so one update writes the search index once. Migration replaces legacy update triggers before provenance backfill and rebuilds the search index; repeated initialization remains safe.
+- Review `--now` accepts negative and unsigned relative day offsets such as `-3d` and `30d`, alongside existing formats. Invalid values are named in usage errors.
+- Explicit `--db` paths now create missing parent directories recursively with mode 0700 and new database files with mode 0600.
+- Documented the opt-in `@file` rule and literal leading `@` behavior of current CLI arguments.
+
 ## [0.6.1] - 2026-10-29
 
 ### Added

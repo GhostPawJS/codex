@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { Readable, Writable } from 'node:stream';
 import { test } from 'node:test';
@@ -71,8 +71,13 @@ test('CLI literal values, provenance, duplicate, aliases, validation and superse
 		])
 			assert.equal((await invoke(args)).code, 2, args.join(' '));
 		const missing = await invoke(['search', 'fox', '--db', join(dir, 'missing', 'x.db')]);
-		assert.equal(missing.code, 3);
-		assert.match(missing.err, /missing/);
+		assert.equal(missing.code, 0);
+		assert.equal(missing.err, '');
+		assert.equal(missing.out, 'No matching beliefs.\n');
+		if (process.platform !== 'win32') {
+			assert.equal(statSync(join(dir, 'missing')).mode & 0o777, 0o700);
+			assert.equal(statSync(join(dir, 'missing', 'x.db')).mode & 0o777, 0o600);
+		}
 		assert.equal(
 			(await invoke(['belief', 'correct', '1', '-c', 'Fox waves', '--provenance', 'chat:2'])).code,
 			0,

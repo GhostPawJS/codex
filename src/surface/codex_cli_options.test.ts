@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Readable, Writable } from 'node:stream';
@@ -12,21 +12,24 @@ test('codex noun verb add, search, show and not found use a file database', asyn
 	try {
 		const invoke = async (args: string[]) => {
 			let out = '';
-			const code = await runToolCli([...args, '--db', join(dir, 'test.db'), '--json'], {
-				...codexCliOptions,
-				stdin: Readable.from([]),
-				stdout: new Writable({
-					write(chunk, _encoding, cb) {
-						out += String(chunk);
-						cb();
-					},
-				}),
-				stderr: new Writable({
-					write(_chunk, _encoding, cb) {
-						cb();
-					},
-				}),
-			});
+			const code = await runToolCli(
+				[...args, '--db', join(dir, 'parents', 'nested', 'test.db'), '--json'],
+				{
+					...codexCliOptions,
+					stdin: Readable.from([]),
+					stdout: new Writable({
+						write(chunk, _encoding, cb) {
+							out += String(chunk);
+							cb();
+						},
+					}),
+					stderr: new Writable({
+						write(_chunk, _encoding, cb) {
+							cb();
+						},
+					}),
+				},
+			);
 			return { code, result: JSON.parse(out) };
 		};
 		const added = await invoke([
@@ -39,6 +42,11 @@ test('codex noun verb add, search, show and not found use a file database', asyn
 			'procedure',
 		]);
 		assert.equal(added.code, 0);
+		if (process.platform !== 'win32') {
+			assert.equal(statSync(join(dir, 'parents')).mode & 0o777, 0o700);
+			assert.equal(statSync(join(dir, 'parents', 'nested')).mode & 0o777, 0o700);
+			assert.equal(statSync(join(dir, 'parents', 'nested', 'test.db')).mode & 0o777, 0o600);
+		}
 		const found = await invoke(['search', 'deploys']);
 		assert.equal(found.result.data.results[0].id, added.result.data.belief.id);
 		assert.equal((await invoke(['belief', 'show', String(added.result.data.belief.id)])).code, 0);
@@ -94,6 +102,11 @@ test('plain CLI output, quiet ids, per-action help, dates and guide commands', a
 		assert.equal((await invoke(['search', 'deploys', '--quiet'])).out, '1\n');
 		assert.equal((await invoke(['review', 'log', '--quiet'])).out, '1\n');
 		assert.equal((await invoke(['review', 'status', '--quiet'])).out, '');
+		for (const now of ['-3d', '30d', '+3d'])
+			assert.equal((await invoke(['review', 'status', '--now', now])).code, 0);
+		const badNow = await invoke(['review', 'status', '--now', 'not-a-date']);
+		assert.equal(badNow.code, 2);
+		assert.match(badNow.err, /Invalid --now "not-a-date"/);
 		assert.equal((await invoke(['version', '--quiet'])).out, '');
 		assert.match((await invoke(['review', 'status'])).out, /activeBeliefCount: +1/);
 		assert.match(

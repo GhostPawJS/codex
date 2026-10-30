@@ -1,0 +1,84 @@
+// Schema snapshot from v0.6.0; keep independent of current migrations.
+import type { CodexDb } from '../../database.ts';
+
+export function initLegacy060(db: CodexDb): void {
+	legacyBeliefTables(db);
+	legacyBeliefSearch(db);
+}
+
+function legacyBeliefTables(db: CodexDb): void {
+	db.exec(`
+		CREATE TABLE IF NOT EXISTS query_aliases (
+			term TEXT NOT NULL,
+			alias TEXT NOT NULL,
+			created_at INTEGER NOT NULL,
+			PRIMARY KEY (term, alias)
+		);
+
+		CREATE TABLE IF NOT EXISTS beliefs (
+			id INTEGER PRIMARY KEY,
+			claim TEXT NOT NULL,
+			claim_normalized TEXT NOT NULL,
+			certainty REAL NOT NULL CHECK (certainty >= 0 AND certainty <= 1),
+			evidence INTEGER NOT NULL CHECK (evidence >= 1),
+			source TEXT NOT NULL CHECK (source IN ('explicit', 'observed', 'distilled', 'inferred')),
+			category TEXT NOT NULL CHECK (category IN ('preference', 'fact', 'procedure', 'capability', 'custom')),
+			created_at INTEGER NOT NULL,
+			verified_at INTEGER NOT NULL,
+			superseded_by INTEGER REFERENCES beliefs(id),
+			superseded_reason TEXT,
+			provenance TEXT,
+			deferred_until INTEGER,
+			embedding BLOB NOT NULL,
+			embedding_norm REAL NOT NULL,
+			embedding_dim INTEGER NOT NULL,
+			embedding_version TEXT NOT NULL
+		)
+	`);
+
+	if (
+		!db
+			.prepare('PRAGMA table_info(beliefs)')
+			.all<{ name: string }>()
+			.some((column) => column.name === 'superseded_reason')
+	) {
+		db.exec('ALTER TABLE beliefs ADD COLUMN superseded_reason TEXT');
+	}
+
+	db.exec('CREATE INDEX IF NOT EXISTS beliefs_active_idx ON beliefs (superseded_by)');
+	db.exec('CREATE INDEX IF NOT EXISTS beliefs_verified_idx ON beliefs (verified_at DESC)');
+	db.exec('CREATE INDEX IF NOT EXISTS beliefs_category_idx ON beliefs (category)');
+	db.exec('CREATE INDEX IF NOT EXISTS beliefs_source_idx ON beliefs (source)');
+}
+
+function legacyBeliefSearch(db: CodexDb): void {
+	db.exec(`
+		CREATE VIRTUAL TABLE IF NOT EXISTS beliefs_fts USING fts5(
+			claim,
+			content='beliefs',
+			content_rowid='id',
+			tokenize='porter unicode61'
+		)
+	`);
+
+	db.exec(`
+		CREATE TRIGGER IF NOT EXISTS beliefs_ai AFTER INSERT ON beliefs BEGIN
+			INSERT INTO beliefs_fts(rowid, claim) VALUES (new.id, new.claim);
+		END
+	`);
+
+	db.exec(`
+		CREATE TRIGGER IF NOT EXISTS beliefs_ad AFTER DELETE ON beliefs BEGIN
+			INSERT INTO beliefs_fts(beliefs_fts, rowid, claim) VALUES ('delete', old.id, old.claim);
+		END
+	`);
+
+	db.exec(`
+		CREATE TRIGGER IF NOT EXISTS beliefs_au AFTER UPDATE ON beliefs BEGIN
+			INSERT INTO beliefs_fts(beliefs_fts, rowid, claim) VALUES ('delete', old.id, old.claim);
+			INSERT INTO beliefs_fts(rowid, claim) VALUES (new.id, new.claim);
+		END
+	`);
+
+	db.exec(`INSERT INTO beliefs_fts(beliefs_fts) VALUES('rebuild')`);
+}

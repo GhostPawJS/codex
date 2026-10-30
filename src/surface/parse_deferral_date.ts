@@ -1,6 +1,6 @@
 import { CliUsageError } from '../surfaces/cli_args.ts';
 
-export function parseDeferralDate(raw: string, now = Date.now()): number {
+export function parseDeferralDate(raw: string, now = Date.now(), relativeNow = now): number {
 	const invalid = () =>
 		new CliUsageError(
 			`Invalid --deferred-until "${raw}". Use YYYY-MM-DD, DD.MM.YYYY, today, tomorrow, +3d, ISO date-time or epoch ms.`,
@@ -21,10 +21,10 @@ export function parseDeferralDate(raw: string, now = Date.now()): number {
 			date.setHours(23, 59, 59, 999);
 			if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day)
 				throw invalid();
-		} else if (raw === 'today' || raw === 'tomorrow' || /^\+\d+d$/.test(raw)) {
-			date = new Date(now);
+		} else if (raw === 'today' || raw === 'tomorrow' || /^[+-]?\d+d$/.test(raw)) {
+			date = new Date(relativeNow);
 			date.setDate(
-				date.getDate() + (raw === 'today' ? 0 : raw === 'tomorrow' ? 1 : Number(raw.slice(1, -1))),
+				date.getDate() + (raw === 'today' ? 0 : raw === 'tomorrow' ? 1 : Number(raw.slice(0, -1))),
 			);
 			date.setHours(23, 59, 59, 999);
 		} else {

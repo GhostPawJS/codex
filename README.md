@@ -320,6 +320,16 @@ ghostpaw-codex search "when do we deploy" --json | jq '.data.results'
 printf '%s' '{"beliefId":1}' | ghostpaw-codex belief show - --json
 ```
 
+### File values and leading @
+
+File input is opt-in for each CLI argument. When an argument's help lists
+`(@file, @- stdin, @@ literal @)`, `@path` reads a UTF-8 file, `@-` reads
+stdin, and `@@text` passes the literal value `@text`.
+
+No current Codex argument enables this option: flags and positional values
+keep leading `@` and `@@` as written. For long claims, pass a JSON object
+through stdin with `-` (see the example above).
+
 ### Agent Skill
 
 `SKILL.md` (repo root) and `skills/codex/SKILL.md` follow the
@@ -543,7 +553,8 @@ returns `no_op`. A merge into `--successor-id` can omit `--claim`.
 
 `belief --help` lists belief verbs. `review flags --now +8d` and
 `review flags --now 2026-11-10` accept the same date formats as deferral, including
-historical dates and epoch milliseconds. Calendar dates use local end of day.
+historical dates and epoch milliseconds. Relative day offsets also accept `-3d`
+and `30d`. Calendar dates and relative days use local end of day.
 
 New CLI and MCP database files use mode `0600`; newly created parent directories
 use `0700`. Existing permissions are preserved. On first upgrade, legacy active

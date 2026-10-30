@@ -1,11 +1,9 @@
-import { existsSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { addQueryAlias } from '../beliefs/add_query_alias.ts';
 import { listQueryAliases } from '../beliefs/list_query_aliases.ts';
 import { normalizeQueryAlias } from '../beliefs/normalize_query_alias.ts';
 import { removeQueryAlias } from '../beliefs/remove_query_alias.ts';
 import type { CodexDb } from '../database.ts';
-import { CodexNotFoundError } from '../errors.ts';
 import type { ToolCliOptions } from '../surfaces/cli.ts';
 import { codexVersion } from '../version.ts';
 import { codexSurfaceTools } from './codex_surface_tools.ts';
@@ -21,8 +19,6 @@ export const codexCliOptions: ToolCliOptions<CodexDb> = {
 		`Database: ${resolve(resolveCodexDbPath(options.db === undefined ? {} : { flag: options.db }))}\nUse --db <path> or GHOSTPAW_CODEX_DB to override the default ~/.ghostpaw/codex.db.`,
 	tools: codexSurfaceTools,
 	openContext: async (options) => {
-		if (options.db && options.db !== ':memory:' && !existsSync(dirname(options.db)))
-			throw new CodexNotFoundError(`Database directory does not exist: ${dirname(options.db)}`);
 		const { openCodexDb } = await import('./open_codex_db.ts');
 		const { resolveCodexDbPath } = await import('./resolve_codex_db_path.ts');
 		return openCodexDb(resolveCodexDbPath(options.db === undefined ? {} : { flag: options.db }));

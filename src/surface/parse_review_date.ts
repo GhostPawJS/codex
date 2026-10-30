@@ -3,9 +3,7 @@ import { parseDeferralDate } from './parse_deferral_date.ts';
 
 export function parseReviewDate(raw: string): number {
 	try {
-		if (/^\+\d+d$/.test(raw) || raw === 'today' || raw === 'tomorrow')
-			return parseDeferralDate(raw);
-		return parseDeferralDate(raw, Number.MIN_SAFE_INTEGER);
+		return parseDeferralDate(raw, Number.MIN_SAFE_INTEGER, Date.now());
 	} catch (error) {
 		throw new CliUsageError((error as Error).message.replaceAll('--deferred-until', '--now'));
 	}
