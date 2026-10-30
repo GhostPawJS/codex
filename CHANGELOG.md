@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-10-30
+
 ### Fixed
 
 - `belief correct` on a belief that 0.6.0 stored with provenance failed with "database disk image is malformed". The update trigger now fires only when the claim changes, so one update writes the search index once. Migration replaces legacy update triggers before provenance backfill and rebuilds the search index; repeated initialization remains safe.
@@ -181,7 +183,8 @@ All notable changes to this project are documented here. The format follows
 - CI runs on every push and pull request on Node 24 and 26. Releases publish
   through npm trusted publishing with provenance.
 
-[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/GhostPawJS/codex/compare/v0.6.1...v0.6.2
 [0.6.0]: https://github.com/GhostPawJS/codex/compare/v0.5.2...v0.6.0
 [0.5.2]: https://github.com/GhostPawJS/codex/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/GhostPawJS/codex/compare/v0.5.0...v0.5.1
