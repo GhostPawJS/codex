@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Clarified Cline CLI configuration verification with `cline config mcp` and distinguished direct tool handler checks from MCP stdio checks in the install guide.
+
 ## [0.6.2] - 2026-10-30
 
 ### Fixed

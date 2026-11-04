@@ -228,7 +228,8 @@ VS Code often starts without `~/.local/bin` on PATH, so use the absolute path
 that `echo "$HOME/.local/bin/ghostpaw-codex"` prints (PowerShell:
 `"$env:LOCALAPPDATA\Programs\ghostpaw\bin\ghostpaw-codex.exe"`). Merge the
 entry into the existing `mcpServers`. Settings file locations, the
-`cline mcp add` form and a test call: [llms-install.md](llms-install.md).
+`cline mcp add` form and checks: [llms-install.md](llms-install.md).
+For Cline CLI 3.x, `cline config mcp` lists the configured servers.
 
 ```json
 {

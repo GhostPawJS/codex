@@ -113,8 +113,8 @@ Use the printed path in step 3. The database path works the same way:
 
 ## 3. Add it to Cline
 
-Cline reads `cline_mcp_settings.json`. In Cline, **MCP Servers → Installed →
-Configure MCP Servers** opens it. Typical locations:
+Cline reads `cline_mcp_settings.json`. In the VS Code extension,
+**MCP Servers → Installed → Configure MCP Servers** opens it. Typical locations:
 
 | Client | Typical settings file |
 |---|---|
@@ -160,6 +160,15 @@ cline mcp add ghostpaw-codex --yes -- "$HOME/.local/bin/ghostpaw-codex" mcp --db
 
 ## 4. Test it
 
+With Cline CLI 3.x, check that it reads the entry:
+
+```sh
+cline config mcp
+```
+
+It should list `ghostpaw-codex [stdio]` and the settings file path. This lists
+configuration; it does not connect to the server or list its tools.
+
 From a terminal, use the same binary and database:
 
 ```sh
@@ -168,8 +177,8 @@ export GHOSTPAW_CODEX_DB="$HOME/.ghostpaw/codex.db"
 "$HOME/.local/bin/ghostpaw-codex" search "staging deploy"
 ```
 
-For a headless check of the MCP tool, run `call` in the same shell. It runs the
-handler the MCP server uses and prints the JSON result:
+For a headless check of the tool handler, run `call` in the same shell. This
+prints the JSON result directly; it does not test MCP stdio or Cline:
 
 ```sh
 "$HOME/.local/bin/ghostpaw-codex" call search_codex '{"query":"staging deploy"}'
