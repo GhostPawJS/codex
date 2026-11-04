@@ -100,6 +100,14 @@ export function recall(
 		!options.fts && trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"');
 	const text = phrase ? trimmed.slice(1, -1) : query;
 	const tokens = tokenizeQuery(expandQuery(db, text));
+	const leadingTokens = tokenizeQuery(text);
+	const matchesEntity = (claim: string): boolean => {
+		if (options.fts || phrase) return false;
+		const colon = claim.indexOf(':');
+		if (colon < 0) return false;
+		const entity = tokenizeQuery(claim.slice(0, colon));
+		return entity.length > 0 && entity.every((token, i) => token === leadingTokens[i]);
+	};
 	let exactRanks: Map<number, number> | undefined;
 	if (options.fts || phrase) {
 		try {
@@ -136,6 +144,12 @@ export function recall(
 					tokens.some((token) => tokenizeQuery(row.claim).some((word) => nearToken(token, word))),
 				)
 			: loadActiveBeliefRows(db, [...lexicalRanks.keys()]);
+	if (!exactRanks) {
+		const ids = new Set(rows.map((row) => row.id));
+		for (const row of loadActiveBeliefRows(db)) {
+			if (!ids.has(row.id) && matchesEntity(row.claim)) rows.push(row);
+		}
+	}
 	rows = rows.filter(
 		(row) =>
 			(!options.category || row.category === options.category) &&
@@ -174,12 +188,20 @@ export function recall(
 	};
 	const best = Math.max(0, ...ranked.map(signal));
 	return ranked
-		.filter((result) => exactRanks || commonOnly || signal(result) >= best * 0.55)
-		.sort((a, b) =>
-			// With no informative lexical match, avoid promoting weak hash collisions.
-			commonOnly
-				? (a.lexicalRank ?? Infinity) - (b.lexicalRank ?? Infinity) || a.id - b.id
-				: signal(b) - signal(a) || b.finalScore - a.finalScore || a.id - b.id,
+		.filter(
+			(result) =>
+				exactRanks ||
+				matchesEntity(result.value.row.claim) ||
+				commonOnly ||
+				signal(result) >= best * 0.55,
+		)
+		.sort(
+			(a, b) =>
+				// With no informative lexical match, avoid promoting weak hash collisions.
+				Number(matchesEntity(b.value.row.claim)) - Number(matchesEntity(a.value.row.claim)) ||
+				(commonOnly
+					? (a.lexicalRank ?? Infinity) - (b.lexicalRank ?? Infinity) || a.id - b.id
+					: signal(b) - signal(a) || b.finalScore - a.finalScore || a.id - b.id),
 		)
 		.slice(0, commonOnly ? Math.min(limit, 3) : limit)
 		.map((result) => ({

@@ -8,6 +8,7 @@ export interface ToolCliOptions<TCtx> {
 	bin: string;
 	version: string;
 	description: string;
+	defaultDbPath?: () => string | undefined;
 	describeDb?: (options: { db?: string }) => string;
 	formatResult?: (
 		result: unknown,
@@ -32,6 +33,34 @@ export async function runToolCli<TCtx>(
 	argv: string[],
 	options: ToolCliOptions<TCtx>,
 ): Promise<number> {
+	const originalOptions = options;
+	const notice = (opts: { db?: string }) => {
+		if (opts.db !== undefined || process.env.GHOSTPAW_QUIET === '1') return;
+		const end = argv.indexOf('--');
+		if (argv.slice(0, end < 0 ? argv.length : end).some((arg) => arg === '--quiet' || arg === '-q'))
+			return;
+		const path = originalOptions.defaultDbPath?.();
+		if (path !== undefined)
+			(originalOptions.stderr ?? process.stderr).write(`using default db ${path}\n`);
+	};
+	options = {
+		...options,
+		openContext: (opts) => {
+			notice(opts);
+			return originalOptions.openContext(opts);
+		},
+		...(options.commands?.mcp
+			? {
+					commands: {
+						...options.commands,
+						mcp: (opts: { db?: string }) => {
+							notice(opts);
+							return originalOptions.commands?.mcp?.(opts);
+						},
+					},
+				}
+			: {}),
+	};
 	if (process.env.GHOSTPAW_OUTPUT === 'json') argv = ['--json', ...argv];
 	argv = argv.map((arg, i) =>
 		argv.slice(0, i).includes('--') ? arg : ({ '-q': '--quiet', '-j': '--json' }[arg] ?? arg),

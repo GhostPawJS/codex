@@ -8,12 +8,18 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Without `--db` or `GHOSTPAW_CODEX_DB`, the CLI prints `using default db <path>` on stderr; `--quiet` or `GHOSTPAW_QUIET=1` suppresses it.
+
 - Accept `--json` on every CLI read command.
 - Support `GHOSTPAW_OUTPUT=json` as an opt-in CLI output default.
 - Warn on stderr that `belief retire` irreversibly deletes the whole lineage; document `belief forget` for soft removal.
 
 - `review status --by-prefix` counts active claim prefixes (`byPrefix`, `prefixCounts` in the facade).
 - `review duplicates --limit` lists nearby active pairs immediately, honoring proximity dismissals.
+
+### Changed
+
+- Search ranks beliefs first whose `prefix:` matches the leading query words (default and `--prefix` modes; `--fts` ranking unchanged).
 
 ## [0.6.3] - 2026-11-04
 

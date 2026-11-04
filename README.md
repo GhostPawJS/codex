@@ -292,6 +292,8 @@ end of day and must be in the future.
 Array flags repeat, kebab-case flags map to schema properties, and values are literal, including leading `@`. Use JSON stdin (`-`) for long input. `--` ends flags. A positional `-`, or piped stdin
 with no arguments, reads a JSON object; explicit flags override its fields.
 Database selection uses `--db`, `GHOSTPAW_CODEX_DB`, then `~/.ghostpaw/codex.db`.
+Opening the default database prints `using default db <path>` once on stderr.
+Suppress the notice with `--quiet` or `GHOSTPAW_QUIET=1`. Commands that do not open a database print no notice.
 Top-level help shows the resolved path. Version output starts with
 `ghostpaw-codex` and identifies binary target, npm or library execution.
 
@@ -574,6 +576,10 @@ Use `search --fts 'alpha OR beta'` for raw FTS5 syntax, or
 `search note --prefix "project:"` to filter claims by a case-insensitive prefix
 after leading whitespace. A query is required with `--prefix`. Library recall
 options and search tool inputs also accept `fts` and `prefix`.
+Default search ranks claims whose entity before the first colon matches the leading
+query tokens first, ignoring case and treating spaces and hyphens alike (for example,
+`Agentpreneur: ...` for `Agentpreneur state files routine memory db`). This also
+applies with `--prefix`; `--fts` and quoted phrase ranking remain unchanged.
 
 Review status integrity remains the percentage of active beliefs with certainty
 at least 0.7. The new, unconfirmed count covers beliefs with one evidence item

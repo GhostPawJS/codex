@@ -19,7 +19,7 @@ test('safe search, raw FTS, prefix, positional help and correction output', asyn
 					cb();
 				},
 			});
-		const code = await runToolCli(args, {
+		const code = await runToolCli([...args, '--db', ':memory:'], {
 			...codexCliOptions,
 			openContext: () => db,
 			closeContext: () => {},

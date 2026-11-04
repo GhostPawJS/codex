@@ -44,7 +44,9 @@ Search before adding with `search_codex` (CLI: `ghostpaw-codex search`): `ghostp
 
 Exit codes: 0 success, 1 operation failure, 2 usage, 3 missing belief, 4 conflict, 70 internal failure.
 
-Database: `~/.ghostpaw/codex.db`. Override with `--db <path>` or `GHOSTPAW_CODEX_DB`.
+Database: `~/.ghostpaw/codex.db`. Override with `--db <path>` or `GHOSTPAW_CODEX_DB`. Default database opens print `using default db <path>` once on stderr; suppress with `--quiet` or `GHOSTPAW_QUIET=1`. Informational commands do not print the notice.
+
+Search ranks colon-prefixed entities matching the leading query tokens first (case-insensitive, including multiword and hyphenated entities), also with `--prefix`. Raw `--fts` and quoted phrase ranking are unchanged.
 
 Codex is a local belief and memory engine that records claims, evidence, certainty, and revision history. Search before you remember to avoid duplicates and recover relevant context. Inspect before you revise; use revise for confirmation, correction, merging, forgetting, or deferral. Use retire only for permanent erasure. Certainty is not truth: confidence and derived flags guide attention, never prove a claim. Preserve honest lineage when understanding changes and ask for clarification when the intended action is ambiguous.
 

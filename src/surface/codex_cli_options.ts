@@ -14,9 +14,10 @@ export const codexCliOptions: ToolCliOptions<CodexDb> = {
 	bin: 'ghostpaw-codex',
 	version: codexVersion,
 	description: 'Local belief and memory engine',
+	defaultDbPath: () => (process.env.GHOSTPAW_CODEX_DB ? undefined : resolveCodexDbPath()),
 	formatResult: renderCodexPlainResult,
 	describeDb: (options) =>
-		`Database: ${resolve(resolveCodexDbPath(options.db === undefined ? {} : { flag: options.db }))}\nUse --db <path> or GHOSTPAW_CODEX_DB to override the default ~/.ghostpaw/codex.db.`,
+		`Database: ${resolve(resolveCodexDbPath(options.db === undefined ? {} : { flag: options.db }))}\nUse --db <path> or GHOSTPAW_CODEX_DB to override the default ~/.ghostpaw/codex.db. Default opens print using default db <path> on stderr; suppress with --quiet or GHOSTPAW_QUIET=1.`,
 	tools: codexSurfaceTools,
 	openContext: async (options) => {
 		const { openCodexDb } = await import('./open_codex_db.ts');

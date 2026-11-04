@@ -133,7 +133,7 @@ export async function runCliCommand<T>(
 				command: `${options.bin} ${command.path}`,
 				description: command.fixed.action
 					? `${String(command.fixed.action)[0]?.toUpperCase()}${String(command.fixed.action).slice(1)} a belief.`
-					: command.tool.description,
+					: `${command.tool.description}${command.path === 'search' ? ' Leading query tokens matching the entity before a claim colon rank first, including with --prefix; --fts ranking is unchanged.' : ''}`,
 				positionals: command.positionals.map((name) => ({
 					...argument(name, properties[name] ?? {}),
 					...(properties[name]?.type === 'array'
