@@ -317,7 +317,7 @@
 	},
 	".:exports.skills.processStaleBeliefsSkill.description": {
 		"kind": "string",
-		"value": "Refresh or retire beliefs whose freshness has dropped too far, using flags to identify them and the right verb to resolve each."
+		"value": "Refresh or forget beliefs whose freshness has dropped too far, using flags to identify them and the right verb to resolve each."
 	},
 	".:exports.skills.processStaleBeliefsSkill.name": {
 		"kind": "string",
@@ -735,7 +735,7 @@
 	},
 	".:exports.tools.retireBeliefTool.description": {
 		"kind": "string",
-		"value": "Permanently delete a belief and its entire lineage chain. No trace remains. This is for privacy and hard erasure, not normal revision."
+		"value": "WARNING: Hard-deletes the whole lineage (the belief and all its predecessors/successors) and cannot be undone. Use belief forget for soft removal that keeps lineage."
 	},
 	".:exports.tools.retireBeliefTool.handler": {
 		"kind": "function"

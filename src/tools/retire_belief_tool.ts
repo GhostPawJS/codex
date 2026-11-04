@@ -49,7 +49,7 @@ export const retireBeliefTool = defineCodexTool<
 >({
 	name: retireBeliefToolName,
 	description:
-		'Permanently delete a belief and its entire lineage chain. No trace remains. This is for privacy and hard erasure, not normal revision.',
+		'WARNING: Hard-deletes the whole lineage (the belief and all its predecessors/successors) and cannot be undone. Use belief forget for soft removal that keeps lineage.',
 	whenToUse:
 		'Use this only for privacy cleanup or hard erasure. The belief and all of its lineage (predecessors and successors) will be destroyed.',
 	whenNotToUse:

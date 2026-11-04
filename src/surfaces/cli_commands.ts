@@ -46,6 +46,7 @@ export async function runCliCommand<T>(
 		quiet = argv.includes('--quiet') || argv.includes('-q'),
 		compact = false,
 		help = false;
+	const writeText = (text: string) => stdout.write(json ? `${JSON.stringify(text)}\n` : text);
 	let db: string | undefined;
 	const fail = (message: string, code: number) => {
 		stderr.write(`${message}\n`);
@@ -160,7 +161,7 @@ export async function runCliCommand<T>(
 		if (args[0] === 'alias' && options.commands?.alias) {
 			if (help) {
 				if (!quiet)
-					stdout.write(`${options.bin} alias add <term> <alias> | remove <term> <alias> | list\n`);
+					writeText(`${options.bin} alias add <term> <alias> | remove <term> <alias> | list\n`);
 				return 0;
 			}
 			const action = args[1];
@@ -192,10 +193,10 @@ export async function runCliCommand<T>(
 			const matches = tree.filter((command) => command.path.startsWith(args.join(' ')));
 			if (!entry && !matches.length) throw new CliUsageError(`Unknown command: ${args.join(' ')}`);
 			if (!quiet)
-				stdout.write(
+				writeText(
 					entry
-						? `${renderCliHelp(specFor(entry))}Global flags: --json/-j, --quiet/-q, --help/-h, --db <path>\n`
-						: `${options.bin} ${options.version}\n${options.description}\n${options.describeDb ? `\n${options.describeDb(db === undefined ? {} : { db })}\n` : ''}\nCommands:\n${matches.map((command) => `  ${command.path}`).join('\n')}${args.length ? '' : '\n  alias add|remove|list\n  mcp, skill, tools [--json], describe <tool>, call <tool> [JSON|-], completions <bash|zsh|fish>, version'}\nGlobal flags: --db <path>, --json/-j, --quiet/-q, --compact, --claim/-c, --help/-h, --version/-V/-v, --no-color\n`,
+						? `${renderCliHelp(specFor(entry))}Global flags: --json/-j (all read commands), --quiet/-q, --help/-h, --db <path>\nGHOSTPAW_OUTPUT=json opts into JSON output.\n`
+						: `${options.bin} ${options.version}\n${options.description}\n${options.describeDb ? `\n${options.describeDb(db === undefined ? {} : { db })}\n` : ''}\nCommands:\n${matches.map((command) => `  ${command.path}`).join('\n')}${args.length ? '' : '\n  alias add|remove|list\n  mcp, skill, tools [--json], describe <tool>, call <tool> [JSON|-], completions <bash|zsh|fish>, version'}\nGlobal flags: --db <path>, --json/-j, --quiet/-q, --compact, --claim/-c, --help/-h, --version/-V/-v, --no-color\n--json applies to all read commands; GHOSTPAW_OUTPUT=json opts into JSON output.\n`,
 				);
 			return 0;
 		}
@@ -217,11 +218,11 @@ export async function runCliCommand<T>(
 				'completions',
 				'version',
 			]);
-			if (shell === 'bash') stdout.write(`complete -W '${words.join(' ')}' ${options.bin}\n`);
+			if (shell === 'bash') writeText(`complete -W '${words.join(' ')}' ${options.bin}\n`);
 			else if (shell === 'zsh')
-				stdout.write(`#compdef ${options.bin}\n_arguments '*:command:(${words.join(' ')})'\n`);
+				writeText(`#compdef ${options.bin}\n_arguments '*:command:(${words.join(' ')})'\n`);
 			else if (shell === 'fish')
-				stdout.write(`complete -c ${options.bin} -f -a '${words.join(' ')}'\n`);
+				writeText(`complete -c ${options.bin} -f -a '${words.join(' ')}'\n`);
 			else throw new CliUsageError('Expected completion shell: bash, zsh or fish');
 			return 0;
 		}
@@ -272,6 +273,7 @@ export async function runCliCommand<T>(
 		}
 		const context = await options.openContext(db === undefined ? {} : { db });
 		try {
+			if (entry.tool.name === 'retire_belief') stderr.write(`${entry.tool.description}\n`);
 			const result = await entry.tool.handler(context, input);
 			const record = result as {
 				ok?: boolean;

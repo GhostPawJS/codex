@@ -32,6 +32,7 @@ export async function runToolCli<TCtx>(
 	argv: string[],
 	options: ToolCliOptions<TCtx>,
 ): Promise<number> {
+	if (process.env.GHOSTPAW_OUTPUT === 'json') argv = ['--json', ...argv];
 	argv = argv.map((arg, i) =>
 		argv.slice(0, i).includes('--') ? arg : ({ '-q': '--quiet', '-j': '--json' }[arg] ?? arg),
 	);
@@ -50,7 +51,7 @@ export async function runToolCli<TCtx>(
 	const modern = await runCliCommand(argv, options);
 	if (modern !== undefined) return modern;
 	const quiet = argv.includes('--quiet');
-	const explicitJson = argv.includes('--json') && !argv.includes('tools');
+	const explicitJson = argv.includes('--json');
 	if (quiet)
 		options = {
 			...options,
@@ -101,7 +102,7 @@ export async function runToolCli<TCtx>(
 	}
 	if (command === 'tools') {
 		stdout.write(
-			args.includes('--json')
+			explicitJson
 				? `${JSON.stringify(
 						options.tools.map(({ handler: _handler, cli: _cli, ...tool }) => tool),
 						null,
@@ -114,7 +115,8 @@ export async function runToolCli<TCtx>(
 	if (command === 'skill') {
 		if (!options.commands?.skill) return fail('skill command unavailable');
 		try {
-			stdout.write(await options.commands.skill(args));
+			const text = await options.commands.skill(args);
+			stdout.write(explicitJson ? `${JSON.stringify(text)}\n` : text);
 			return 0;
 		} catch (error) {
 			return fail(error instanceof Error ? error.message : String(error));
@@ -128,6 +130,11 @@ export async function runToolCli<TCtx>(
 	const name = command === 'call' || command === 'describe' ? args.shift() : command;
 	const tool = options.tools.find((tool) => normalize(tool.name) === normalize(name ?? ''));
 	if (!tool) return fail(`Unknown tool: ${name ?? ''}`);
+	if (command === 'describe' && explicitJson) {
+		const { handler: _handler, cli: _cli, ...description } = tool;
+		stdout.write(`${JSON.stringify(description, null, 2)}\n`);
+		return 0;
+	}
 	if (command === 'describe') {
 		stdout.write(
 			`${tool.name}\n${tool.description}\nUse when: ${tool.whenToUse ?? ''}\nNot for: ${tool.whenNotToUse ?? ''}\nRead only: ${tool.readOnly ?? false}\n\nParameter | Type | Required | Description\n${Object.entries(
@@ -214,6 +221,7 @@ export async function runToolCli<TCtx>(
 		return fail(String(cause), (cause as { code?: string }).code === 'not_found' ? 3 : 70);
 	}
 	try {
+		if (tool.name === 'retire_belief') stderr.write(`${tool.description}\n`);
 		const result = await tool.handler(context, input as Record<string, unknown>);
 		stdout.write(`${JSON.stringify(result, null, compact ? undefined : 2)}\n`);
 		if (

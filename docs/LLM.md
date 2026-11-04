@@ -254,7 +254,7 @@ The current `skills` namespace exports these 17 workflow blocks:
 - `resolve-near-duplicate-beliefs` — decide whether proximate beliefs are duplicates, successors, or distinct
 - `correct-belief-lineage-honestly` — use correct instead of forget+remember to preserve lineage
 - `handle-ambiguous-belief-updates` — choose the right verb when new information collides with existing beliefs
-- `process-stale-beliefs` — refresh or retire beliefs whose freshness has dropped too far
+- `process-stale-beliefs` — refresh or forget beliefs whose freshness has dropped too far
 - `run-calibration-pass` — detect systematic overconfidence in certainty estimates
 - `defer-beliefs-pending-outcomes` — postpone flag processing for beliefs that depend on future events
 - `erase-beliefs-for-privacy` — choose between forget and retire based on privacy requirements

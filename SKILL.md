@@ -34,11 +34,12 @@ Search before adding with `search_codex` (CLI: `ghostpaw-codex search`): `ghostp
 - `ghostpaw-codex belief show <id>`
 - `ghostpaw-codex belief confirm <id>`
 - `ghostpaw-codex belief correct <id> --claim "Deploys go out on Wednesdays."`
+- WARNING: `belief retire` hard-deletes the whole lineage (the belief and all its predecessors/successors) and cannot be undone. Use `belief forget` for soft removal that keeps lineage.
 - `ghostpaw-codex belief forget <id>`
 - `ghostpaw-codex belief defer <id> --deferred-until +7d`
 - `ghostpaw-codex belief merge <id> <id> --claim "Combined claim"`
 - `ghostpaw-codex review flags|status|log|trends|duplicates`; use `review status --by-prefix` for active prefix counts and `review duplicates --limit 20` for immediate nearby pairs.
-- `--json` prints full results; `--quiet` prints ids only.
+- `--json` prints full results on every read command (including tools, describe, version and guides); `GHOSTPAW_OUTPUT=json` opts all commands into JSON; other values leave defaults unchanged; `--quiet` prints ids only.
 - `ghostpaw-codex skill --list` lists guides; `ghostpaw-codex skill <guide>` reads one.
 
 Exit codes: 0 success, 1 operation failure, 2 usage, 3 missing belief, 4 conflict, 70 internal failure.
@@ -160,7 +161,7 @@ Example: `ghostpaw-codex call revise_belief '{"action":"confirm","beliefId":1}'`
 
 ## retire_belief (CLI: ghostpaw-codex belief retire)
 
-Permanently delete a belief and its entire lineage chain. No trace remains. This is for privacy and hard erasure, not normal revision.
+WARNING: Hard-deletes the whole lineage (the belief and all its predecessors/successors) and cannot be undone. Use belief forget for soft removal that keeps lineage.
 
 Use when: Use this only for privacy cleanup or hard erasure. The belief and all of its lineage (predecessors and successors) will be destroyed.
 
@@ -199,7 +200,7 @@ Example: `ghostpaw-codex call dismiss_proximity '{"beliefA":1,"beliefB":2}'`
 - `ghostpaw-codex skill resolve-near-duplicate-beliefs`: Decide whether two proximate beliefs are duplicates, successors, complementary, or genuinely distinct, then act accordingly.
 - `ghostpaw-codex skill correct-belief-lineage-honestly`: Use correct instead of forget-and-remember so lineage preserves what changed, when, and why.
 - `ghostpaw-codex skill handle-ambiguous-belief-updates`: Choose the right verb when new information collides with an existing belief: confirm, correct, merge, forget-with-successor, or dismiss.
-- `ghostpaw-codex skill process-stale-beliefs`: Refresh or retire beliefs whose freshness has dropped too far, using flags to identify them and the right verb to resolve each.
+- `ghostpaw-codex skill process-stale-beliefs`: Refresh or forget beliefs whose freshness has dropped too far, using flags to identify them and the right verb to resolve each.
 - `ghostpaw-codex skill run-calibration-pass`: Detect and respond to systematic overconfidence by inspecting calibration alerts and high-certainty revision patterns in trends.
 - `ghostpaw-codex skill defer-beliefs-pending-outcomes`: Postpone flag processing for beliefs that cannot be judged yet by deferring them until a future date.
 - `ghostpaw-codex skill erase-beliefs-for-privacy`: Choose between forget (soft removal with audit trail) and retire (hard delete) based on privacy and compliance requirements.

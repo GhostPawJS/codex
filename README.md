@@ -267,6 +267,10 @@ ghostpaw-codex mcp|skill|tools|describe|call|completions|version|help
 
 Belief additions include a nearest-belief hint when an active belief has similarity of at least 0.7; use it to confirm or merge related claims.
 
+WARNING: `belief retire` hard-deletes the whole lineage (the belief and all its predecessors/successors) and cannot be undone. Use `belief forget` for soft removal that keeps lineage. Every retire invocation warns on stderr.
+
+`--json` is accepted on every read command, including all review views, belief show, alias list, tools, describe, version, help and skill guides. Set `GHOSTPAW_OUTPUT=json` to opt all commands into JSON output as if `--json` were passed. Other values or an unset variable preserve default output, including when stdout is piped or a TTY.
+
 Global flags can appear anywhere: `--db <path>`, `--json`, `--quiet`,
 `--compact`, `--help`/`-h`, `--version`/`-V`/`-v`, `--no-color`.
 `NO_COLOR` is accepted; output uses no terminal colors.

@@ -93,7 +93,7 @@
     },
     {
       "name": "retire_belief",
-      "description": "Permanently delete a belief and its entire lineage chain. No trace remains. This is for privacy and hard erasure, not normal revision."
+      "description": "WARNING: Hard-deletes the whole lineage (the belief and all its predecessors/successors) and cannot be undone. Use belief forget for soft removal that keeps lineage."
     },
     {
       "name": "dismiss_proximity",

@@ -3,7 +3,7 @@ import { defineCodexSkill } from './skill_types.ts';
 export const processStaleBeliefsSkill = defineCodexSkill({
 	name: 'process-stale-beliefs',
 	description:
-		'Refresh or retire beliefs whose freshness has dropped too far, using flags to identify them and the right verb to resolve each.',
+		'Refresh or forget beliefs whose freshness has dropped too far, using flags to identify them and the right verb to resolve each.',
 	content: `# Process Stale Beliefs
 
 Primary tools:

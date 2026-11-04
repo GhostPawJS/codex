@@ -39,11 +39,12 @@ Search before adding with \`search_codex\` (CLI: \`ghostpaw-codex search\`): \`g
 - \`ghostpaw-codex belief show <id>\`
 - \`ghostpaw-codex belief confirm <id>\`
 - \`ghostpaw-codex belief correct <id> --claim "Deploys go out on Wednesdays."\`
+- WARNING: \`belief retire\` hard-deletes the whole lineage (the belief and all its predecessors/successors) and cannot be undone. Use \`belief forget\` for soft removal that keeps lineage.
 - \`ghostpaw-codex belief forget <id>\`
 - \`ghostpaw-codex belief defer <id> --deferred-until +7d\`
 - \`ghostpaw-codex belief merge <id> <id> --claim "Combined claim"\`
 - \`ghostpaw-codex review flags|status|log|trends|duplicates\`; use \`review status --by-prefix\` for active prefix counts and \`review duplicates --limit 20\` for immediate nearby pairs.
-- \`--json\` prints full results; \`--quiet\` prints ids only.
+- \`--json\` prints full results on every read command (including tools, describe, version and guides); \`GHOSTPAW_OUTPUT=json\` opts all commands into JSON; other values leave defaults unchanged; \`--quiet\` prints ids only.
 - \`ghostpaw-codex skill --list\` lists guides; \`ghostpaw-codex skill <guide>\` reads one.
 
 Exit codes: 0 success, 1 operation failure, 2 usage, 3 missing belief, 4 conflict, 70 internal failure.

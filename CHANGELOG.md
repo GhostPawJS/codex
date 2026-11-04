@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Accept `--json` on every CLI read command.
+- Support `GHOSTPAW_OUTPUT=json` as an opt-in CLI output default.
+- Warn on stderr that `belief retire` irreversibly deletes the whole lineage; document `belief forget` for soft removal.
+
 - `review status --by-prefix` counts active claim prefixes (`byPrefix`, `prefixCounts` in the facade).
 - `review duplicates --limit` lists nearby active pairs immediately, honoring proximity dismissals.
 
