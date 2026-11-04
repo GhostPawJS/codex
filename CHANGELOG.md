@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Remove landing page sources and the automated site deployment workflow; retain the demo build tooling. Demo fonts can be supplied through `DOCS_FONT_DIR`.
+
 ### Fixed
 
 - Clarified Cline CLI configuration verification with `cline config mcp` and distinguished direct tool handler checks from MCP stdio checks in the install guide.

@@ -5,8 +5,11 @@ import { readdirSync } from 'node:fs';
 const LIBS = ['codex', 'questlog', 'affinity', 'souls', 'grimoire', 'email', 'telegram'];
 
 function landingFont() {
+	// The site build sets DOCS_FONT_DIR to the landing page release dir.
+	const dir = process.env.DOCS_FONT_DIR;
+	if (!dir) return null;
 	try {
-		const f = readdirSync('site/release').find((n) => /^tektur-var-[0-9a-f]+\.woff2$/.test(n));
+		const f = readdirSync(dir).find((n) => /^tektur-var-[0-9a-f]+\.woff2$/.test(n));
 		return f ? `../${f}` : null;
 	} catch {
 		return null;
