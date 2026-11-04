@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-11-04
+
 ### Added
 
 - `belief add` names the nearest active belief (id, claim, similarity) when similarity is at least 0.7, in text, `--compact` and JSON (`nearest`) output.
@@ -203,7 +205,8 @@ All notable changes to this project are documented here. The format follows
 - CI runs on every push and pull request on Node 24 and 26. Releases publish
   through npm trusted publishing with provenance.
 
-[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.3...HEAD
+[0.6.3]: https://github.com/GhostPawJS/codex/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/GhostPawJS/codex/compare/v0.6.1...v0.6.2
 [0.6.0]: https://github.com/GhostPawJS/codex/compare/v0.5.2...v0.6.0
 [0.5.2]: https://github.com/GhostPawJS/codex/compare/v0.5.1...v0.5.2
