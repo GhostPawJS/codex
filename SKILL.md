@@ -37,7 +37,7 @@ Search before adding with `search_codex` (CLI: `ghostpaw-codex search`): `ghostp
 - `ghostpaw-codex belief forget <id>`
 - `ghostpaw-codex belief defer <id> --deferred-until +7d`
 - `ghostpaw-codex belief merge <id> <id> --claim "Combined claim"`
-- `ghostpaw-codex review flags|status|log|trends`
+- `ghostpaw-codex review flags|status|log|trends|duplicates`; use `review status --by-prefix` for active prefix counts and `review duplicates --limit 20` for immediate nearby pairs.
 - `--json` prints full results; `--quiet` prints ids only.
 - `ghostpaw-codex skill --list` lists guides; `ghostpaw-codex skill <guide>` reads one.
 
@@ -79,7 +79,7 @@ Example: `ghostpaw-codex call search_codex '{"query":"deployment schedule"}'`
 
 ## review_codex (CLI: ghostpaw-codex review)
 
-Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, or trends for time-based patterns.
+Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, trends for time-based patterns, or duplicates for nearby active pairs.
 
 Use when: Use this when you need an overview of the codex state rather than a specific belief. Start with flags for maintenance, status for a dashboard, or log for recent changes.
 
@@ -89,8 +89,9 @@ Read-only.
 
 | Parameter | Type | Required | Values / description |
 | --- | --- | --- | --- |
-| view | string | yes | flags, status, log, trends. Which codex review surface to load. Flags suppress single_evidence, low_trust and gap for beliefs created less than seven days ago. |
-| limit | integer | no | Maximum entries for the log view. |
+| view | string | yes | flags, status, log, trends, duplicates. Which codex review surface to load. Flags suppress single_evidence, low_trust and gap for beliefs created less than seven days ago. |
+| limit | integer | no | Maximum entries for log or duplicates. |
+| byPrefix | boolean | no | Include active claim prefix counts in status. |
 | now | integer | no | Optional timestamp override for freshness computation. |
 
 Example: `ghostpaw-codex call review_codex '{"view":"flags"}'`

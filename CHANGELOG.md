@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `review status --by-prefix` counts active claim prefixes (`byPrefix`, `prefixCounts` in the facade).
+- `review duplicates --limit` lists nearby active pairs immediately, honoring proximity dismissals.
+
 ## [0.6.3] - 2026-11-04
 
 ### Added

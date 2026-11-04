@@ -77,7 +77,7 @@
     },
     {
       "name": "review_codex",
-      "description": "Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, or trends for time-based patterns."
+      "description": "Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, trends for time-based patterns, or duplicates for nearby active pairs."
     },
     {
       "name": "inspect_codex_item",

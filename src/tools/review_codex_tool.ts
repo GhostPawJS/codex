@@ -2,7 +2,13 @@ import type { FlagResultItem, LogRecord, StatusRecord, TrendRecord } from '../be
 import type { CodexDb } from '../database.ts';
 import * as read from '../read.ts';
 import { translateToolError } from './tool_errors.ts';
-import { defineCodexTool, enumSchema, integerSchema, objectSchema } from './tool_metadata.ts';
+import {
+	booleanSchema,
+	defineCodexTool,
+	enumSchema,
+	integerSchema,
+	objectSchema,
+} from './tool_metadata.ts';
 import { reviewCodexToolName } from './tool_names.ts';
 import { inspectItemNext, reviseNext } from './tool_next.ts';
 import { toBeliefIdRef } from './tool_ref.ts';
@@ -10,12 +16,22 @@ import type { ToolEntityRef, ToolNextStepHint, ToolResult } from './tool_types.t
 import { toolSuccess, toolWarning } from './tool_types.ts';
 import { validateToolInput } from './validate_tool_input.ts';
 
-type ReviewCodexView = 'flags' | 'log' | 'status' | 'trends';
+type ReviewCodexView = 'flags' | 'log' | 'status' | 'trends' | 'duplicates';
 
 type ReviewCodexPayload =
 	| { view: 'flags'; data: FlagResultItem[] }
 	| { view: 'log'; data: LogRecord[] }
-	| { view: 'status'; data: StatusRecord }
+	| { view: 'status'; data: StatusRecord & { prefixCounts?: { prefix: string; count: number }[] } }
+	| {
+			view: 'duplicates';
+			data: {
+				beliefA: number;
+				beliefB: number;
+				claimA: string;
+				claimB: string;
+				similarity: number;
+			}[];
+	  }
 	| { view: 'trends'; data: TrendRecord };
 
 export interface ReviewCodexToolData {
@@ -56,8 +72,21 @@ function buildLogResult(db: CodexDb, limit?: number): ReviewCodexToolResult {
 	);
 }
 
-function buildStatusResult(db: CodexDb, now?: number): ReviewCodexToolResult {
-	const data = read.getStatus(db, now);
+function buildStatusResult(db: CodexDb, now?: number, byPrefix?: boolean): ReviewCodexToolResult {
+	const data: StatusRecord & { prefixCounts?: { prefix: string; count: number }[] } =
+		read.getStatus(db, now);
+	if (byPrefix) {
+		const counts = new Map<string, number>();
+		for (const { claim } of db
+			.prepare('SELECT claim FROM beliefs WHERE superseded_by IS NULL')
+			.all<{ claim: string }>()) {
+			const prefix = claim.includes(':') ? claim.slice(0, claim.indexOf(':')).trim() : '(none)';
+			counts.set(prefix, (counts.get(prefix) ?? 0) + 1);
+		}
+		data.prefixCounts = [...counts]
+			.map(([prefix, count]) => ({ prefix, count }))
+			.sort((a, b) => b.count - a.count || a.prefix.localeCompare(b.prefix));
+	}
 	return toolSuccess(
 		`Codex integrity: ${Math.round(data.integrity)}%. ${data.activeBeliefCount} active beliefs held.`,
 		{ payload: { view: 'status', data } },
@@ -75,9 +104,40 @@ function buildTrendsResult(db: CodexDb): ReviewCodexToolResult {
 	);
 }
 
+function buildDuplicatesResult(db: CodexDb, limit = 20, now?: number): ReviewCodexToolResult {
+	const pairs: {
+		beliefA: number;
+		beliefB: number;
+		claimA: string;
+		claimB: string;
+		similarity: number;
+	}[] = [];
+	const rows = db
+		.prepare('SELECT id, claim FROM beliefs WHERE superseded_by IS NULL ORDER BY id')
+		.all<{ id: number; claim: string }>();
+	for (const row of rows) {
+		for (const nearby of read.listBeliefProximity(db, row.id, rows.length, 0.7, now)) {
+			if (row.id < nearby.id)
+				pairs.push({
+					beliefA: row.id,
+					beliefB: nearby.id,
+					claimA: row.claim,
+					claimB: nearby.claim,
+					similarity: nearby.similarity,
+				});
+		}
+	}
+	const data = pairs
+		.sort((a, b) => b.similarity - a.similarity || a.beliefA - b.beliefA || a.beliefB - b.beliefB)
+		.slice(0, limit);
+	return toolSuccess(`${data.length} near-duplicate pairs.`, {
+		payload: { view: 'duplicates', data },
+	});
+}
+
 export function reviewCodexToolHandler(
 	db: CodexDb,
-	input: { view: ReviewCodexView; limit?: number; now?: number },
+	input: { view: ReviewCodexView; limit?: number; now?: number; byPrefix?: boolean },
 ): ReviewCodexToolResult {
 	const invalid = validateToolInput(reviewCodexTool.inputSchema, input);
 	if (invalid) return invalid;
@@ -88,7 +148,9 @@ export function reviewCodexToolHandler(
 			case 'log':
 				return buildLogResult(db, input.limit);
 			case 'status':
-				return buildStatusResult(db, input.now);
+				return buildStatusResult(db, input.now, input.byPrefix);
+			case 'duplicates':
+				return buildDuplicatesResult(db, input.limit, input.now);
 			case 'trends':
 				return buildTrendsResult(db);
 		}
@@ -103,7 +165,7 @@ export const reviewCodexTool = defineCodexTool<
 >({
 	name: reviewCodexToolName,
 	description:
-		'Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, or trends for time-based patterns.',
+		'Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, trends for time-based patterns, or duplicates for nearby active pairs.',
 	whenToUse:
 		'Use this when you need an overview of the codex state rather than a specific belief. Start with flags for maintenance, status for a dashboard, or log for recent changes.',
 	whenNotToUse:
@@ -113,8 +175,9 @@ export const reviewCodexTool = defineCodexTool<
 	supportsClarification: false,
 	targetKinds: ['belief'],
 	inputDescriptions: {
-		view: 'Which review surface: flags, status, log, or trends.',
-		limit: 'Maximum entries for the log view. Defaults to 20.',
+		view: 'Which review surface: flags, status, log, trends, or duplicates.',
+		limit: 'Maximum entries for log or duplicates. Defaults to 20.',
+		byPrefix: 'Include active claim prefix counts in status.',
 		now: 'Optional timestamp override for freshness computation in flags and status.',
 	},
 	outputDescription:
@@ -122,10 +185,11 @@ export const reviewCodexTool = defineCodexTool<
 	inputSchema: objectSchema(
 		{
 			view: enumSchema(
-				['flags', 'status', 'log', 'trends'],
+				['flags', 'status', 'log', 'trends', 'duplicates'],
 				'Which codex review surface to load. Flags suppress single_evidence, low_trust and gap for beliefs created less than seven days ago.',
 			),
-			limit: integerSchema('Maximum entries for the log view.'),
+			limit: integerSchema('Maximum entries for log or duplicates.'),
+			byPrefix: booleanSchema('Include active claim prefix counts in status.'),
 			now: integerSchema('Optional timestamp override for freshness computation.'),
 		},
 		['view'],

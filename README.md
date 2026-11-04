@@ -574,3 +574,5 @@ options and search tool inputs also accept `fts` and `prefix`.
 Review status integrity remains the percentage of active beliefs with certainty
 at least 0.7. The new, unconfirmed count covers beliefs with one evidence item
 younger than seven days; it overlaps the existing strength counts.
+
+Review: `review status --by-prefix` counts active claim prefixes; `review duplicates --limit 20` lists nearby active pairs immediately, honoring dismissals.

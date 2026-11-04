@@ -42,7 +42,7 @@ Search before adding with \`search_codex\` (CLI: \`ghostpaw-codex search\`): \`g
 - \`ghostpaw-codex belief forget <id>\`
 - \`ghostpaw-codex belief defer <id> --deferred-until +7d\`
 - \`ghostpaw-codex belief merge <id> <id> --claim "Combined claim"\`
-- \`ghostpaw-codex review flags|status|log|trends\`
+- \`ghostpaw-codex review flags|status|log|trends|duplicates\`; use \`review status --by-prefix\` for active prefix counts and \`review duplicates --limit 20\` for immediate nearby pairs.
 - \`--json\` prints full results; \`--quiet\` prints ids only.
 - \`ghostpaw-codex skill --list\` lists guides; \`ghostpaw-codex skill <guide>\` reads one.
 

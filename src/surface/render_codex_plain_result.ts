@@ -63,6 +63,29 @@ export function renderCodexPlainResult(
 	const claim = (text: string) => text.replace(/\s+/g, ' ').trim();
 	const line = (belief: BeliefRecord & { reasonCodes?: string[] }) =>
 		`${belief.id}  ${claim(belief.claim)}  [${belief.certainty.toFixed(2)} ${belief.source} ${belief.strength}]${belief.provenance ? ` provenance: ${belief.provenance}` : ''}${belief.reasonCodes ? ` flags: ${belief.reasonCodes.join(',')}` : ''}`;
+	if (data.payload?.view === 'duplicates') {
+		const pairs = data.payload.data as {
+			beliefA: number;
+			beliefB: number;
+			claimA: string;
+			claimB: string;
+			similarity: number;
+		}[];
+		if (quiet) return pairs.map((pair) => `${pair.beliefA} ${pair.beliefB}\n`).join('');
+		return pairs.length
+			? pairs
+					.map(
+						(pair) =>
+							`#${pair.beliefA} #${pair.beliefB} ${pair.similarity.toFixed(2)} ${JSON.stringify(claim(pair.claimA).slice(0, 50))} | ${JSON.stringify(claim(pair.claimB).slice(0, 50))}\n`,
+					)
+					.join('')
+			: `${record.summary}\n`;
+	}
+	if (data.payload?.view === 'status' && input.byPrefix) {
+		if (quiet) return '';
+		const status = data.payload.data as { prefixCounts: { prefix: string; count: number }[] };
+		return status.prefixCounts.map(({ prefix, count }) => `${count} ${prefix}\n`).join('');
+	}
 	const list =
 		data.results ??
 		(Array.isArray(data.payload?.data)
