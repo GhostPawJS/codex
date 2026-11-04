@@ -6,10 +6,13 @@ export function renderCodexPlainResult(
 	tool: Pick<SurfaceTool<unknown>, 'name'>,
 	input: Record<string, unknown>,
 	quiet = false,
+	compact = false,
 ): string {
 	const record = result as {
 		summary: string;
 		data: {
+			supersededId?: number;
+			nearest?: { id: number; claim: string; similarity: number };
 			results?: BeliefRecord[];
 			payload?: { view: string; data: unknown };
 			belief?: BeliefRecord & { proximity?: BeliefRecord[] };
@@ -69,7 +72,14 @@ export function renderCodexPlainResult(
 		if (quiet) return list.map((belief) => `${belief.id}\n`).join('');
 		return `${list.length ? list.map((belief) => (data.payload?.view === 'log' ? `${belief.id}  ${'type' in belief ? belief.type : ''}  ${claim(belief.claim)}` : line(belief))).join('\n') : record.summary}\n`;
 	}
-	if (data.payload) return quiet ? '' : `${block(flatten(data.payload.data))}\n`;
+	if (data.payload) {
+		if (quiet) return '';
+		if (data.payload.view === 'status') {
+			const status = data.payload.data as import('../beliefs/types.ts').StatusRecord;
+			return `integrity ${Math.round(status.integrity)}% of ${status.denominator} active beliefs (certainty >= 0.7 / active)\nnew, unconfirmed: ${status.newUnconfirmed} (single evidence, younger than 7 days; overlaps strength counts)\n${block(flatten(status))}\n`;
+		}
+		return `${block(flatten(data.payload.data))}\n`;
+	}
 	const belief = data.belief ?? data.detail;
 	const id =
 		belief?.id ??
@@ -111,8 +121,22 @@ export function renderCodexPlainResult(
 		pairs.push(['created', date(belief.createdAt)]);
 		if (data.lineage) pairs.push(['lineage', data.lineage.map((entry) => entry.id).join(', ')]);
 		if (data.detail?.deferredUntil) pairs.push(['deferred until', date(data.detail.deferredUntil)]);
+		const nearest = data.nearest;
+		const hint = nearest
+			? compact
+				? ` near=#${nearest.id} ${nearest.similarity.toFixed(2)} ${JSON.stringify(claim(nearest.claim).slice(0, 60))}`
+				: `nearest:   #${nearest.id} ${JSON.stringify(claim(nearest.claim))} (similarity ${nearest.similarity.toFixed(2)}; merge or confirm)\n`
+			: '';
 		const nearby = data.proximity ?? belief.proximity ?? [];
-		return `${block(pairs)}\n${nearby.length ? `nearby:\n${nearby.map(line).join('\n')}\n` : ''}`;
+		const superseded =
+			input.action === 'correct' &&
+			data.supersededId !== undefined &&
+			data.supersededId !== belief.id
+				? compact
+					? ` superseded=#${data.supersededId}`
+					: `superseded #${data.supersededId} → #${belief.id}\n`
+				: '';
+		return `${compact ? '' : superseded}${block(pairs)}${compact ? superseded : ''}${compact ? hint : ''}\n${compact ? '' : hint}${nearby.length ? `nearby:\n${nearby.map(line).join('\n')}\n` : ''}`;
 	}
 	if (input.action === 'defer' && belief?.deferredUntil)
 		return `Deferred belief "${claim(belief.claim)}" until ${date(belief.deferredUntil)}. (id ${belief.id})\n`;

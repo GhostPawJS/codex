@@ -39,8 +39,15 @@ it('preserves remember, inspect and review outputs on a mixed belief history', (
 		retired: api.tools.inspectCodexItemToolHandler(db, { beliefId: 6 }),
 		status: api.tools.reviewCodexToolHandler(db, { view: 'status', now: 10000000000 }),
 	};
+	const status = api.read.getStatus(db, 10000000000);
+	strictEqual(status.newUnconfirmed, 1);
+	strictEqual(status.denominator, 6);
+	// Keep the original compatibility fingerprint for all pre-existing fields.
+	const legacyJson = JSON.stringify(result, (key, value) =>
+		key === 'newUnconfirmed' || key === 'denominator' ? undefined : value,
+	);
 	strictEqual(
-		createHash('sha256').update(JSON.stringify(result)).digest('hex'),
+		createHash('sha256').update(legacyJson).digest('hex'),
 		'6a0d28306983105aec1fa110459efa3ebded328f56b0c614e3f67f7e167d803e',
 	);
 	db.close();

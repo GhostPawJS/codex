@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync, statSync } from 'node:fs';
+import { mkdtempSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Readable, Writable } from 'node:stream';
 import { test } from 'node:test';
@@ -48,6 +48,7 @@ test('CLI literal values, provenance, duplicate, aliases, validation and superse
 		const first = await invoke([...add, '-j']);
 		assert.equal(first.code, 0);
 		assert.equal(JSON.parse(first.out).data.belief.claim, '@fox said hi');
+		assert.equal(JSON.parse(first.out).data.nearest, undefined);
 		const duplicate = await invoke([...add, '-j']);
 		assert.equal(duplicate.code, 0);
 		assert.equal(JSON.parse(duplicate.out).outcome, 'no_op');
@@ -74,6 +75,19 @@ test('CLI literal values, provenance, duplicate, aliases, validation and superse
 		assert.equal(missing.code, 0);
 		assert.equal(missing.err, '');
 		assert.equal(missing.out, 'No matching beliefs.\n');
+		assert.ok(statSync(join(dir, 'missing', 'x.db')).isFile());
+		const blocked = join(dir, 'blocked');
+		writeFileSync(blocked, 'file');
+		for (const parent of [blocked, join(blocked, 'nested')]) {
+			const failure = await invoke(['search', 'fox', '--db', join(parent, 'x.db')]);
+			assert.equal(failure.code, 2);
+			assert.equal(failure.out, '');
+			assert.equal(
+				failure.err,
+				`Cannot create database directory ${parent}: a path component is not a directory\n`,
+			);
+		}
+
 		if (process.platform !== 'win32') {
 			assert.equal(statSync(join(dir, 'missing')).mode & 0o777, 0o700);
 			assert.equal(statSync(join(dir, 'missing', 'x.db')).mode & 0o777, 0o600);
@@ -200,6 +214,75 @@ test('twenty concurrent CLI adds serialize duplicate detection on a cold databas
 		} finally {
 			db.close();
 		}
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+test('belief add nearest hints in text, compact and JSON exclude self and unrelated beliefs', async () => {
+	const dir = mkdtempSync(join(process.cwd(), '.nearest-cli-'));
+	let out = '';
+	const invoke = async (claim: string, flags: string[] = []) => {
+		out = '';
+		const code = await runToolCli(
+			[
+				'--db',
+				join(dir, 'db.sqlite'),
+				'belief',
+				'add',
+				claim,
+				'--source',
+				'explicit',
+				'--category',
+				'fact',
+				...flags,
+			],
+			{
+				...codexCliOptions,
+				stdin: Readable.from([]),
+				stdout: new Writable({
+					write(chunk, _encoding, cb) {
+						out += String(chunk);
+						cb();
+					},
+				}),
+				stderr: new Writable({
+					write(_chunk, _encoding, cb) {
+						cb();
+					},
+				}),
+			},
+		);
+		assert.equal(code, 0);
+		return out;
+	};
+	try {
+		const claim = 'Deploys go out on Tuesdays';
+		assert.doesNotMatch(await invoke(claim), /nearest:|near=#/);
+		assert.match(
+			await invoke(claim, ['--allow-duplicate']),
+			/nearest: +#1 "Deploys go out on Tuesdays" \(similarity 1.00; merge or confirm\)/,
+		);
+		assert.match(
+			await invoke(claim, ['--allow-duplicate', '--compact']),
+			/ near=#1 1.00 "Deploys go out on Tuesdays"/,
+		);
+		const result = JSON.parse(await invoke(`${claim} regularly`, ['--json']));
+		assert.equal(result.data.nearest.id, 1);
+		assert.equal(result.data.nearest.claim, claim);
+		assert.ok(result.data.nearest.similarity >= 0.7);
+		assert.notEqual(result.data.nearest.id, result.data.belief.id);
+		assert.ok(result.warnings.some((w: { code: string }) => w.code === 'partial_match'));
+		assert.ok(
+			result.next.some(
+				(n: { suggestedInput?: { beliefId?: number } }) => n.suggestedInput?.beliefId === 1,
+			),
+		);
+		assert.doesNotMatch(await invoke('Elephants eat bananas'), /nearest:|near=#/);
+		assert.equal(
+			JSON.parse(await invoke('Quantum physics particles', ['--json'])).data.nearest,
+			undefined,
+		);
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}

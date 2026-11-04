@@ -2,6 +2,7 @@ import { closeSync, mkdirSync, openSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { CodexDb } from '../database.ts';
 import { initCodexTables } from '../init_codex_tables.ts';
+import { CliUsageError } from '../surfaces/cli_args.ts';
 
 export async function openCodexDb(path: string): Promise<CodexDb> {
 	const original = process.emitWarning;
@@ -26,7 +27,21 @@ export async function openCodexDb(path: string): Promise<CodexDb> {
 		process.emitWarning = original;
 	}
 	if (path !== ':memory:') {
-		mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
+		const dir = dirname(path);
+		try {
+			mkdirSync(dir, { recursive: true, mode: 0o700 });
+		} catch (error) {
+			const code = (error as NodeJS.ErrnoException).code;
+			const reason =
+				code === 'ENOTDIR' || code === 'EEXIST'
+					? 'a path component is not a directory'
+					: code === 'EACCES' || code === 'EPERM'
+						? 'permission denied'
+						: code === 'EROFS'
+							? 'read-only file system'
+							: code;
+			throw new CliUsageError(`Cannot create database directory ${dir}: ${reason}`);
+		}
 		try {
 			closeSync(openSync(path, 'wx', 0o600));
 		} catch (error) {

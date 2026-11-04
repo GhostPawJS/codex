@@ -100,6 +100,8 @@ export interface EvidenceDistribution {
 }
 
 export interface StatusRecord {
+	newUnconfirmed: number;
+	denominator: number;
 	activeBeliefCount: number;
 	totalBeliefCount: number;
 	integrity: number;
@@ -200,6 +202,8 @@ export interface MergeBeliefsInput {
 }
 
 export interface RecallOptions {
+	fts?: boolean | undefined;
+	prefix?: string | undefined;
 	limit?: number | undefined;
 	minScore?: number | undefined;
 	category?: BeliefCategory | undefined;

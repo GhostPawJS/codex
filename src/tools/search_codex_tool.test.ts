@@ -60,6 +60,24 @@ describe('searchCodexToolHandler', () => {
 		}
 	});
 
+	it('reports invalid raw FTS with a literal-search hint', async () => {
+		const db = await createInitializedCodexDb();
+		try {
+			const result = searchCodexToolHandler(db, { query: 'x AND (', fts: true });
+			strictEqual(result.ok, false);
+			if (result.outcome === 'error') {
+				strictEqual(result.error.code, 'invalid_input');
+				strictEqual(
+					result.error.message,
+					'Invalid FTS query "x AND (" (omit --fts to search literal text)',
+				);
+				strictEqual(result.error.recovery, undefined);
+			}
+		} finally {
+			db.close();
+		}
+	});
+
 	it('rejects empty query with a recovery hint', async () => {
 		const db = await createInitializedCodexDb();
 		remember(db, { claim: 'Exists', source: 'explicit', category: 'fact' }, { now: 1 });

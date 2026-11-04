@@ -2,6 +2,7 @@ import type { CodexDb } from '../database.ts';
 import { computeFreshness } from '../lib/freshness.ts';
 import { resolveNow } from '../resolve_now.ts';
 
+import { FLAG_GRACE_MS } from './list_flags.ts';
 import { getStrengthTier } from './map_belief_row.ts';
 import type {
 	BeliefCategory,
@@ -18,9 +19,14 @@ export function getStatus(db: CodexDb, now?: number): StatusRecord {
 	);
 	const activeRows = db
 		.prepare(
-			'SELECT certainty, evidence, source, category, verified_at FROM beliefs WHERE superseded_by IS NULL',
+			'SELECT certainty, evidence, source, category, verified_at, created_at FROM beliefs WHERE superseded_by IS NULL',
 		)
-		.all<Pick<BeliefRow, 'certainty' | 'evidence' | 'source' | 'category' | 'verified_at'>>();
+		.all<
+			Pick<
+				BeliefRow,
+				'certainty' | 'evidence' | 'source' | 'category' | 'verified_at' | 'created_at'
+			>
+		>();
 	const strengthCounts = { strong: 0, fading: 0, faint: 0 } as Record<StrengthTier, number>;
 	const sourceCounts = { explicit: 0, observed: 0, distilled: 0, inferred: 0 } as Record<
 		BeliefSource,
@@ -51,6 +57,10 @@ export function getStatus(db: CodexDb, now?: number): StatusRecord {
 	const activeCount = activeRows.length;
 	return {
 		activeBeliefCount: activeCount,
+		denominator: activeCount,
+		newUnconfirmed: activeRows.filter(
+			(row) => row.evidence === 1 && timestamp - row.created_at < FLAG_GRACE_MS,
+		).length,
 		totalBeliefCount,
 		integrity: activeCount === 0 ? 0 : (strengthCounts.strong / activeCount) * 100,
 		strengthCounts,

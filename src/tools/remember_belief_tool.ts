@@ -19,6 +19,7 @@ import { validateToolInput } from './validate_tool_input.ts';
 
 export interface RememberBeliefToolData {
 	belief: RememberResult;
+	nearest?: { id: number; claim: string; similarity: number };
 }
 
 export type RememberBeliefToolResult = ToolResult<RememberBeliefToolData>;
@@ -50,6 +51,10 @@ export function rememberBeliefToolHandler(
 				),
 				outcome: 'no_op',
 			};
+		const match = result.proximity[0];
+		const nearest = match
+			? { id: match.id, claim: match.claim, similarity: match.similarity }
+			: undefined;
 		const entities = [toBeliefRef(result)];
 		const next: ToolNextStepHint[] = [inspectItemNext(result.id, result.claim)];
 		const warnings = [];
@@ -70,7 +75,7 @@ export function rememberBeliefToolHandler(
 			result.proximity.length > 0
 				? `Captured belief "${result.claim}". ${result.proximity.length} nearby belief${result.proximity.length === 1 ? '' : 's'} found — check for duplicates.`
 				: `Captured belief "${result.claim}".`,
-			{ belief: result },
+			{ belief: result, ...(nearest ? { nearest } : {}) },
 			{
 				entities,
 				next,

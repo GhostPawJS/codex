@@ -67,6 +67,8 @@ Read-only.
 
 | Parameter | Type | Required | Values / description |
 | --- | --- | --- | --- |
+| fts | boolean | no | Use raw FTS5 syntax; defaults to false. |
+| prefix | string | no | Case-insensitive claim prefix; query is required. |
 | query | string | yes | Free-form natural language query. |
 | limit | integer | no | Maximum number of results. |
 | minScore | number | no | Minimum final recall score, default 0.01; relative relevance filtering also applies. |

@@ -6,13 +6,25 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `belief add` names the nearest active belief (id, claim, similarity) when similarity is at least 0.7, in text, `--compact` and JSON (`nearest`) output.
+- `search --prefix <text>` (tool: `prefix`) limits matches to claims starting with that text; a query is still required.
+- Opt-in raw FTS5 search syntax through CLI `--fts` and tool input `fts`.
+- `review status` prints its integrity denominator and counts single-evidence beliefs younger than 7 days as `new, unconfirmed` (`newUnconfirmed`, `denominator` fields). Existing values are unchanged.
+
 ### Changed
 
+- Search escapes its input by default: punctuation such as `:` and `-` matches literally, and input wrapped in double quotes is searched as one phrase. Pass `--fts` (tool: `fts: true`) for FTS5 operators.
 - Remove landing page sources and the automated site deployment workflow; retain the demo build tooling. Demo fonts can be supplied through `DOCS_FONT_DIR`.
 
 ### Fixed
 
-- Clarified Cline CLI configuration verification with `cline config mcp` and distinguished direct tool handler checks from MCP stdio checks in the install guide.
+- `belief correct` text output starts with `superseded #<old> → #<new>`.
+- `--help` works after positional arguments at any command depth, e.g. `belief add '<claim>' --help`.
+- Invalid `--fts` queries print one line and exit 2.
+- A `--db` path whose parent cannot be created reports `Cannot create database directory <dir>: <reason>` and exits 2.
+- Cline install guide: verify the configuration with `cline config mcp` and separate direct tool handler checks from MCP stdio checks.
 
 ## [0.6.2] - 2026-10-30
 

@@ -14,6 +14,7 @@ export interface ToolCliOptions<TCtx> {
 		tool: SurfaceTool<TCtx>,
 		input: Record<string, unknown>,
 		quiet: boolean,
+		compact?: boolean,
 	) => string;
 	tools: readonly SurfaceTool<TCtx>[];
 	openContext(opts: { db?: string }): TCtx | Promise<TCtx>;

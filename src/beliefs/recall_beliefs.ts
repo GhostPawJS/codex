@@ -1,4 +1,5 @@
 import type { CodexDb } from '../database.ts';
+import { CodexValidationError } from '../errors.ts';
 import { buildQueryEmbedding } from '../lib/build_query_embedding.ts';
 import { deserializeVectorBlob } from '../lib/deserialize_vector_blob.ts';
 import { hybridRecall } from '../lib/hybrid_recall.ts';
@@ -32,6 +33,10 @@ function nearToken(a: string, b: string): boolean {
 	return (previous[b.length] ?? Infinity) <= bound;
 }
 
+function quoteFts(text: string): string {
+	return `"${text.replaceAll('"', '""')}"`;
+}
+
 function safeFtsQuery(db: CodexDb, ftsExpr: string, limit: number): { id: number }[] {
 	try {
 		return db
@@ -48,11 +53,12 @@ function fetchLexicalCandidateIds(
 	db: CodexDb,
 	tokens: readonly string[],
 	limit: number,
+	literalQuery: string,
 ): Map<number, number> {
 	const searches = [
-		`"${tokens.join(' ')}"`,
-		tokens.join(' '),
-		tokens.map((token) => `${token}*`).join(' OR '),
+		quoteFts(tokens.join(' ')),
+		literalQuery.trim().split(/\s+/).filter(Boolean).map(quoteFts).join(' '),
+		tokens.map((token) => `${quoteFts(token)}*`).join(' OR '),
 	];
 	const ranks = new Map<number, number>();
 	for (const search of searches) {
@@ -89,7 +95,25 @@ export function recall(
 	const limit = options.limit ?? 20;
 	const minScore = options.minScore ?? 0.01;
 
-	const tokens = tokenizeQuery(expandQuery(db, query));
+	const trimmed = query.trim();
+	const phrase =
+		!options.fts && trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"');
+	const text = phrase ? trimmed.slice(1, -1) : query;
+	const tokens = tokenizeQuery(expandQuery(db, text));
+	let exactRanks: Map<number, number> | undefined;
+	if (options.fts || phrase) {
+		try {
+			const expression = options.fts ? query : quoteFts(text);
+			const matches = db
+				.prepare(
+					'SELECT rowid AS id FROM beliefs_fts WHERE beliefs_fts MATCH ? ORDER BY bm25(beliefs_fts)',
+				)
+				.all<{ id: number }>(expression);
+			exactRanks = new Map(matches.map((row, i) => [row.id, i + 1]));
+		} catch {
+			throw new CodexValidationError(`Invalid FTS query ${JSON.stringify(query)}.`);
+		}
+	}
 	if (tokens.length === 0) {
 		return [];
 	}
@@ -98,13 +122,16 @@ export function recall(
 
 	const candidateCap = 300;
 	const { weights, informative, commonOnly } = queryTokenWeights(db, query);
-	const lexicalRanks = fetchLexicalCandidateIds(
-		db,
-		informative.length && !commonOnly ? informative : tokens,
-		candidateCap,
-	);
+	const lexicalRanks =
+		exactRanks ??
+		fetchLexicalCandidateIds(
+			db,
+			informative.length && !commonOnly ? informative : tokens,
+			candidateCap,
+			text,
+		);
 	let rows =
-		lexicalRanks.size === 0
+		!exactRanks && lexicalRanks.size === 0
 			? loadActiveBeliefRows(db).filter((row) =>
 					tokens.some((token) => tokenizeQuery(row.claim).some((word) => nearToken(token, word))),
 				)
@@ -112,7 +139,9 @@ export function recall(
 	rows = rows.filter(
 		(row) =>
 			(!options.category || row.category === options.category) &&
-			(!options.source || row.source === options.source),
+			(!options.source || row.source === options.source) &&
+			(options.prefix === undefined ||
+				row.claim.trimStart().toLowerCase().startsWith(options.prefix.toLowerCase())),
 	);
 	if (rows.length === 0) {
 		return [];
@@ -145,7 +174,7 @@ export function recall(
 	};
 	const best = Math.max(0, ...ranked.map(signal));
 	return ranked
-		.filter((result) => commonOnly || signal(result) >= best * 0.55)
+		.filter((result) => exactRanks || commonOnly || signal(result) >= best * 0.55)
 		.sort((a, b) =>
 			// With no informative lexical match, avoid promoting weak hash collisions.
 			commonOnly

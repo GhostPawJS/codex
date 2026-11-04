@@ -265,6 +265,8 @@ ghostpaw-codex proximity dismiss <beliefA> <beliefB>
 ghostpaw-codex mcp|skill|tools|describe|call|completions|version|help
 ```
 
+Belief additions include a nearest-belief hint when an active belief has similarity of at least 0.7; use it to confirm or merge related claims.
+
 Global flags can appear anywhere: `--db <path>`, `--json`, `--quiet`,
 `--compact`, `--help`/`-h`, `--version`/`-V`/`-v`, `--no-color`.
 `NO_COLOR` is accepted; output uses no terminal colors.
@@ -562,3 +564,13 @@ use `0700`. Existing permissions are preserved. On first upgrade, legacy active
 normalized duplicates consolidate into the oldest id, preserving summed evidence,
 source references and lineage. Later `--allow-duplicate` additions remain separate.
 Merge fan-in alone does not trigger `unstable`; repeated corrections still do.
+
+Search treats punctuation literally; wrap the whole query in double quotes for a phrase.
+Use `search --fts 'alpha OR beta'` for raw FTS5 syntax, or
+`search note --prefix "project:"` to filter claims by a case-insensitive prefix
+after leading whitespace. A query is required with `--prefix`. Library recall
+options and search tool inputs also accept `fts` and `prefix`.
+
+Review status integrity remains the percentage of active beliefs with certainty
+at least 0.7. The new, unconfirmed count covers beliefs with one evidence item
+younger than seven days; it overlaps the existing strength counts.

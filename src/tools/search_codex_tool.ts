@@ -4,6 +4,7 @@ import type { CodexDb } from '../database.ts';
 import * as read from '../read.ts';
 import { translateToolError } from './tool_errors.ts';
 import {
+	booleanSchema,
 	defineCodexTool,
 	enumSchema,
 	integerSchema,
@@ -28,6 +29,8 @@ export function searchCodexToolHandler(
 	db: CodexDb,
 	input: {
 		query: string;
+		fts?: boolean;
+		prefix?: string;
 		limit?: number;
 		minScore?: number;
 		category?: string;
@@ -38,6 +41,8 @@ export function searchCodexToolHandler(
 	if (invalid) return invalid;
 	try {
 		const options: Parameters<typeof read.recall>[2] = {
+			fts: input.fts,
+			prefix: input.prefix,
 			limit: input.limit,
 			minScore: input.minScore,
 		};
@@ -77,7 +82,15 @@ export function searchCodexToolHandler(
 			},
 		);
 	} catch (error) {
-		return translateToolError(error, { summary: 'Could not search the codex.' });
+		const result = translateToolError(error, { summary: 'Could not search the codex.' });
+		if (
+			result.error.code === 'invalid_input' &&
+			result.error.message.startsWith('Invalid FTS query ')
+		) {
+			result.error.message = `Invalid FTS query ${JSON.stringify(input.query)} (omit --fts to search literal text)`;
+			delete result.error.recovery;
+		}
+		return result;
 	}
 }
 
@@ -97,6 +110,8 @@ export const searchCodexTool = defineCodexTool<
 	supportsClarification: false,
 	targetKinds: ['belief'],
 	inputDescriptions: {
+		fts: 'Use raw FTS5 syntax; defaults to false.',
+		prefix: 'Case-insensitive claim prefix after trimming leading whitespace. Query is required.',
 		query: 'Free-form natural language query describing what to recall.',
 		limit: 'Maximum number of results. Defaults to 20.',
 		minScore:
@@ -108,6 +123,8 @@ export const searchCodexTool = defineCodexTool<
 		'Ranked active belief matches with recall scores, score parts breakdown, certainty, freshness, and strength tier.',
 	inputSchema: objectSchema(
 		{
+			fts: booleanSchema('Use raw FTS5 syntax; defaults to false.'),
+			prefix: stringSchema('Case-insensitive claim prefix; query is required.'),
 			query: stringSchema('Free-form natural language query.'),
 			limit: integerSchema('Maximum number of results.'),
 			minScore: numberSchema(

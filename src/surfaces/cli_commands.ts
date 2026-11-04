@@ -100,9 +100,9 @@ export async function runCliCommand<T>(
 			args.shift();
 		}
 		if (!args.length) help = true;
-		const entry = tree.find((command) =>
-			command.path.split(' ').every((part, i) => args[i] === part),
-		);
+		const entry = [...tree]
+			.sort((a, b) => b.path.split(' ').length - a.path.split(' ').length)
+			.find((command) => command.path.split(' ').every((part, i) => args[i] === part));
 		const specFor = (command: (typeof tree)[number]): CliSpec => {
 			const argument = (name: string, schema: JsonSchema): CliArgument => ({
 				name,
@@ -190,7 +190,7 @@ export async function runCliCommand<T>(
 		}
 		if (help) {
 			const matches = tree.filter((command) => command.path.startsWith(args.join(' ')));
-			if (!matches.length) throw new CliUsageError(`Unknown command: ${args.join(' ')}`);
+			if (!entry && !matches.length) throw new CliUsageError(`Unknown command: ${args.join(' ')}`);
 			if (!quiet)
 				stdout.write(
 					entry
@@ -302,7 +302,7 @@ export async function runCliCommand<T>(
 			if (json && !quiet)
 				stdout.write(`${JSON.stringify(result, null, compact ? undefined : 2)}\n`);
 			else if (!code && options.formatResult) {
-				stdout.write(options.formatResult(result, entry.tool, input, quiet));
+				stdout.write(options.formatResult(result, entry.tool, input, quiet, compact));
 				const warnings = (result as { warnings?: { code?: string; message?: string }[] }).warnings;
 				if (!quiet)
 					for (const warning of warnings ?? [])
