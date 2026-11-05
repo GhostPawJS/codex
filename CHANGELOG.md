@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.4] - 2026-11-05
+
 ### Added
 
 - Without `--db` or `GHOSTPAW_CODEX_DB`, the CLI prints `using default db <path>` on stderr; `--quiet` or `GHOSTPAW_QUIET=1` suppresses it.
@@ -220,7 +222,8 @@ All notable changes to this project are documented here. The format follows
 - CI runs on every push and pull request on Node 24 and 26. Releases publish
   through npm trusted publishing with provenance.
 
-[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.3...HEAD
+[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.4...HEAD
+[0.6.4]: https://github.com/GhostPawJS/codex/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/GhostPawJS/codex/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/GhostPawJS/codex/compare/v0.6.1...v0.6.2
 [0.6.0]: https://github.com/GhostPawJS/codex/compare/v0.5.2...v0.6.0
