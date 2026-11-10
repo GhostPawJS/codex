@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+- Add atomic JSON/JSONL belief imports with dry runs and indexed results, and optional belief topics with migration and list/search filters.
+
 ### Added
 
 - Add `--cross-entity` / `crossEntity` to include duplicate review candidates across claim prefixes.

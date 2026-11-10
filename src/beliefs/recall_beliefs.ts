@@ -152,6 +152,7 @@ export function recall(
 	}
 	rows = rows.filter(
 		(row) =>
+			(options.topic === undefined || row.topic === options.topic) &&
 			(!options.category || row.category === options.category) &&
 			(!options.source || row.source === options.source) &&
 			(options.prefix === undefined ||

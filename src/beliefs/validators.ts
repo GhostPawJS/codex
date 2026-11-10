@@ -31,3 +31,8 @@ export function clampCertainty(certainty: number, maxCertainty = 0.99): number {
 	}
 	return Math.min(maxCertainty, Math.max(0.1, certainty));
 }
+
+export function assertBeliefTopic(topic: unknown): void {
+	if (topic !== undefined && (typeof topic !== 'string' || topic.trim().length === 0))
+		throw new CodexValidationError('Topic must be a non-empty string.');
+}

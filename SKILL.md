@@ -42,6 +42,10 @@ Search before adding with `search_codex` (CLI: `ghostpaw-codex search`): `ghostp
 - `--json` prints full results on every read command (including tools, describe, version and guides); `GHOSTPAW_OUTPUT=json` opts all commands into JSON; other values leave defaults unchanged; `--quiet` prints ids only.
 - `ghostpaw-codex skill --list` lists guides; `ghostpaw-codex skill <guide>` reads one.
 
+Batch capture: `ghostpaw-codex belief import @beliefs.jsonl --json` or `belief import - --dry-run --json` for stdin. JSON arrays and JSON Lines contain belief objects (claim, source, category, optional topic/provenance/certainty/allowDuplicate). Tool: `import_beliefs` with items or input text and optional dryRun. One transaction per batch; failures report indexed errors in error.details.items and roll back everything. Success data.items contains indexed ids; dry-run ids are provisional.
+
+Optional non-empty `topic` is supported by add, correct, merge and import. Corrections inherit omitted topics; merges inherit the primary or existing successor topic. Duplicate adds update explicitly supplied topics. Unset topics are omitted from JSON. Filter exact topics with `search QUERY --topic work` or `review list --topic work` (review_codex view list). Schema migration is automatic and idempotent.
+
 Exit codes: 0 success, 1 operation failure, 2 usage, 3 missing belief, 4 conflict, 70 internal failure.
 
 Database: `~/.ghostpaw/codex.db`. Override with `--db <path>` or `GHOSTPAW_CODEX_DB`. Default database opens print `using default db <path>` once on stderr; suppress with `--quiet` or `GHOSTPAW_QUIET=1`. Informational commands do not print the notice.
@@ -76,6 +80,7 @@ Read-only.
 
 | Parameter | Type | Required | Values / description |
 | --- | --- | --- | --- |
+| topic | string | no | Optional non-empty exact topic label. |
 | fts | boolean | no | Use raw FTS5 syntax; defaults to false. |
 | prefix | string | no | Case-insensitive claim prefix; query is required. |
 | query | string | yes | Free-form natural language query. |
@@ -98,7 +103,8 @@ Read-only.
 
 | Parameter | Type | Required | Values / description |
 | --- | --- | --- | --- |
-| view | string | yes | flags, status, log, trends, duplicates. Which codex review surface to load. Flags suppress single_evidence, low_trust and gap for beliefs created less than seven days ago. |
+| topic | string | no | Exact topic filter for list. |
+| view | string | yes | flags, status, log, trends, duplicates, list. Which codex review surface to load. Flags suppress single_evidence, low_trust and gap for beliefs created less than seven days ago. |
 | limit | integer | no | Maximum entries for log or duplicates. |
 | crossEntity | boolean | no | Include duplicate candidates across different claim prefixes. Defaults to false. |
 | byPrefix | boolean | no | Include active claim prefix counts in status. |
@@ -134,6 +140,7 @@ Writes: writes_state.
 
 | Parameter | Type | Required | Values / description |
 | --- | --- | --- | --- |
+| topic | string | no | Optional non-empty exact topic label. |
 | claim | string | yes | The proposition being asserted. |
 | source | string | yes | explicit, observed, distilled, inferred. Where the belief came from. |
 | category | string | yes | preference, fact, procedure, capability, custom. What kind of claim. |
@@ -155,6 +162,7 @@ Writes: writes_state.
 
 | Parameter | Type | Required | Values / description |
 | --- | --- | --- | --- |
+| topic | string | no | Optional non-empty exact topic label. |
 | action | string | yes | confirm, correct, merge, forget, defer. Revision action. |
 | beliefId | integer | no | Single belief id. |
 | beliefIds | array of integer | no | Belief ids for merge. |
@@ -200,6 +208,24 @@ Writes: writes_state.
 | beliefB | integer | yes | Second belief id. |
 
 Example: `ghostpaw-codex call dismiss_proximity '{"beliefA":1,"beliefB":2}'`
+
+## import_beliefs (CLI: ghostpaw-codex belief import)
+
+Import a JSON array or JSON Lines of beliefs atomically; report indexed ids or errors. Dry runs roll back and return provisional ids.
+
+Use when: Use for batch capture of existing beliefs.
+
+Not for: Use remember_belief for one belief and revise_belief for revisions.
+
+Writes: writes_state.
+
+| Parameter | Type | Required | Values / description |
+| --- | --- | --- | --- |
+| items | array of any | no | Belief objects; each item is validated inside the batch. |
+| input | string | no | JSON array or JSON Lines text; CLI accepts @file or @- stdin. |
+| dryRun | boolean | no | Validate and roll back; ids are provisional. |
+
+Example: `ghostpaw-codex call import_beliefs '{"items":[{"claim":"Deploys go out on Tuesdays.","source":"explicit","category":"procedure","topic":"deploy"}]}'`
 
 ## Workflow guides
 

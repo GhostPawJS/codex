@@ -9,6 +9,7 @@ import {
 	enumSchema,
 	integerSchema,
 	objectSchema,
+	stringSchema,
 } from './tool_metadata.ts';
 import { reviewCodexToolName } from './tool_names.ts';
 import { inspectItemNext, reviseNext } from './tool_next.ts';
@@ -17,9 +18,10 @@ import type { ToolEntityRef, ToolNextStepHint, ToolResult } from './tool_types.t
 import { toolSuccess, toolWarning } from './tool_types.ts';
 import { validateToolInput } from './validate_tool_input.ts';
 
-type ReviewCodexView = 'flags' | 'log' | 'status' | 'trends' | 'duplicates';
+type ReviewCodexView = 'list' | 'flags' | 'log' | 'status' | 'trends' | 'duplicates';
 
 type ReviewCodexPayload =
+	| { view: 'list'; data: import('../beliefs/types.ts').BeliefRecord[] }
 	| { view: 'flags'; data: FlagResultItem[] }
 	| { view: 'log'; data: LogRecord[] }
 	| { view: 'status'; data: StatusRecord & { prefixCounts?: { prefix: string; count: number }[] } }
@@ -147,6 +149,7 @@ export function reviewCodexToolHandler(
 	db: CodexDb,
 	input: {
 		view: ReviewCodexView;
+		topic?: string;
 		limit?: number;
 		now?: number;
 		byPrefix?: boolean;
@@ -157,6 +160,10 @@ export function reviewCodexToolHandler(
 	if (invalid) return invalid;
 	try {
 		switch (input.view) {
+			case 'list': {
+				const data = read.listBeliefs(db, input);
+				return toolSuccess(`${data.length} active beliefs.`, { payload: { view: 'list', data } });
+			}
 			case 'flags':
 				return buildFlagsResult(db, input.now);
 			case 'log':
@@ -199,8 +206,9 @@ export const reviewCodexTool = defineCodexTool<
 		'One review surface payload. Flags include reason codes and review priority. Status includes integrity, distributions, and averages. Log includes typed entries. Trends include growing categories and calibration alerts.',
 	inputSchema: objectSchema(
 		{
+			topic: stringSchema('Exact topic filter for list.'),
 			view: enumSchema(
-				['flags', 'status', 'log', 'trends', 'duplicates'],
+				['flags', 'status', 'log', 'trends', 'duplicates', 'list'],
 				'Which codex review surface to load. Flags suppress single_evidence, low_trust and gap for beliefs created less than seven days ago.',
 			),
 			limit: integerSchema('Maximum entries for log or duplicates.'),

@@ -8,7 +8,7 @@ import { mapBeliefRow } from './map_belief_row.ts';
 import { prepareBeliefStorage } from './prepare_belief_storage.ts';
 import { sourceInitialCertainty } from './source_initial_certainty.ts';
 import type { BeliefRow, CorrectBeliefInput, CorrectOptions, CorrectResult } from './types.ts';
-import { clampCertainty } from './validators.ts';
+import { assertBeliefTopic, clampCertainty } from './validators.ts';
 
 export function correctBelief(
 	db: CodexDb,
@@ -16,6 +16,7 @@ export function correctBelief(
 	input: CorrectBeliefInput,
 	options?: CorrectOptions,
 ): CorrectResult {
+	assertBeliefTopic(input.topic);
 	const timestamp = resolveNow(options?.now);
 	const record = withTransaction(db, () => {
 		const current = assertActiveBeliefExists(db, beliefId);
@@ -26,6 +27,7 @@ export function correctBelief(
 			prepared.claimNormalized === current.claim_normalized &&
 			nextSource === current.source &&
 			nextCategory === current.category &&
+			(input.topic === undefined || input.topic === current.topic) &&
 			(input.certainty === undefined || input.certainty === current.certainty)
 		) {
 			if (input.provenance != null)
@@ -43,8 +45,8 @@ export function correctBelief(
 			.prepare(`
 			INSERT INTO beliefs (
 				claim, claim_normalized, certainty, evidence, source, category, created_at, verified_at,
-				superseded_by, provenance, deferred_until, embedding, embedding_norm, embedding_dim, embedding_version
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				superseded_by, provenance, deferred_until, embedding, embedding_norm, embedding_dim, embedding_version, topic
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`)
 			.run(
 				input.claim,
@@ -62,6 +64,7 @@ export function correctBelief(
 				prepared.embeddingNorm,
 				prepared.embeddingDim,
 				prepared.embeddingVersion,
+				input.topic ?? current.topic ?? null,
 			);
 		const newId = Number(result.lastInsertRowid);
 		db.prepare(

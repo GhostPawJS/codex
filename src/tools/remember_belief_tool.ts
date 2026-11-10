@@ -32,6 +32,7 @@ export function rememberBeliefToolHandler(
 		category: (typeof BELIEF_CATEGORIES)[number];
 		certainty?: number;
 		provenance?: string;
+		topic?: string;
 		allowDuplicate?: boolean;
 	},
 ): RememberBeliefToolResult {
@@ -116,6 +117,7 @@ export const rememberBeliefTool = defineCodexTool<
 		'The created or reused belief record with derived state, plus proximity matches showing nearby existing beliefs that may overlap.',
 	inputSchema: objectSchema(
 		{
+			topic: stringSchema('Optional non-empty exact topic label.'),
 			claim: stringSchema('The proposition being asserted.'),
 			source: enumSchema([...BELIEF_SOURCES], 'Where the belief came from.'),
 			category: enumSchema([...BELIEF_CATEGORIES], 'What kind of claim.'),

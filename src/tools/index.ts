@@ -3,6 +3,8 @@ export type {
 	DismissProximityToolResult,
 } from './dismiss_proximity_tool.ts';
 export { dismissProximityTool, dismissProximityToolHandler } from './dismiss_proximity_tool.ts';
+export type { ImportBeliefsToolInput } from './import_beliefs_tool.ts';
+export { importBeliefsTool, importBeliefsToolHandler } from './import_beliefs_tool.ts';
 export type {
 	InspectCodexItemToolData,
 	InspectCodexItemToolResult,
@@ -47,6 +49,7 @@ export {
 } from './tool_metadata.ts';
 export {
 	dismissProximityToolName,
+	importBeliefsToolName,
 	inspectCodexItemToolName,
 	rememberBeliefToolName,
 	retireBeliefToolName,

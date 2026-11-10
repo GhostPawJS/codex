@@ -31,6 +31,7 @@ export function searchCodexToolHandler(
 		query: string;
 		fts?: boolean;
 		prefix?: string;
+		topic?: string;
 		limit?: number;
 		minScore?: number;
 		category?: string;
@@ -43,6 +44,7 @@ export function searchCodexToolHandler(
 		const options: Parameters<typeof read.recall>[2] = {
 			fts: input.fts,
 			prefix: input.prefix,
+			topic: input.topic,
 			limit: input.limit,
 			minScore: input.minScore,
 		};
@@ -123,6 +125,7 @@ export const searchCodexTool = defineCodexTool<
 		'Ranked active belief matches with recall scores, score parts breakdown, certainty, freshness, and strength tier.',
 	inputSchema: objectSchema(
 		{
+			topic: stringSchema('Optional non-empty exact topic label.'),
 			fts: booleanSchema('Use raw FTS5 syntax; defaults to false.'),
 			prefix: stringSchema('Case-insensitive claim prefix; query is required.'),
 			query: stringSchema('Free-form natural language query.'),

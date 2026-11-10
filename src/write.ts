@@ -1,3 +1,5 @@
+export type { ImportBeliefsResult } from './beliefs/import_beliefs.ts';
+export { importBeliefs } from './beliefs/import_beliefs.ts';
 export {
 	addQueryAlias,
 	confirmBelief,

@@ -5,6 +5,13 @@ import { parseDeferralDate } from './parse_deferral_date.ts';
 import { parseReviewDate } from './parse_review_date.ts';
 
 const mapping: Record<string, NonNullable<SurfaceTool<CodexDb>['cli']>> = {
+	import_beliefs: {
+		noun: 'belief',
+		verb: 'import',
+		positionals: ['input'],
+		fileArgs: ['input'],
+		stdinField: 'input',
+	},
 	search_codex: { verb: 'search', positionals: ['query'] },
 	review_codex: { verb: 'review', positionals: ['view'], valueParsers: { now: parseReviewDate } },
 	remember_belief: { noun: 'belief', verb: 'add', positionals: ['claim'] },
@@ -20,7 +27,7 @@ const mapping: Record<string, NonNullable<SurfaceTool<CodexDb>['cli']>> = {
 			positionals: { merge: ['beliefIds'] },
 			flags: {
 				confirm: ['beliefId', 'provenance'],
-				correct: ['beliefId', 'claim', 'source', 'category', 'certainty', 'provenance'],
+				correct: ['beliefId', 'claim', 'source', 'category', 'certainty', 'provenance', 'topic'],
 				forget: ['beliefId', 'successorId', 'provenance'],
 				defer: ['beliefId', 'deferredUntil', 'provenance'],
 				merge: [
@@ -29,6 +36,7 @@ const mapping: Record<string, NonNullable<SurfaceTool<CodexDb>['cli']>> = {
 					'successorId',
 					'source',
 					'category',
+					'topic',
 					'certainty',
 					'provenance',
 				],
@@ -49,6 +57,16 @@ export const codexMcpSurfaceTools: readonly SurfaceTool<CodexDb>[] = codexTools.
 }));
 
 const examples: Record<string, Record<string, unknown>> = {
+	import_beliefs: {
+		items: [
+			{
+				claim: 'Deploys go out on Tuesdays.',
+				source: 'explicit',
+				category: 'procedure',
+				topic: 'deploy',
+			},
+		],
+	},
 	search_codex: { query: 'deployment schedule' },
 	review_codex: { view: 'flags' },
 	inspect_codex_item: { beliefId: 1 },

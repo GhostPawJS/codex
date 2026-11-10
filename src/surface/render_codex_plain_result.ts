@@ -104,6 +104,14 @@ export function renderCodexPlainResult(
 		}
 		return `${block(flatten(data.payload.data))}\n`;
 	}
+	if (tool.name === 'import_beliefs') {
+		const batch =
+			record.data as unknown as import('../beliefs/import_beliefs.ts').ImportBeliefsResult;
+		return quiet
+			? batch.items.map((item) => `${item.id}\n`).join('')
+			: `${record.summary}\n${batch.items.map((item) => `${item.index}: ${item.id}${item.duplicate ? ' (duplicate)' : ''}`).join('\n')}\n`;
+	}
+
 	const belief = data.belief ?? data.detail;
 	const id =
 		belief?.id ??
@@ -137,6 +145,7 @@ export function renderCodexPlainResult(
 		const strengthPair = pairs.find(([key]) => key === 'strength');
 		if (strengthPair) strengthPair[0] = 'display strength';
 		pairs.push(['integrity tier', belief.integrityTier ?? getStrengthTier(belief.certainty)]);
+		if (belief.topic !== undefined) pairs.push(['topic', belief.topic]);
 		if (belief.provenanceSources?.length)
 			pairs.push(['sources', belief.provenanceSources.join(', ')]);
 		if (belief.provenance) pairs.push(['provenance', belief.provenance]);

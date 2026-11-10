@@ -16,6 +16,8 @@ export interface SurfaceTool<TCtx> {
 		valueParsers?: Record<string, (raw: string) => unknown>;
 		/** Input properties whose CLI value may be `@path`, `@-` or `@@text`; every other value is literal. */
 		fileArgs?: readonly string[];
+		/** Opt in to raw stdin on a positional dash instead of a JSON object envelope. */
+		stdinField?: string;
 		action?: {
 			property: string;
 			verbs?: Record<string, string>;

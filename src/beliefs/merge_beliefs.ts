@@ -8,13 +8,14 @@ import { mapBeliefRow } from './map_belief_row.ts';
 import { prepareBeliefStorage } from './prepare_belief_storage.ts';
 import { sourceInitialCertainty } from './source_initial_certainty.ts';
 import type { BeliefRecord, BeliefRow, MergeBeliefsInput, WriteOptions } from './types.ts';
-import { clampCertainty } from './validators.ts';
+import { assertBeliefTopic, clampCertainty } from './validators.ts';
 
 export function mergeBeliefs(
 	db: CodexDb,
 	input: MergeBeliefsInput,
 	options?: WriteOptions,
 ): BeliefRecord {
+	assertBeliefTopic(input.topic);
 	const uniqueIds = [...new Set(input.beliefIds)];
 	if (
 		uniqueIds.length === 0 ||
@@ -37,6 +38,8 @@ export function mergeBeliefs(
 					).run(successor.id, timestamp, belief.id);
 				}
 			}
+			if (input.topic !== undefined)
+				db.prepare('UPDATE beliefs SET topic=? WHERE id=?').run(input.topic, successor.id);
 			const mergedIn = beliefs.filter((belief) => belief.id !== successor.id);
 			const evidence =
 				successor.evidence + mergedIn.reduce((sum, belief) => sum + belief.evidence, 0);
@@ -85,8 +88,8 @@ export function mergeBeliefs(
 			.prepare(`
 			INSERT INTO beliefs (
 				claim, claim_normalized, certainty, evidence, source, category, created_at, verified_at,
-				superseded_by, provenance, deferred_until, embedding, embedding_norm, embedding_dim, embedding_version
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				superseded_by, provenance, deferred_until, embedding, embedding_norm, embedding_dim, embedding_version, topic
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`)
 			.run(
 				claim,
@@ -107,6 +110,7 @@ export function mergeBeliefs(
 				prepared.embeddingNorm,
 				prepared.embeddingDim,
 				prepared.embeddingVersion,
+				input.topic ?? primary.topic ?? null,
 			);
 		const successorId = Number(result.lastInsertRowid);
 		for (const belief of beliefs) {

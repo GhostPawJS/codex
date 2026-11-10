@@ -289,7 +289,7 @@ help. Each revision verb accepts only the flags it uses. Correction takes
 `--deferred-until` as YYYY-MM-DD, DD.MM.YYYY, today, tomorrow, +3d, an ISO
 date-time with timezone, or epoch milliseconds. Calendar dates resolve to local
 end of day and must be in the future.
-Array flags repeat, kebab-case flags map to schema properties, and values are literal, including leading `@`. Use JSON stdin (`-`) for long input. `--` ends flags. A positional `-`, or piped stdin
+Array flags repeat, kebab-case flags map to schema properties, and values are literal, including leading `@`. Use JSON stdin (`-`) for long input. `--` ends flags. Except for raw belief import, a positional `-`, or piped stdin
 with no arguments, reads a JSON object; explicit flags override its fields.
 Database selection uses `--db`, `GHOSTPAW_CODEX_DB`, then `~/.ghostpaw/codex.db`.
 Opening the default database prints `using default db <path>` once on stderr.
@@ -335,7 +335,7 @@ File input is opt-in for each CLI argument. When an argument's help lists
 `(@file, @- stdin, @@ literal @)`, `@path` reads a UTF-8 file, `@-` reads
 stdin, and `@@text` passes the literal value `@text`.
 
-No current Codex argument enables this option: flags and positional values
+The belief import input enables this option. Other Codex arguments do not: flags and positional values
 keep leading `@` and `@@` as written. For long claims, pass a JSON object
 through stdin with `-` (see the example above).
 
@@ -593,3 +593,30 @@ Review: `review status --by-prefix` counts active claim prefixes; `review duplic
 Belief JSON keeps the existing `strength` display tier and adds `integrityTier`, the certainty-only tier used by `review status`. Display `strength` is `strong` when certainty >= 0.4 and freshness >= 0.7; otherwise it falls back to the certainty tier. Thus certainty >= 0.7 always displays `strong`, even when stale. `integrityTier` is `strong` at certainty >= 0.7, `fading` at >= 0.4, otherwise `faint`. Integrity counts strong active beliefs divided by all active beliefs. Human `belief show` labels these as `display strength` and `integrity tier`; a fresh inferred belief at certainty 0.5 can display strong while its integrity tier is fading.
 
 When running the CLI or MCP server from a sandboxed Codex CLI job (`codex exec -s workspace-write`), put the database inside the working directory, for example `ghostpaw-codex --db ./codex.db review status`. An external DB folder needs an added writable root: `codex exec -s workspace-write --add-dir /path/to/db-folder ...`. Otherwise SQLite cannot open the database and the CLI exits with code 70.
+
+### Batch import and topics
+
+`ghostpaw-codex belief import @beliefs.jsonl --json` reads a UTF-8 JSON Lines
+file or JSON array. Use `belief import - --json` (or `@-`) for raw stdin. Each item has
+`claim`, `source`, `category` and optional `certainty`, `provenance`, `topic`,
+`allowDuplicate`, matching belief add. `--dry-run` runs the same writes and
+rolls back, returning provisional IDs. An empty batch succeeds without writes.
+
+The `import_beliefs` tool accepts `{items: [...]}` or `{input: "JSON/JSONL text"}`,
+plus optional `dryRun`. Library: `write.importBeliefs(db, items, {dryRun})`.
+The whole batch is atomic. Success returns `data.items` with zero-based `index`,
+`id`, and `duplicate` when reused. Any item error rolls back the entire batch;
+the tool returns `error.details.items` with each item's error, including rollback
+status for otherwise valid items. Rolled-back IDs are omitted. Malformed JSON
+is rejected before any write; malformed JSON Lines errors identify the line.
+Imports preserve the normal normalized duplicate policy and provenance history.
+
+`belief add --topic work` and `belief correct <id> --claim TEXT --topic work`
+set an exact topic label. Corrections inherit omitted topics; merges inherit
+the primary belief's topic (or existing successor's) unless supplied. Duplicate
+adds keep the existing ID and update topic when explicitly supplied. Topics
+must be non-empty strings. Existing databases gain a nullable topic column
+idempotently; unset topics are omitted from JSON, preserving existing output.
+Use `search QUERY --topic work`, `review list --topic work`, or
+`read.listBeliefs(db, {topic: "work"})`. Tool inputs accept the same topic field;
+`review_codex` view `list` lists active beliefs by ID, default limit 20.

@@ -9,3 +9,5 @@ export {
 	listQueryAliases,
 	recall,
 } from './beliefs/index.ts';
+
+export { listBeliefs } from './beliefs/list_beliefs.ts';

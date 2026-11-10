@@ -39,9 +39,9 @@ describe('tool mapping', () => {
 		}
 	});
 
-	it('maps 16 domain functions to 7 tools', () => {
-		strictEqual(codexToolMappings.length, 16);
+	it('maps 18 domain functions to 8 tools', () => {
+		strictEqual(codexToolMappings.length, 18);
 		const uniqueTools = new Set(codexToolMappings.map((m) => m.tool));
-		strictEqual(uniqueTools.size, 7);
+		strictEqual(uniqueTools.size, 8);
 	});
 });

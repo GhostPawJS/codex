@@ -1,7 +1,6 @@
 import type { CodexDb } from '../database.ts';
 import { resolveNow } from '../resolve_now.ts';
 import { withTransaction } from '../with_transaction.ts';
-
 import { listBeliefProximity } from './list_belief_proximity.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
 import { prepareBeliefStorage } from './prepare_belief_storage.ts';
@@ -12,6 +11,7 @@ import {
 	assertBeliefCategory,
 	assertBeliefClaim,
 	assertBeliefSource,
+	assertBeliefTopic,
 	clampCertainty,
 } from './validators.ts';
 
@@ -20,6 +20,7 @@ export function remember(
 	input: RememberBeliefInput,
 	options?: RememberOptions,
 ): RememberResult {
+	assertBeliefTopic(input.topic);
 	assertBeliefClaim(input.claim);
 	assertBeliefSource(input.source);
 	assertBeliefCategory(input.category);
@@ -37,6 +38,8 @@ export function remember(
 				.get<BeliefRow>(prepared.claimNormalized);
 			if (existing) {
 				duplicate = true;
+				if (input.topic !== undefined)
+					db.prepare('UPDATE beliefs SET topic=? WHERE id=?').run(input.topic, existing.id);
 				if (input.provenance != null)
 					db.prepare('UPDATE beliefs SET provenance = ? WHERE id = ?').run(
 						input.provenance,
@@ -53,8 +56,8 @@ export function remember(
 				`
 			INSERT INTO beliefs (
 				claim, claim_normalized, certainty, evidence, source, category, created_at, verified_at,
-				superseded_by, provenance, deferred_until, embedding, embedding_norm, embedding_dim, embedding_version
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				superseded_by, provenance, deferred_until, embedding, embedding_norm, embedding_dim, embedding_version, topic
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`,
 			)
 			.run(
@@ -73,6 +76,7 @@ export function remember(
 				prepared.embeddingNorm,
 				prepared.embeddingDim,
 				prepared.embeddingVersion,
+				input.topic ?? null,
 			);
 		const row = db
 			.prepare('SELECT * FROM beliefs WHERE id = ?')

@@ -4,6 +4,7 @@ import { validateInput } from '../surfaces/validate_input.ts';
 import { codexSurfaceTools } from './codex_surface_tools.ts';
 
 const inputs: Record<string, Record<string, unknown>> = {
+	import_beliefs: { items: [{ claim: 'Tabs', source: 'explicit', category: 'preference' }] },
 	search_codex: { query: 'tabs' },
 	review_codex: { view: 'status' },
 	inspect_codex_item: { beliefId: 1 },

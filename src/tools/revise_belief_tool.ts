@@ -30,6 +30,7 @@ export interface ReviseBeliefToolInput {
 	category?: (typeof BELIEF_CATEGORIES)[number];
 	certainty?: number;
 	provenance?: string;
+	topic?: string;
 }
 
 export type ReviseBeliefToolResult = ToolResult<Record<string, unknown>>;
@@ -65,6 +66,7 @@ function handleCorrect(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefT
 		category: input.category,
 		certainty: input.certainty,
 		provenance: input.provenance,
+		topic: input.topic,
 	});
 	if (result.id === input.beliefId)
 		return toolNoOp(
@@ -107,6 +109,7 @@ function handleMerge(db: CodexDb, input: ReviseBeliefToolInput): ReviseBeliefToo
 		category: input.category,
 		certainty: input.certainty,
 		provenance: input.provenance,
+		topic: input.topic,
 	});
 	return toolSuccess(
 		`Merged ${input.beliefIds.length} beliefs into "${belief.claim}".`,
@@ -216,6 +219,7 @@ export const reviseBeliefTool = defineCodexTool<ReviseBeliefToolInput, Record<st
 		'The updated belief record. Correct also returns the superseded id and proximity matches. Merge returns the merged ids.',
 	inputSchema: objectSchema(
 		{
+			topic: stringSchema('Optional non-empty exact topic label.'),
 			action: enumSchema(['confirm', 'correct', 'merge', 'forget', 'defer'], 'Revision action.'),
 			beliefId: integerSchema('Single belief id.'),
 			beliefIds: arraySchema(integerSchema('Belief id.'), 'Belief ids for merge.'),

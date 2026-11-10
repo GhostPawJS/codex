@@ -9,6 +9,7 @@ export function getStrengthTier(certainty: number): StrengthTier {
 export function mapBeliefRow(row: BeliefRow, now: number): BeliefRecord {
 	return {
 		id: row.id,
+		...(row.topic == null ? {} : { topic: row.topic }),
 		claim: row.claim,
 		claimNormalized: row.claim_normalized,
 		certainty: row.certainty,

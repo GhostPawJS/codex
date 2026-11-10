@@ -47,6 +47,10 @@ Search before adding with \`search_codex\` (CLI: \`ghostpaw-codex search\`): \`g
 - \`--json\` prints full results on every read command (including tools, describe, version and guides); \`GHOSTPAW_OUTPUT=json\` opts all commands into JSON; other values leave defaults unchanged; \`--quiet\` prints ids only.
 - \`ghostpaw-codex skill --list\` lists guides; \`ghostpaw-codex skill <guide>\` reads one.
 
+Batch capture: \`ghostpaw-codex belief import @beliefs.jsonl --json\` or \`belief import - --dry-run --json\` for stdin. JSON arrays and JSON Lines contain belief objects (claim, source, category, optional topic/provenance/certainty/allowDuplicate). Tool: \`import_beliefs\` with items or input text and optional dryRun. One transaction per batch; failures report indexed errors in error.details.items and roll back everything. Success data.items contains indexed ids; dry-run ids are provisional.
+
+Optional non-empty \`topic\` is supported by add, correct, merge and import. Corrections inherit omitted topics; merges inherit the primary or existing successor topic. Duplicate adds update explicitly supplied topics. Unset topics are omitted from JSON. Filter exact topics with \`search QUERY --topic work\` or \`review list --topic work\` (review_codex view list). Schema migration is automatic and idempotent.
+
 Exit codes: 0 success, 1 operation failure, 2 usage, 3 missing belief, 4 conflict, 70 internal failure.
 
 Database: \`~/.ghostpaw/codex.db\`. Override with \`--db <path>\` or \`GHOSTPAW_CODEX_DB\`. Default database opens print \`using default db <path>\` once on stderr; suppress with \`--quiet\` or \`GHOSTPAW_QUIET=1\`. Informational commands do not print the notice.

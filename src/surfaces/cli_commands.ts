@@ -253,13 +253,17 @@ export async function runCliCommand<T>(
 			if (stdinIndex !== undefined) rest.splice(stdinIndex, 1);
 			let raw = '';
 			for await (const chunk of stdin) raw += String(chunk);
-			try {
-				base = raw.trim() ? JSON.parse(raw) : {};
-			} catch {
-				throw new CliUsageError('Invalid stdin JSON');
+			if (entry.tool.cli?.stdinField) {
+				base = { [entry.tool.cli.stdinField]: raw };
+			} else {
+				try {
+					base = raw.trim() ? JSON.parse(raw) : {};
+				} catch {
+					throw new CliUsageError('Invalid stdin JSON');
+				}
+				if (!base || typeof base !== 'object' || Array.isArray(base))
+					throw new CliUsageError('Expected stdin JSON object');
 			}
-			if (!base || typeof base !== 'object' || Array.isArray(base))
-				throw new CliUsageError('Expected stdin JSON object');
 		}
 		const input = { ...(base as object), ...parseCliArgs(rest, spec), ...entry.fixed };
 		const errors = validateInput(entry.tool.inputSchema, input);

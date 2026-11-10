@@ -61,6 +61,15 @@ embedding_version TEXT NOT NULL
 		db.exec('ALTER TABLE beliefs ADD COLUMN superseded_reason TEXT');
 	}
 
+	if (
+		!db
+			.prepare('PRAGMA table_info(beliefs)')
+			.all<{ name: string }>()
+			.some((column) => column.name === 'topic')
+	)
+		db.exec('ALTER TABLE beliefs ADD COLUMN topic TEXT');
+	db.exec('CREATE INDEX IF NOT EXISTS beliefs_topic_idx ON beliefs(topic)');
+
 	const migrate = !db
 		.prepare('PRAGMA table_info(beliefs)')
 		.all<{ name: string }>()

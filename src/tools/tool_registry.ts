@@ -1,4 +1,5 @@
 import { dismissProximityTool } from './dismiss_proximity_tool.ts';
+import { importBeliefsTool } from './import_beliefs_tool.ts';
 import { inspectCodexItemTool } from './inspect_codex_item_tool.ts';
 import { rememberBeliefTool } from './remember_belief_tool.ts';
 import { retireBeliefTool } from './retire_belief_tool.ts';
@@ -15,6 +16,7 @@ export const codexTools = [
 	reviseBeliefTool,
 	retireBeliefTool,
 	dismissProximityTool,
+	importBeliefsTool,
 ] satisfies ToolDefinitionRegistry;
 
 export function listCodexToolDefinitions() {

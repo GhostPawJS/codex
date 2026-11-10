@@ -5,3 +5,5 @@ export const rememberBeliefToolName = 'remember_belief';
 export const reviseBeliefToolName = 'revise_belief';
 export const retireBeliefToolName = 'retire_belief';
 export const dismissProximityToolName = 'dismiss_proximity';
+
+export const importBeliefsToolName = 'import_beliefs';

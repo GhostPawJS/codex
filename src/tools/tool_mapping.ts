@@ -1,5 +1,6 @@
 import {
 	dismissProximityToolName,
+	importBeliefsToolName,
 	inspectCodexItemToolName,
 	rememberBeliefToolName,
 	retireBeliefToolName,
@@ -24,6 +25,8 @@ export const codexToolMappings: readonly CodexToolMapping[] = [
 	{ source: 'getBeliefDetail', tool: inspectCodexItemToolName },
 	{ source: 'getBeliefLineage', tool: inspectCodexItemToolName },
 	{ source: 'listBeliefProximity', tool: inspectCodexItemToolName },
+	{ source: 'importBeliefs', tool: importBeliefsToolName },
+	{ source: 'listBeliefs', tool: reviewCodexToolName, view: 'list' },
 	{ source: 'remember', tool: rememberBeliefToolName },
 	{ source: 'confirmBelief', tool: reviseBeliefToolName, action: 'confirm' },
 	{ source: 'correctBelief', tool: reviseBeliefToolName, action: 'correct' },

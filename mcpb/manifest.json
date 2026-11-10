@@ -98,6 +98,10 @@
     {
       "name": "dismiss_proximity",
       "description": "Record that two beliefs are not meaningfully related despite proximity detection. Uses exponential backoff — the pair will resurface less frequently with each dismissal."
+    },
+    {
+      "name": "import_beliefs",
+      "description": "Import a JSON array or JSON Lines of beliefs atomically; report indexed ids or errors. Dry runs roll back and return provisional ids."
     }
   ],
   "compatibility": {

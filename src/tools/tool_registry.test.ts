@@ -13,8 +13,8 @@ import {
 import { codexTools, getCodexToolByName, listCodexToolDefinitions } from './tool_registry.ts';
 
 describe('tool registry', () => {
-	it('contains exactly 7 tools in canonical order', () => {
-		strictEqual(codexTools.length, 7);
+	it('contains exactly 8 tools in canonical order', () => {
+		strictEqual(codexTools.length, 8);
 		strictEqual(codexTools[0]?.name, searchCodexToolName);
 		strictEqual(codexTools[1]?.name, reviewCodexToolName);
 		strictEqual(codexTools[2]?.name, inspectCodexItemToolName);
@@ -22,10 +22,11 @@ describe('tool registry', () => {
 		strictEqual(codexTools[4]?.name, reviseBeliefToolName);
 		strictEqual(codexTools[5]?.name, retireBeliefToolName);
 		strictEqual(codexTools[6]?.name, dismissProximityToolName);
+		strictEqual(codexTools[7]?.name, 'import_beliefs');
 	});
 
 	it('lists all definitions', () => {
-		strictEqual(listCodexToolDefinitions().length, 7);
+		strictEqual(listCodexToolDefinitions().length, 8);
 	});
 
 	it('finds a tool by name', () => {

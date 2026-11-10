@@ -22,6 +22,8 @@ export type FlagReasonCode = (typeof FLAG_REASON_CODES)[number];
 export type StrengthTier = (typeof STRENGTH_TIERS)[number];
 
 export interface BeliefRow {
+	/** Optional exact topic label. */
+	topic?: string | null;
 	id: number;
 	claim: string;
 	claim_normalized: string;
@@ -42,6 +44,8 @@ export interface BeliefRow {
 }
 
 export interface BeliefRecord {
+	/** Optional exact topic label. */
+	topic?: string | undefined;
 	id: number;
 	claim: string;
 	claimNormalized: string;
@@ -177,6 +181,8 @@ export interface CorrectResult extends BeliefRecord {
 }
 
 export interface RememberBeliefInput {
+	/** Optional exact topic label. */
+	topic?: string | undefined;
 	allowDuplicate?: boolean;
 	claim: string;
 	source: BeliefSource;
@@ -186,6 +192,8 @@ export interface RememberBeliefInput {
 }
 
 export interface CorrectBeliefInput {
+	/** Optional exact topic label. */
+	topic?: string | undefined;
 	claim: string;
 	source?: BeliefSource | undefined;
 	category?: BeliefCategory | undefined;
@@ -194,6 +202,8 @@ export interface CorrectBeliefInput {
 }
 
 export interface MergeBeliefsInput {
+	/** Optional exact topic label. */
+	topic?: string | undefined;
 	beliefIds: number[];
 	claim?: string | undefined;
 	source?: BeliefSource | undefined;
@@ -204,6 +214,8 @@ export interface MergeBeliefsInput {
 }
 
 export interface RecallOptions {
+	/** Optional exact topic label. */
+	topic?: string | undefined;
 	fts?: boolean | undefined;
 	prefix?: string | undefined;
 	limit?: number | undefined;
