@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Document writable database roots for sandboxed agent harnesses in the README and generated agent skill. Clarify which GhostPaw store owns identity, beliefs, relationships, work, procedures, and stable operational facts.
+
 - Add atomic JSON/JSONL belief imports with dry runs and indexed results, and optional belief topics with migration and list/search filters.
 
 ### Added

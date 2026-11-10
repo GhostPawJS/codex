@@ -178,6 +178,31 @@ import { initCodexTables, read, write } from '@ghostpaw/codex';
 
 See [Library usage](#library).
 
+
+## Running inside sandboxed agent harnesses
+
+Inside a Codex CLI `--sandbox workspace-write` session, the database and its
+parent directory must be inside a writable root, including SQLite's `-wal` and
+`-shm` side files. A default DB under `~/.ghostpaw` outside those roots can fail
+with `SQLITE_CANTOPEN` or `EPERM` (often exit 70; directory creation failures
+may exit 2), even when normal shell permissions allow access. Put the DB inside the workspace with `--db ./state/codex.db`,
+or set `GHOSTPAW_CODEX_DB="$PWD/state/codex.db"` for CLI/MCP use.
+
+To use an external DB directory, add it when starting the OpenAI Codex CLI
+(replace `<dir-with-db>` with its absolute path):
+
+```sh
+codex exec --sandbox workspace-write --add-dir <dir-with-db> "Run the GhostPaw CLI"
+```
+
+Alternatively, set `sandbox_workspace_write.writable_roots` in
+`~/.codex/config.toml` before starting the session:
+
+```toml
+[sandbox_workspace_write]
+writable_roots = ["/absolute/dir-with-db"]
+```
+
 ## 30-second quickstart
 
 ### MCP server
@@ -592,7 +617,6 @@ Review: `review status --by-prefix` counts active claim prefixes; `review duplic
 
 Belief JSON keeps the existing `strength` display tier and adds `integrityTier`, the certainty-only tier used by `review status`. Display `strength` is `strong` when certainty >= 0.4 and freshness >= 0.7; otherwise it falls back to the certainty tier. Thus certainty >= 0.7 always displays `strong`, even when stale. `integrityTier` is `strong` at certainty >= 0.7, `fading` at >= 0.4, otherwise `faint`. Integrity counts strong active beliefs divided by all active beliefs. Human `belief show` labels these as `display strength` and `integrity tier`; a fresh inferred belief at certainty 0.5 can display strong while its integrity tier is fading.
 
-When running the CLI or MCP server from a sandboxed Codex CLI job (`codex exec -s workspace-write`), put the database inside the working directory, for example `ghostpaw-codex --db ./codex.db review status`. An external DB folder needs an added writable root: `codex exec -s workspace-write --add-dir /path/to/db-folder ...`. Otherwise SQLite cannot open the database and the CLI exits with code 70.
 
 ### Batch import and topics
 
