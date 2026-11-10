@@ -607,7 +607,7 @@
 	},
 	".:exports.tools.inspectCodexItemTool.description": {
 		"kind": "string",
-		"value": "Inspect one belief in full detail: certainty, freshness, strength, source, category, lineage chain, proximity to similar beliefs, and version diff when applicable."
+		"value": "Inspect one belief in full detail: certainty, freshness, display strength (strong if certainty >= 0.7 or certainty >= 0.4 and freshness >= 0.7), integrityTier (strong if certainty >= 0.7), source, category, lineage chain, proximity to similar beliefs, and version diff when applicable."
 	},
 	".:exports.tools.inspectCodexItemTool.handler": {
 		"kind": "function"
@@ -790,7 +790,7 @@
 	},
 	".:exports.tools.reviewCodexTool.description": {
 		"kind": "string",
-		"value": "Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, trends for time-based patterns, or duplicates for nearby active pairs."
+		"value": "Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, trends for time-based patterns, or duplicates for nearby active pairs sharing a claim prefix (unprefixed claims pair together)."
 	},
 	".:exports.tools.reviewCodexTool.handler": {
 		"kind": "function"
@@ -1295,6 +1295,10 @@
 				"type": "number",
 				"optional": false
 			},
+			"integrityTier": {
+				"type": "\"strong\" | \"fading\" | \"faint\" | undefined",
+				"optional": true
+			},
 			"isActive": {
 				"type": "boolean",
 				"optional": false
@@ -1393,6 +1397,10 @@
 				"type": "number",
 				"optional": false
 			},
+			"integrityTier": {
+				"type": "\"strong\" | \"fading\" | \"faint\" | undefined",
+				"optional": true
+			},
 			"isActive": {
 				"type": "boolean",
 				"optional": false
@@ -1426,7 +1434,7 @@
 				"optional": false
 			}
 		},
-		"definition": "interface BeliefRecord { id: number; claim: string; claimNormalized: string; certainty: number; evidence: number; source: BeliefSource; category: BeliefCategory; createdAt: number; verifiedAt: number; supersededBy: number | null; provenance: string | null; provenanceSources?: string[]; deferredUntil: number | null; freshness: number; strength: StrengthTier; isActive: boolean; lastChangedAt: number; }",
+		"definition": "interface BeliefRecord { id: number; claim: string; claimNormalized: string; certainty: number; evidence: number; source: BeliefSource; category: BeliefCategory; createdAt: number; verifiedAt: number; supersededBy: number | null; provenance: string | null; provenanceSources?: string[]; deferredUntil: number | null; freshness: number; strength: StrengthTier; integrityTier?: StrengthTier; isActive: boolean; lastChangedAt: number; }",
 		"references": {
 			"BeliefCategory": ".:public.BeliefCategory",
 			"BeliefSource": ".:public.BeliefSource",
@@ -2494,7 +2502,7 @@
 	},
 	".:public.codexTools": {
 		"kind": "value",
-		"type": "(CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]",
+		"type": "(CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; crossEntity?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]",
 		"references": {
 			"CodexToolDefinition": ".:public.CodexToolDefinition",
 			"DismissProximityToolData": ".:public.DismissProximityToolData",
@@ -3394,7 +3402,7 @@
 	},
 	".:public.getCodexToolByName": {
 		"kind": "value",
-		"type": "(name: string) => CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData> | null",
+		"type": "(name: string) => CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; crossEntity?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData> | null",
 		"references": {
 			"CodexToolDefinition": ".:public.CodexToolDefinition",
 			"DismissProximityToolData": ".:public.DismissProximityToolData",
@@ -3771,7 +3779,7 @@
 	},
 	".:public.listCodexToolDefinitions": {
 		"kind": "value",
-		"type": "() => (CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]",
+		"type": "() => (CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; crossEntity?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]",
 		"references": {
 			"CodexToolDefinition": ".:public.CodexToolDefinition",
 			"DismissProximityToolData": ".:public.DismissProximityToolData",
@@ -4150,6 +4158,10 @@
 				"type": "number",
 				"optional": false
 			},
+			"integrityTier": {
+				"type": "\"strong\" | \"fading\" | \"faint\" | undefined",
+				"optional": true
+			},
 			"isActive": {
 				"type": "boolean",
 				"optional": false
@@ -4309,6 +4321,10 @@
 			"id": {
 				"type": "number",
 				"optional": false
+			},
+			"integrityTier": {
+				"type": "\"strong\" | \"fading\" | \"faint\" | undefined",
+				"optional": true
 			},
 			"isActive": {
 				"type": "boolean",
@@ -4497,6 +4513,10 @@
 				"type": "number",
 				"optional": false
 			},
+			"integrityTier": {
+				"type": "\"strong\" | \"fading\" | \"faint\" | undefined",
+				"optional": true
+			},
 			"isActive": {
 				"type": "boolean",
 				"optional": false
@@ -4673,7 +4693,7 @@
 	},
 	".:public.reviewCodexTool": {
 		"kind": "value",
-		"type": "CodexToolDefinition<{ view: ReviewCodexView; limit?: number; now?: number; byPrefix?: boolean; }, ReviewCodexToolData>",
+		"type": "CodexToolDefinition<{ view: ReviewCodexView; limit?: number; now?: number; byPrefix?: boolean; crossEntity?: boolean; }, ReviewCodexToolData>",
 		"references": {
 			"CodexToolDefinition": ".:public.CodexToolDefinition",
 			"ReviewCodexToolData": ".:public.ReviewCodexToolData",
@@ -4970,6 +4990,10 @@
 				"type": "number",
 				"optional": false
 			},
+			"integrityTier": {
+				"type": "\"strong\" | \"fading\" | \"faint\" | undefined",
+				"optional": true
+			},
 			"isActive": {
 				"type": "boolean",
 				"optional": false
@@ -5023,7 +5047,7 @@
 	},
 	".:public.reviewCodexToolHandler": {
 		"kind": "value",
-		"type": "(db: CodexDb, input: { view: ReviewCodexView; limit?: number; now?: number; byPrefix?: boolean; }) => ReviewCodexToolResult",
+		"type": "(db: CodexDb, input: { view: ReviewCodexView; limit?: number; now?: number; byPrefix?: boolean; crossEntity?: boolean; }) => ReviewCodexToolResult",
 		"references": {
 			"CodexDb": ".:public.CodexDb",
 			"ReviewCodexToolResult": ".:public.ReviewCodexToolResult",
@@ -8061,7 +8085,7 @@
 	},
 	".:public.tools.codexTools": {
 		"kind": "value",
-		"type": "(CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]"
+		"type": "(CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; crossEntity?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]"
 	},
 	".:public.tools.defineCodexTool": {
 		"kind": "value",
@@ -8137,7 +8161,7 @@
 	},
 	".:public.tools.getCodexToolByName": {
 		"kind": "value",
-		"type": "(name: string) => CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData> | null"
+		"type": "(name: string) => CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; crossEntity?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData> | null"
 	},
 	".:public.tools.inspectCodexItemTool": {
 		"kind": "value",
@@ -8469,7 +8493,7 @@
 	},
 	".:public.tools.listCodexToolDefinitions": {
 		"kind": "value",
-		"type": "() => (CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]"
+		"type": "() => (CodexToolDefinition<{ beliefA: number; beliefB: number; }, DismissProximityToolData> | CodexToolDefinition<{ beliefId: number; }, InspectCodexItemToolData> | CodexToolDefinition<{ claim: string; source: (typeof BELIEF_SOURCES)[number]; category: (typeof BELIEF_CATEGORIES)[number]; certainty?: number; provenance?: string; allowDuplicate?: boolean; }, RememberBeliefToolData> | CodexToolDefinition<{ beliefId: number; }, RetireBeliefToolData> | CodexToolDefinition<{ view: \"flags\" | \"status\" | \"log\" | \"trends\" | \"duplicates\"; limit?: number; now?: number; byPrefix?: boolean; crossEntity?: boolean; }, ReviewCodexToolData> | CodexToolDefinition<ReviseBeliefToolInput, Record<string, unknown>> | CodexToolDefinition<{ query: string; fts?: boolean; prefix?: string; limit?: number; minScore?: number; category?: string; source?: string; }, SearchCodexToolData>)[]"
 	},
 	".:public.tools.literalSchema": {
 		"kind": "value",
@@ -8621,7 +8645,7 @@
 	},
 	".:public.tools.reviewCodexTool": {
 		"kind": "value",
-		"type": "CodexToolDefinition<{ view: ReviewCodexView; limit?: number; now?: number; byPrefix?: boolean; }, ReviewCodexToolData>"
+		"type": "CodexToolDefinition<{ view: ReviewCodexView; limit?: number; now?: number; byPrefix?: boolean; crossEntity?: boolean; }, ReviewCodexToolData>"
 	},
 	".:public.tools.ReviewCodexToolData": {
 		"kind": "type",
@@ -8639,7 +8663,7 @@
 	},
 	".:public.tools.reviewCodexToolHandler": {
 		"kind": "value",
-		"type": "(db: CodexDb, input: { view: ReviewCodexView; limit?: number; now?: number; byPrefix?: boolean; }) => ReviewCodexToolResult"
+		"type": "(db: CodexDb, input: { view: ReviewCodexView; limit?: number; now?: number; byPrefix?: boolean; crossEntity?: boolean; }) => ReviewCodexToolResult"
 	},
 	".:public.tools.reviewCodexToolName": {
 		"kind": "value",
@@ -12145,6 +12169,10 @@
 				"type": "number",
 				"optional": false
 			},
+			"integrityTier": {
+				"type": "\"strong\" | \"fading\" | \"faint\" | undefined",
+				"optional": true
+			},
 			"isActive": {
 				"type": "boolean",
 				"optional": false
@@ -12234,6 +12262,10 @@
 			"id": {
 				"type": "number",
 				"optional": false
+			},
+			"integrityTier": {
+				"type": "\"strong\" | \"fading\" | \"faint\" | undefined",
+				"optional": true
 			},
 			"isActive": {
 				"type": "boolean",
@@ -13337,6 +13369,10 @@
 				"type": "number",
 				"optional": false
 			},
+			"integrityTier": {
+				"type": "\"strong\" | \"fading\" | \"faint\" | undefined",
+				"optional": true
+			},
 			"isActive": {
 				"type": "boolean",
 				"optional": false
@@ -13456,6 +13492,10 @@
 			"id": {
 				"type": "number",
 				"optional": false
+			},
+			"integrityTier": {
+				"type": "\"strong\" | \"fading\" | \"faint\" | undefined",
+				"optional": true
 			},
 			"isActive": {
 				"type": "boolean",

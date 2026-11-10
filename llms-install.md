@@ -190,3 +190,6 @@ In Cline, the server shows seven tools (`search_codex`, `review_codex`,
 `inspect_codex_item`, `remember_belief`, `revise_belief`, `retire_belief`,
 `dismiss_proximity`). Ask: "Use search_codex to find what you know about the
 staging deploy." The result lists the belief added above.
+
+
+When running the CLI or MCP server from a sandboxed Codex CLI job (`codex exec -s workspace-write`), put the database inside the working directory, for example `ghostpaw-codex --db ./codex.db review status`. An external DB folder needs an added writable root: `codex exec -s workspace-write --add-dir /path/to/db-folder ...`. Otherwise SQLite cannot open the database and the CLI exits with code 70.

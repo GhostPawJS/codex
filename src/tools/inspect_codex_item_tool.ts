@@ -74,7 +74,7 @@ export const inspectCodexItemTool = defineCodexTool<
 >({
 	name: inspectCodexItemToolName,
 	description:
-		'Inspect one belief in full detail: certainty, freshness, strength, source, category, lineage chain, proximity to similar beliefs, and version diff when applicable.',
+		'Inspect one belief in full detail: certainty, freshness, display strength (strong if certainty >= 0.7 or certainty >= 0.4 and freshness >= 0.7), integrityTier (strong if certainty >= 0.7), source, category, lineage chain, proximity to similar beliefs, and version diff when applicable.',
 	whenToUse:
 		'Use this after finding a belief through search_codex or review_codex to understand it deeply before deciding whether to confirm, correct, or forget it.',
 	whenNotToUse:

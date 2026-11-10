@@ -37,12 +37,25 @@ test('review prefix counts and immediate duplicates', async () => {
 			'add',
 			'--claim',
 			'instagram-desk: note',
+			'--certainty',
+			'0.5',
 			'--source',
 			'explicit',
 			'--category',
 			'fact',
 		]);
 		assert.equal(added.code, 0, added.err);
+		const shown = await invoke(['belief', 'show', '1']);
+		assert.match(shown.out, /display strength:\s+strong/);
+		assert.match(shown.out, /integrity tier:\s+fading/);
+		const shownJson = JSON.parse((await invoke(['belief', 'show', '1', '--json'])).out);
+		assert.equal(shownJson.data.detail.strength, 'strong');
+		assert.equal(shownJson.data.detail.integrityTier, 'fading');
+		const health = JSON.parse((await invoke(['review', 'status', '--json'])).out);
+		assert.equal(health.data.payload.data.integrity, 0);
+		const help = await invoke(['review', '--help']);
+		assert.match(help.out, /--cross-entity/);
+		assert.match(help.out, /Defaults to false/);
 		const prefixes = await invoke(['review', 'status', '--by-prefix']);
 		assert.equal(prefixes.code, 0, prefixes.err);
 		assert.equal(prefixes.out, '1 instagram-desk\n');
@@ -70,6 +83,28 @@ test('review prefix counts and immediate duplicates', async () => {
 		assert.equal((await invoke(['proximity', 'dismiss', '1', '2'])).code, 0);
 		assert.match((await invoke(['review', 'duplicates'])).out, /0 near-duplicate pairs/);
 		assert.equal((await invoke(['belief', 'forget', '2'])).code, 0);
+		for (const entity of ['alpha', 'beta']) {
+			assert.equal(
+				(
+					await invoke([
+						'belief',
+						'add',
+						'--claim',
+						`${entity}: Deploy the service every Tuesday morning after checking all reports`,
+						'--source',
+						'explicit',
+						'--category',
+						'procedure',
+					])
+				).code,
+				0,
+			);
+		}
+		const scoped = JSON.parse((await invoke(['review', 'duplicates', '--json'])).out);
+		assert.equal(scoped.data.payload.data.length, 0);
+		const cross = await invoke(['review', 'duplicates', '--cross-entity', '--json']);
+		assert.equal(cross.code, 0, cross.err);
+		assert.equal(JSON.parse(cross.out).data.payload.data.length, 1);
 	} finally {
 		db.close();
 	}

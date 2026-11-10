@@ -1,3 +1,4 @@
+import { normalizeClaim } from '../beliefs/normalize_claim.ts';
 import type { FlagResultItem, LogRecord, StatusRecord, TrendRecord } from '../beliefs/types.ts';
 import type { CodexDb } from '../database.ts';
 import * as read from '../read.ts';
@@ -104,7 +105,12 @@ function buildTrendsResult(db: CodexDb): ReviewCodexToolResult {
 	);
 }
 
-function buildDuplicatesResult(db: CodexDb, limit = 20, now?: number): ReviewCodexToolResult {
+function buildDuplicatesResult(
+	db: CodexDb,
+	limit = 20,
+	now?: number,
+	crossEntity = false,
+): ReviewCodexToolResult {
 	const pairs: {
 		beliefA: number;
 		beliefB: number;
@@ -115,9 +121,11 @@ function buildDuplicatesResult(db: CodexDb, limit = 20, now?: number): ReviewCod
 	const rows = db
 		.prepare('SELECT id, claim FROM beliefs WHERE superseded_by IS NULL ORDER BY id')
 		.all<{ id: number; claim: string }>();
+	const prefix = (claim: string) =>
+		claim.includes(':') ? normalizeClaim(claim.slice(0, claim.indexOf(':'))) : '';
 	for (const row of rows) {
 		for (const nearby of read.listBeliefProximity(db, row.id, rows.length, 0.7, now)) {
-			if (row.id < nearby.id)
+			if (row.id < nearby.id && (crossEntity || prefix(row.claim) === prefix(nearby.claim)))
 				pairs.push({
 					beliefA: row.id,
 					beliefB: nearby.id,
@@ -137,7 +145,13 @@ function buildDuplicatesResult(db: CodexDb, limit = 20, now?: number): ReviewCod
 
 export function reviewCodexToolHandler(
 	db: CodexDb,
-	input: { view: ReviewCodexView; limit?: number; now?: number; byPrefix?: boolean },
+	input: {
+		view: ReviewCodexView;
+		limit?: number;
+		now?: number;
+		byPrefix?: boolean;
+		crossEntity?: boolean;
+	},
 ): ReviewCodexToolResult {
 	const invalid = validateToolInput(reviewCodexTool.inputSchema, input);
 	if (invalid) return invalid;
@@ -150,7 +164,7 @@ export function reviewCodexToolHandler(
 			case 'status':
 				return buildStatusResult(db, input.now, input.byPrefix);
 			case 'duplicates':
-				return buildDuplicatesResult(db, input.limit, input.now);
+				return buildDuplicatesResult(db, input.limit, input.now, input.crossEntity);
 			case 'trends':
 				return buildTrendsResult(db);
 		}
@@ -165,7 +179,7 @@ export const reviewCodexTool = defineCodexTool<
 >({
 	name: reviewCodexToolName,
 	description:
-		'Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, trends for time-based patterns, or duplicates for nearby active pairs.',
+		'Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, trends for time-based patterns, or duplicates for nearby active pairs sharing a claim prefix (unprefixed claims pair together).',
 	whenToUse:
 		'Use this when you need an overview of the codex state rather than a specific belief. Start with flags for maintenance, status for a dashboard, or log for recent changes.',
 	whenNotToUse:
@@ -177,6 +191,7 @@ export const reviewCodexTool = defineCodexTool<
 	inputDescriptions: {
 		view: 'Which review surface: flags, status, log, trends, or duplicates.',
 		limit: 'Maximum entries for log or duplicates. Defaults to 20.',
+		crossEntity: 'Include duplicate candidates across different claim prefixes. Defaults to false.',
 		byPrefix: 'Include active claim prefix counts in status.',
 		now: 'Optional timestamp override for freshness computation in flags and status.',
 	},
@@ -189,6 +204,9 @@ export const reviewCodexTool = defineCodexTool<
 				'Which codex review surface to load. Flags suppress single_evidence, low_trust and gap for beliefs created less than seven days ago.',
 			),
 			limit: integerSchema('Maximum entries for log or duplicates.'),
+			crossEntity: booleanSchema(
+				'Include duplicate candidates across different claim prefixes. Defaults to false.',
+			),
 			byPrefix: booleanSchema('Include active claim prefix counts in status.'),
 			now: integerSchema('Optional timestamp override for freshness computation.'),
 		},

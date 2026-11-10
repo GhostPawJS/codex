@@ -29,6 +29,7 @@ describe('mapBeliefRow', () => {
 		strictEqual(record.claim, 'x');
 		strictEqual(record.isActive, true);
 		strictEqual(record.strength, 'strong');
+		strictEqual(record.integrityTier, 'strong');
 		strictEqual(record.lastChangedAt, 1);
 	});
 
@@ -55,6 +56,8 @@ describe('mapBeliefRow', () => {
 			600,
 		);
 		strictEqual(record.lastChangedAt, 500);
+		strictEqual(record.strength, 'strong');
+		strictEqual(record.integrityTier, 'fading');
 	});
 
 	it('derives strength tiers from certainty', () => {

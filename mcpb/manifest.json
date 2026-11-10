@@ -77,11 +77,11 @@
     },
     {
       "name": "review_codex",
-      "description": "Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, trends for time-based patterns, or duplicates for nearby active pairs."
+      "description": "Load a codex review surface: flags for beliefs needing attention, status for portfolio health, log for recent activity, trends for time-based patterns, or duplicates for nearby active pairs sharing a claim prefix (unprefixed claims pair together)."
     },
     {
       "name": "inspect_codex_item",
-      "description": "Inspect one belief in full detail: certainty, freshness, strength, source, category, lineage chain, proximity to similar beliefs, and version diff when applicable."
+      "description": "Inspect one belief in full detail: certainty, freshness, display strength (strong if certainty >= 0.7 or certainty >= 0.4 and freshness >= 0.7), integrityTier (strong if certainty >= 0.7), source, category, lineage chain, proximity to similar beliefs, and version diff when applicable."
     },
     {
       "name": "remember_belief",

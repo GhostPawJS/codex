@@ -44,7 +44,9 @@ it('preserves remember, inspect and review outputs on a mixed belief history', (
 	strictEqual(status.denominator, 6);
 	// Keep the original compatibility fingerprint for all pre-existing fields.
 	const legacyJson = JSON.stringify(result, (key, value) =>
-		key === 'newUnconfirmed' || key === 'denominator' ? undefined : value,
+		key === 'newUnconfirmed' || key === 'denominator' || key === 'integrityTier'
+			? undefined
+			: value,
 	);
 	strictEqual(
 		createHash('sha256').update(legacyJson).digest('hex'),

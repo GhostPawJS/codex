@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Add `--cross-entity` / `crossEntity` to include duplicate review candidates across claim prefixes.
+- Expose the certainty-only `integrityTier` alongside the existing display `strength`, with distinct labels in belief details.
+- Document writable database paths for CLI and MCP use in sandboxed Codex CLI jobs.
+
+### Changed
+
+- Restrict duplicate review suggestions to matching normalized claim prefixes by default; unprefixed claims pair together.
+
 ## [0.6.4] - 2026-11-05
 
 ### Added

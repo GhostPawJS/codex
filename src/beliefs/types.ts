@@ -59,6 +59,8 @@ export interface BeliefRecord {
 	deferredUntil: number | null;
 	freshness: number;
 	strength: StrengthTier;
+	/** Certainty-only tier used by status integrity, independent of freshness. */
+	integrityTier?: StrengthTier;
 	isActive: boolean;
 	lastChangedAt: number;
 }

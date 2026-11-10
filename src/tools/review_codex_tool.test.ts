@@ -117,3 +117,41 @@ it('counts active prefixes and immediately lists undismissed duplicate pairs', a
 		db.close();
 	}
 });
+
+it('scopes duplicate suggestions to normalized entities unless crossEntity is enabled', async () => {
+	const db = await createInitializedCodexDb();
+	try {
+		const claims = [
+			'Instagram-desk: Deploy the service every Tuesday morning after checking all reports',
+			' instagram desk : Deploy the service every Tuesday morning after checking all reports',
+			'LinkedIn desk: Deploy the service every Tuesday morning after checking all reports',
+			'Deploy the service every Tuesday morning after checking all reports',
+			'Deploy the service every Tuesday morning after checking all reports',
+		];
+		for (const claim of claims)
+			remember(db, { claim, source: 'explicit', category: 'procedure', allowDuplicate: true });
+		const pairs = (crossEntity?: boolean, limit?: number) => {
+			const result = reviewCodexToolHandler(db, {
+				view: 'duplicates',
+				...(crossEntity === undefined ? {} : { crossEntity }),
+				...(limit === undefined ? {} : { limit }),
+			});
+			ok(result.ok && result.data.payload.view === 'duplicates');
+			return result.data.payload.data.map((p) => [p.beliefA, p.beliefB]);
+		};
+		deepStrictEqual(pairs(), [
+			[1, 2],
+			[4, 5],
+		]);
+		deepStrictEqual(pairs(false), pairs());
+		ok(pairs(true).some(([a, b]) => a === 1 && b === 3));
+		ok(pairs(true).some(([a, b]) => a === 1 && b === 4));
+		deepStrictEqual(pairs(false, 1), [[1, 2]]);
+		recordDismissal(db, 1, 3, Date.now());
+		ok(pairs(true).every(([a, b]) => a !== 1 || b !== 3));
+		forgetBelief(db, 3);
+		ok(pairs(true).every(([a, b]) => a !== 3 && b !== 3));
+	} finally {
+		db.close();
+	}
+});

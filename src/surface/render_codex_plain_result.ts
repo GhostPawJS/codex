@@ -1,3 +1,4 @@
+import { getStrengthTier } from '../beliefs/map_belief_row.ts';
 import type { BeliefRecord } from '../beliefs/types.ts';
 import type { SurfaceTool } from '../surfaces/surface_types.ts';
 
@@ -133,6 +134,9 @@ export function renderCodexPlainResult(
 					? claim(belief.claim)
 					: String(belief[key as keyof BeliefRecord]),
 		]);
+		const strengthPair = pairs.find(([key]) => key === 'strength');
+		if (strengthPair) strengthPair[0] = 'display strength';
+		pairs.push(['integrity tier', belief.integrityTier ?? getStrengthTier(belief.certainty)]);
 		if (belief.provenanceSources?.length)
 			pairs.push(['sources', belief.provenanceSources.join(', ')]);
 		if (belief.provenance) pairs.push(['provenance', belief.provenance]);

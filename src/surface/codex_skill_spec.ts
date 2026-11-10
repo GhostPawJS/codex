@@ -51,6 +51,12 @@ Exit codes: 0 success, 1 operation failure, 2 usage, 3 missing belief, 4 conflic
 
 Database: \`~/.ghostpaw/codex.db\`. Override with \`--db <path>\` or \`GHOSTPAW_CODEX_DB\`. Default database opens print \`using default db <path>\` once on stderr; suppress with \`--quiet\` or \`GHOSTPAW_QUIET=1\`. Informational commands do not print the notice.
 
+\`review duplicates\` suggests only pairs with the same normalized colon prefix or leading entity by default (case-insensitive, including multiword and hyphenated prefixes). Unprefixed claims pair with other unprefixed claims. Use \`review duplicates --cross-entity\` (\`crossEntity: true\` in \`review_codex\`) to include pairs across entities as before. Suggestions do not change beliefs; inspect each pair before merging or forgetting.
+
+Belief JSON keeps the existing \`strength\` display tier and adds \`integrityTier\`, the certainty-only tier used by \`review status\`. Display \`strength\` is \`strong\` when certainty >= 0.4 and freshness >= 0.7; otherwise it falls back to the certainty tier. Thus certainty >= 0.7 always displays \`strong\`, even when stale. \`integrityTier\` is \`strong\` at certainty >= 0.7, \`fading\` at >= 0.4, otherwise \`faint\`. Integrity counts strong active beliefs divided by all active beliefs. Human \`belief show\` labels these as \`display strength\` and \`integrity tier\`; a fresh inferred belief at certainty 0.5 can display strong while its integrity tier is fading.
+
+When running the CLI or MCP server from a sandboxed Codex CLI job (\`codex exec -s workspace-write\`), put the database inside the working directory, for example \`ghostpaw-codex --db ./codex.db review status\`. An external DB folder needs an added writable root: \`codex exec -s workspace-write --add-dir /path/to/db-folder ...\`. Otherwise SQLite cannot open the database and the CLI exits with code 70.
+
 Search ranks colon-prefixed entities matching the leading query tokens first (case-insensitive, including multiword and hyphenated entities), also with \`--prefix\`. Raw \`--fts\` and quoted phrase ranking are unchanged.`,
 	tools: codexSurfaceTools,
 	workflows: codexSkills,
