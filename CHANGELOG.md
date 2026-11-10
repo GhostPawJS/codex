@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.5] - 2026-11-10
+
 ### Fixed
 
 - Document the correction-history unstable flag, its persistence through confirmation, and temporary suppression by deferral.
@@ -244,7 +246,8 @@ All notable changes to this project are documented here. The format follows
 - CI runs on every push and pull request on Node 24 and 26. Releases publish
   through npm trusted publishing with provenance.
 
-[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.4...HEAD
+[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.5...HEAD
+[0.6.5]: https://github.com/GhostPawJS/codex/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/GhostPawJS/codex/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/GhostPawJS/codex/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/GhostPawJS/codex/compare/v0.6.1...v0.6.2
