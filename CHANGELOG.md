@@ -14,6 +14,8 @@ All notable changes to this project are documented here. The format follows
 
 - Document writable database roots for sandboxed agent harnesses in the README and generated agent skill. Clarify which GhostPaw store owns identity, beliefs, relationships, work, procedures, and stable operational facts.
 
+- Use a compact AI Agents Listing badge in the README.
+
 - Add atomic JSON/JSONL belief imports with dry runs and indexed results, and optional belief topics with migration and list/search filters.
 
 ### Added
