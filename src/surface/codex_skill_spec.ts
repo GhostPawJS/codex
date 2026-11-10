@@ -38,6 +38,19 @@ Alternatively, set \`sandbox_workspace_write.writable_roots\` in
 writable_roots = ["/absolute/dir-with-db"]
 \`\`\`
 
+## Unstable revision history
+
+The \`unstable\` flag is derived at read time when a correction-connected lineage
+contains more than two beliefs (normally the original plus two corrections).
+Legacy supersessions without a reason also count; merge-only edges do not.
+It signals revision history worth inspecting, not a false claim or low certainty.
+Confirmation raises evidence and certainty but does not clear \`unstable\`, and
+further corrections retain that history. Deferral hides all flags until its
+expiry, then \`unstable\` returns if the history still qualifies. There is no
+acknowledge/reset action: it clears only when the qualifying history no longer
+exists (for example after hard deletion for an independent privacy need).
+Do not delete history merely to silence the signal.
+
 ## What goes where
 
 | Store | Use for |

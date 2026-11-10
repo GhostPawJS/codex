@@ -31,7 +31,7 @@ Step-by-step sequence:
    - \`stale\` or \`fading\`: confirm if still valid, correct if the claim has changed, forget if irrelevant.
    - \`single_evidence\`: confirm to add evidence, or defer if verification is not possible yet.
    - \`low_trust\`: confirm with stronger evidence, correct with upgraded source, or forget if unreliable.
-   - \`unstable\`: inspect lineage to understand why revision depth is high, then stabilize through confirm or correct.
+   - \`unstable\`: inspect lineage to understand why revision depth is high, review the correction history. Confirm and correct do not clear this history-derived flag; defer only hides it until expiry.
    - \`gap\`: note the category imbalance and consider whether missing beliefs should be captured.
 5. If \`inspect_codex_item\` reveals proximity matches, evaluate whether the flagged belief overlaps with a neighbor. Use \`dismiss_proximity\` for false positives.
 6. After processing the batch, use \`review_codex\` with \`view: "status"\` to confirm integrity has improved.
