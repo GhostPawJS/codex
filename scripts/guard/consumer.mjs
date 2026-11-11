@@ -1,5 +1,13 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+	existsSync,
+	mkdtempSync,
+	readdirSync,
+	readFileSync,
+	rmSync,
+	statSync,
+	writeFileSync,
+} from 'node:fs';
 import { isBuiltin } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -177,7 +185,10 @@ try {
 		binNames.length === 1 || binNames.includes(packageName.replace(/^@[^/]+\//, '')),
 		`npx ${packageName} cannot pick an executable from bins: ${binNames.join(', ')}`,
 	);
-	const npx = join(dirname(process.execPath), 'npx');
+	// Prefer the npx beside the running Node; fall back to PATH when Node resolves
+	// through a symlink into a directory without npm's executables.
+	const siblingNpx = join(dirname(process.execPath), 'npx');
+	const npx = existsSync(siblingNpx) ? siblingNpx : 'npx';
 	assert.equal(
 		run(npx, ['--no-install', packageName, '--version'], { cwd: temp }).trim(),
 		`${binName} ${pkg.version} (npm)`,
