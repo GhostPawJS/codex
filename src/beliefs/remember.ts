@@ -1,6 +1,8 @@
 import type { CodexDb } from '../database.ts';
 import { resolveNow } from '../resolve_now.ts';
 import { withTransaction } from '../with_transaction.ts';
+import { getBeliefRow } from './get_belief_row.ts';
+import { insertBeliefSql } from './insert_belief_sql.ts';
 import { listBeliefProximity } from './list_belief_proximity.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
 import { prepareBeliefStorage } from './prepare_belief_storage.ts';
@@ -45,21 +47,11 @@ export function remember(
 						input.provenance,
 						existing.id,
 					);
-				return mapBeliefRow(
-					db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(existing.id) as BeliefRow,
-					timestamp,
-				);
+				return mapBeliefRow(getBeliefRow(db, existing.id) as BeliefRow, timestamp);
 			}
 		}
 		const result = db
-			.prepare(
-				`
-			INSERT INTO beliefs (
-				claim, claim_normalized, certainty, evidence, source, category, created_at, verified_at,
-				superseded_by, provenance, deferred_until, embedding, embedding_norm, embedding_dim, embedding_version, topic
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`,
-			)
+			.prepare(insertBeliefSql)
 			.run(
 				input.claim,
 				prepared.claimNormalized,
@@ -78,12 +70,8 @@ export function remember(
 				prepared.embeddingVersion,
 				input.topic ?? null,
 			);
-		const row = db
-			.prepare('SELECT * FROM beliefs WHERE id = ?')
-			.get<BeliefRow>(Number(result.lastInsertRowid));
-		if (!row) {
-			throw new Error('Inserted belief could not be reloaded.');
-		}
+		const row = getBeliefRow(db, Number(result.lastInsertRowid));
+		if (!row) throw new Error('Inserted belief could not be reloaded.');
 		return mapBeliefRow(row, timestamp);
 	});
 	if (duplicate) return { ...record, proximity: [], duplicate: true };

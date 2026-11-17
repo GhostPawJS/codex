@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `belief import --json` (and the `import_beliefs` tool) now lists the committed beliefs in `entities` (kind, id, claim), duplicates included, so callers no longer search or query SQLite for the new ids. Dry runs keep `entities` empty because their ids are provisional.
+
+### Changed
+
+- Share belief row lookups and insert SQL, and remove an unreachable merge check to keep the import entity fix within existing bundle size budgets.
+
 ## [0.6.5] - 2026-11-10
 
 ### Fixed

@@ -2,11 +2,11 @@ import type { CodexDb } from '../database.ts';
 import { computeVersionDiff } from '../lib/version_diff.ts';
 import { resolveNow } from '../resolve_now.ts';
 import { activeSuccessorId } from './active_successor_id.ts';
-
 import { getBeliefLineage } from './get_belief_lineage.ts';
+import { getBeliefRow } from './get_belief_row.ts';
 import { listBeliefProximity } from './list_belief_proximity.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
-import type { BeliefDetailRecord, BeliefRow } from './types.ts';
+import type { BeliefDetailRecord } from './types.ts';
 
 export function getBeliefDetail(
 	db: CodexDb,
@@ -14,7 +14,7 @@ export function getBeliefDetail(
 	now?: number,
 ): BeliefDetailRecord | null {
 	const timestamp = resolveNow(now);
-	const row = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(beliefId);
+	const row = getBeliefRow(db, beliefId);
 	if (!row) {
 		return null;
 	}

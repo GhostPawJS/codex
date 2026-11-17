@@ -1,10 +1,10 @@
 import type { CodexDb } from '../database.ts';
 import { resolveNow } from '../resolve_now.ts';
 import { withTransaction } from '../with_transaction.ts';
-
 import { assertActiveBeliefExists } from './assert_active_belief_exists.ts';
+import { getBeliefRow } from './get_belief_row.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
-import type { BeliefRecord, BeliefRow, ForgetOptions } from './types.ts';
+import type { BeliefRecord, ForgetOptions } from './types.ts';
 
 export function forgetBelief(db: CodexDb, beliefId: number, options?: ForgetOptions): BeliefRecord {
 	const timestamp = resolveNow(options?.now);
@@ -17,10 +17,8 @@ export function forgetBelief(db: CodexDb, beliefId: number, options?: ForgetOpti
 		db.prepare(
 			`UPDATE beliefs SET superseded_by = ?, superseded_reason = 'forgotten', verified_at = ?, provenance = ? WHERE id = ?`,
 		).run(next, timestamp, options?.provenance ?? current.provenance, beliefId);
-		const row = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(beliefId);
-		if (!row) {
-			throw new Error('Forgotten belief could not be reloaded.');
-		}
+		const row = getBeliefRow(db, beliefId);
+		if (!row) throw new Error('Forgotten belief could not be reloaded.');
 		return mapBeliefRow(row, timestamp);
 	});
 }

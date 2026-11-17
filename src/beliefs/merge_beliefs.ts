@@ -3,7 +3,9 @@ import { CodexValidationError } from '../errors.ts';
 import { resolveNow } from '../resolve_now.ts';
 import { withTransaction } from '../with_transaction.ts';
 import { assertActiveBeliefExists } from './assert_active_belief_exists.ts';
+import { getBeliefRow } from './get_belief_row.ts';
 import { inheritProvenance } from './inherit_provenance.ts';
+import { insertBeliefSql } from './insert_belief_sql.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
 import { prepareBeliefStorage } from './prepare_belief_storage.ts';
 import { sourceInitialCertainty } from './source_initial_certainty.ts';
@@ -67,15 +69,10 @@ export function mergeBeliefs(
 				successor.id,
 				mergedIn.map((belief) => belief.id),
 			);
-			return mapBeliefRow(
-				db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(successor.id) as BeliefRow,
-				timestamp,
-			);
+			return mapBeliefRow(getBeliefRow(db, successor.id) as BeliefRow, timestamp);
 		}
-		const primary = beliefs[0];
-		if (!primary) {
-			throw new CodexValidationError('Merging beliefs requires at least one primary belief.');
-		}
+		// uniqueIds is nonempty, and every id was resolved above.
+		const primary = beliefs[0] as BeliefRow;
 		const claim = input.claim ?? beliefs.map((belief) => belief.claim).join(' / ');
 		const prepared = prepareBeliefStorage(claim);
 		const source = input.source ?? primary.source;
@@ -84,34 +81,27 @@ export function mergeBeliefs(
 			input.certainty ??
 				Math.max(sourceInitialCertainty(source), ...beliefs.map((belief) => belief.certainty)),
 		);
-		const result = db
-			.prepare(`
-			INSERT INTO beliefs (
-				claim, claim_normalized, certainty, evidence, source, category, created_at, verified_at,
-				superseded_by, provenance, deferred_until, embedding, embedding_norm, embedding_dim, embedding_version, topic
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`)
-			.run(
-				claim,
-				prepared.claimNormalized,
-				certainty,
-				beliefs.reduce((sum, belief) => sum + belief.evidence, 0),
-				source,
-				category,
-				timestamp,
-				timestamp,
-				null,
-				input.provenance ??
-					(beliefs.every((belief) => belief.provenance === primary.provenance)
-						? primary.provenance
-						: null),
-				null,
-				prepared.embedding,
-				prepared.embeddingNorm,
-				prepared.embeddingDim,
-				prepared.embeddingVersion,
-				input.topic ?? primary.topic ?? null,
-			);
+		const result = db.prepare(insertBeliefSql).run(
+			claim,
+			prepared.claimNormalized,
+			certainty,
+			beliefs.reduce((sum, belief) => sum + belief.evidence, 0),
+			source,
+			category,
+			timestamp,
+			timestamp,
+			null,
+			input.provenance ??
+				(beliefs.every((belief) => belief.provenance === primary.provenance)
+					? primary.provenance
+					: null),
+			null,
+			prepared.embedding,
+			prepared.embeddingNorm,
+			prepared.embeddingDim,
+			prepared.embeddingVersion,
+			input.topic ?? primary.topic ?? null,
+		);
 		const successorId = Number(result.lastInsertRowid);
 		for (const belief of beliefs) {
 			db.prepare(
@@ -119,10 +109,8 @@ export function mergeBeliefs(
 			).run(successorId, timestamp, belief.id);
 		}
 		inheritProvenance(db, successorId, uniqueIds);
-		const row = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(successorId);
-		if (!row) {
-			throw new Error('Merged belief could not be reloaded.');
-		}
+		const row = getBeliefRow(db, successorId);
+		if (!row) throw new Error('Merged belief could not be reloaded.');
 		return mapBeliefRow(row, timestamp);
 	});
 }

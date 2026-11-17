@@ -82,6 +82,29 @@ test('atomic import returns every item, rolls back duplicates/provenance on erro
 		assert.equal(tool.ok, false);
 		if (tool.outcome === 'error') assert.equal((tool.error.details?.items as unknown[]).length, 2);
 		assert.equal(listBeliefs(db).length, 2);
+		const imported = importBeliefsToolHandler(db, {
+			input:
+				'{"claim":"Entity one","source":"explicit","category":"fact"}\n{"claim":"Valid","source":"explicit","category":"procedure"}',
+		});
+		assert.equal(imported.ok, true);
+		assert.deepEqual(
+			imported.entities.map((e) => [e.kind, e.title]),
+			[
+				['belief', 'Entity one'],
+				['belief', 'Valid'],
+			],
+		);
+		if (imported.outcome === 'success')
+			assert.deepEqual(
+				imported.entities.map((e) => e.id),
+				imported.data.items.map((item) => item.id),
+			);
+		const dryTool = importBeliefsToolHandler(db, {
+			items: [{ ...input, claim: 'Dry only' }],
+			dryRun: true,
+		});
+		assert.equal(dryTool.ok, true);
+		assert.deepEqual(dryTool.entities, []);
 	} finally {
 		db.close();
 	}

@@ -15,6 +15,7 @@ import {
 	stringSchema,
 } from './tool_metadata.ts';
 import { importBeliefsToolName } from './tool_names.ts';
+import { toBeliefIdRef } from './tool_ref.ts';
 import { type ToolResult, toolFailure, toolSuccess } from './tool_types.ts';
 import { validateToolInput } from './validate_tool_input.ts';
 
@@ -34,9 +35,8 @@ export function importBeliefsToolHandler(
 			throw new CodexValidationError(
 				'Provide exactly one of items or input (JSON array / JSON Lines).',
 			);
-		const result = importBeliefs(db, input.items ?? parseBeliefImport(input.input ?? ''), {
-			dryRun: input.dryRun === true,
-		});
+		const items = input.items ?? parseBeliefImport(input.input ?? '');
+		const result = importBeliefs(db, items, { dryRun: input.dryRun === true });
 		if (result.items.some((item) => item.error)) {
 			const failure = toolFailure(
 				'domain',
@@ -51,6 +51,12 @@ export function importBeliefsToolHandler(
 		return toolSuccess(
 			`${result.dryRun ? 'Validated' : 'Imported'} ${result.items.length} beliefs${result.dryRun ? ' (dry run; no writes persisted)' : ''}.`,
 			result,
+			// Committed ids (duplicates name the existing belief); dry-run ids are provisional.
+			{
+				entities: (result.dryRun ? [] : result.items).map((r, i) =>
+					toBeliefIdRef(r.id as number, items[i]?.claim),
+				),
+			},
 		);
 	} catch (error) {
 		return translateToolError(error, { summary: 'Could not import beliefs.' });

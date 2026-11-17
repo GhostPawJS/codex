@@ -2,7 +2,9 @@ import type { CodexDb } from '../database.ts';
 import { resolveNow } from '../resolve_now.ts';
 import { withTransaction } from '../with_transaction.ts';
 import { assertActiveBeliefExists } from './assert_active_belief_exists.ts';
+import { getBeliefRow } from './get_belief_row.ts';
 import { inheritProvenance } from './inherit_provenance.ts';
+import { insertBeliefSql } from './insert_belief_sql.ts';
 import { listBeliefProximity } from './list_belief_proximity.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
 import { prepareBeliefStorage } from './prepare_belief_storage.ts';
@@ -35,19 +37,11 @@ export function correctBelief(
 					input.provenance,
 					beliefId,
 				);
-			return mapBeliefRow(
-				db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(beliefId) as BeliefRow,
-				timestamp,
-			);
+			return mapBeliefRow(getBeliefRow(db, beliefId) as BeliefRow, timestamp);
 		}
 		const certainty = clampCertainty(input.certainty ?? sourceInitialCertainty(nextSource));
 		const result = db
-			.prepare(`
-			INSERT INTO beliefs (
-				claim, claim_normalized, certainty, evidence, source, category, created_at, verified_at,
-				superseded_by, provenance, deferred_until, embedding, embedding_norm, embedding_dim, embedding_version, topic
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`)
+			.prepare(insertBeliefSql)
 			.run(
 				input.claim,
 				prepared.claimNormalized,
@@ -71,10 +65,8 @@ export function correctBelief(
 			`UPDATE beliefs SET superseded_by = ?, superseded_reason = 'corrected', verified_at = ? WHERE id = ?`,
 		).run(newId, timestamp, beliefId);
 		inheritProvenance(db, newId, [beliefId]);
-		const row = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(newId);
-		if (!row) {
-			throw new Error('Corrected belief could not be reloaded.');
-		}
+		const row = getBeliefRow(db, newId);
+		if (!row) throw new Error('Corrected belief could not be reloaded.');
 		return mapBeliefRow(row, timestamp);
 	});
 	const proximity =

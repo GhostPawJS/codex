@@ -5,9 +5,10 @@ import { cosineSimilarity } from '../lib/cosine_similarity.ts';
 import { deserializeVectorBlob } from '../lib/deserialize_vector_blob.ts';
 import { resolveNow } from '../resolve_now.ts';
 import { assertActiveBeliefExists } from './assert_active_belief_exists.ts';
+import { getBeliefRow } from './get_belief_row.ts';
 import { mapBeliefRow } from './map_belief_row.ts';
 import { loadProximityVectors } from './proximity_vectors.ts';
-import type { BeliefRow, ProximityResultItem } from './types.ts';
+import type { ProximityResultItem } from './types.ts';
 
 export function listBeliefProximity(
 	db: CodexDb,
@@ -37,7 +38,7 @@ export function listBeliefProximity(
 		.slice(0, limit)
 		.map(({ id, similarity }) => {
 			// Full records are needed only for the selected matches, not the entire vector scan.
-			const selected = db.prepare('SELECT * FROM beliefs WHERE id = ?').get<BeliefRow>(id);
+			const selected = getBeliefRow(db, id);
 			if (!selected) throw new Error('Proximity belief could not be reloaded.');
 			return { ...mapBeliefRow(selected, timestamp), similarity };
 		});
