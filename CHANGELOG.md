@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.6] - 2026-11-17
+
 ### Fixed
 
 - `belief import --json` (and the `import_beliefs` tool) now lists the committed beliefs in `entities` (kind, id, claim), duplicates included, so callers no longer search or query SQLite for the new ids. Dry runs keep `entities` empty because their ids are provisional.
@@ -254,7 +256,8 @@ All notable changes to this project are documented here. The format follows
 - CI runs on every push and pull request on Node 24 and 26. Releases publish
   through npm trusted publishing with provenance.
 
-[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.5...HEAD
+[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.6...HEAD
+[0.6.6]: https://github.com/GhostPawJS/codex/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/GhostPawJS/codex/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/GhostPawJS/codex/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/GhostPawJS/codex/compare/v0.6.2...v0.6.3
