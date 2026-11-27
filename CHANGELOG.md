@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-27
+
 ### Added
 
 - `show` and `get` alias `belief show`. All three accept multiple ids and retain found beliefs when an id is missing.
@@ -266,7 +268,8 @@ All notable changes to this project are documented here. The format follows
 - CI runs on every push and pull request on Node 24 and 26. Releases publish
   through npm trusted publishing with provenance.
 
-[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.6.6...HEAD
+[Unreleased]: https://github.com/GhostPawJS/codex/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/GhostPawJS/codex/compare/v0.6.6...v0.7.0
 [0.6.6]: https://github.com/GhostPawJS/codex/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/GhostPawJS/codex/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/GhostPawJS/codex/compare/v0.6.3...v0.6.4
