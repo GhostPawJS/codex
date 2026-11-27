@@ -21,6 +21,16 @@ export interface ToolCliOptions<TCtx> {
 	openContext(opts: { db?: string }): TCtx | Promise<TCtx>;
 	closeContext?: (ctx: TCtx) => void | Promise<void>;
 	commands?: {
+		batch?: {
+			path: string;
+			aliases: string[];
+			run(
+				ctx: TCtx,
+				ids: number[],
+				quiet: boolean,
+				compact: boolean,
+			): { text: string; data: unknown; code: number; diagnostic: string };
+		};
 		alias?: (ctx: TCtx, args: string[]) => { text: string; data: unknown; code?: number };
 		mcp?: (opts: { db?: string }) => unknown | Promise<unknown>;
 		skill?: (args: string[]) => string | Promise<string>;

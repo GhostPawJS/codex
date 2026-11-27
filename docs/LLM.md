@@ -315,6 +315,13 @@ invocation.
 
 `ghostpaw-codex search <query>`, `review flags|status|log|trends`, `belief add`,
 `belief show` and revision verbs print compact text, including in pipes.
+
+`show` and `get` are aliases for `belief show`. With several ids, JSON
+returns ordered `data.beliefs` entries containing `{detail, lineage}` or
+`{id, error}`. Missing ids produce exit 3 and keep the other results.
+Search hits are in `data.results`. Use `belief import @path` for files.
+Valid sources are explicit, observed, distilled and inferred. Import failures
+report indexed rollback reasons.
 Use `--json` for the full tool result (`--compact` removes indentation).
 `--quiet` prints all result ids for search, flags and log, and the affected id
 for writes; status, trends and version are silent. Errors include recovery

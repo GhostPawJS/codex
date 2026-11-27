@@ -31,7 +31,7 @@ Search before adding with `search_codex` (CLI: `ghostpaw-codex search`): `ghostp
 
 - `ghostpaw-codex belief add "Deploys go out on Tuesdays." --source explicit --category fact`
 - `ghostpaw-codex alias add <term> <alias>` adds an optional directed query alias.
-- `ghostpaw-codex belief show <id>`
+- `ghostpaw-codex show <id> [<id>...]`
 - `ghostpaw-codex belief confirm <id>`
 - `ghostpaw-codex belief correct <id> --claim "Deploys go out on Wednesdays."`
 - WARNING: `belief retire` hard-deletes the whole lineage (the belief and all its predecessors/successors) and cannot be undone. Use `belief forget` for soft removal that keeps lineage.
@@ -41,6 +41,8 @@ Search before adding with `search_codex` (CLI: `ghostpaw-codex search`): `ghostp
 - `ghostpaw-codex review flags|status|log|trends|duplicates`; use `review status --by-prefix` for active prefix counts and `review duplicates --limit 20` for immediate nearby pairs.
 - `--json` prints full results on every read command (including tools, describe, version and guides); `GHOSTPAW_OUTPUT=json` opts all commands into JSON; other values leave defaults unchanged; `--quiet` prints ids only.
 - `ghostpaw-codex skill --list` lists guides; `ghostpaw-codex skill <guide>` reads one.
+
+Search hits are in data.results. Multi-id show returns ordered data.beliefs and exits 3 for missing ids.
 
 Batch capture: `ghostpaw-codex belief import @beliefs.jsonl --json` or `belief import - --dry-run --json` for stdin. JSON arrays and JSON Lines contain belief objects (claim, source, category, optional topic/provenance/certainty/allowDuplicate). Tool: `import_beliefs` with items or input text and optional dryRun. One transaction per batch; failures report indexed errors in error.details.items and roll back everything. Success data.items contains indexed ids; dry-run ids are provisional.
 
@@ -273,7 +275,7 @@ Writes: writes_state.
 | Parameter | Type | Required | Values / description |
 | --- | --- | --- | --- |
 | items | array of any | no | Belief objects; each item is validated inside the batch. |
-| input | string | no | JSON array or JSON Lines text; CLI accepts @file or @- stdin. |
+| input | string | no | JSON array or JSON Lines text; CLI accepts @file or @- stdin. Valid sources: explicit, observed, distilled, inferred. |
 | dryRun | boolean | no | Validate and roll back; ids are provisional. |
 
 Example: `ghostpaw-codex call import_beliefs '{"items":[{"claim":"Deploys go out on Tuesdays.","source":"explicit","category":"procedure","topic":"deploy"}]}'`

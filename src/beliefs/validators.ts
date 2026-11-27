@@ -15,7 +15,9 @@ export function assertBeliefClaim(claim: string): void {
 
 export function assertBeliefSource(source: string): asserts source is BeliefSource {
 	if (!BELIEF_SOURCES.includes(source as BeliefSource)) {
-		throw new CodexValidationError(`Unsupported belief source: ${source}.`);
+		throw new CodexValidationError(
+			`Unsupported belief source: ${source}. Valid sources: ${BELIEF_SOURCES.join(', ')}.`,
+		);
 	}
 }
 

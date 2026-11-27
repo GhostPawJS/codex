@@ -1,9 +1,10 @@
 import {
+	IMPORT_ROLLED_BACK,
 	type ImportBeliefsResult,
 	importBeliefs,
 	parseBeliefImport,
 } from '../beliefs/import_beliefs.ts';
-import type { RememberBeliefInput } from '../beliefs/types.ts';
+import { BELIEF_SOURCES, type RememberBeliefInput } from '../beliefs/types.ts';
 import type { CodexDb } from '../database.ts';
 import { CodexValidationError } from '../errors.ts';
 import { translateToolError } from './tool_errors.ts';
@@ -42,7 +43,10 @@ export function importBeliefsToolHandler(
 				'domain',
 				'invalid_input',
 				'Belief import rolled back.',
-				'One or more items failed; no items were persisted.',
+				`No items were persisted. ${result.items
+					.filter((item) => item.error !== IMPORT_ROLLED_BACK)
+					.map((item) => `Item ${item.index}: ${item.error}`)
+					.join(' ')}`,
 			);
 			failure.error.details = { ...result };
 			failure.error.recovery = 'Correct the indexed item errors and retry the whole batch.';
@@ -83,7 +87,9 @@ export const importBeliefsTool = defineCodexTool<ImportBeliefsToolInput, ImportB
 	inputSchema: objectSchema(
 		{
 			items: arraySchema({}, 'Belief objects; each item is validated inside the batch.'),
-			input: stringSchema('JSON array or JSON Lines text; CLI accepts @file or @- stdin.'),
+			input: stringSchema(
+				`JSON array or JSON Lines text; CLI accepts @file or @- stdin. Valid sources: ${BELIEF_SOURCES.join(', ')}.`,
+			),
 			dryRun: booleanSchema('Validate and roll back; ids are provisional.'),
 		},
 		[],

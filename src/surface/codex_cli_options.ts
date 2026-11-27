@@ -5,6 +5,7 @@ import { normalizeQueryAlias } from '../beliefs/normalize_query_alias.ts';
 import { removeQueryAlias } from '../beliefs/remove_query_alias.ts';
 import type { CodexDb } from '../database.ts';
 import type { ToolCliOptions } from '../surfaces/cli.ts';
+import { inspectCodexItemToolHandler } from '../tools/inspect_codex_item_tool.ts';
 import { codexVersion } from '../version.ts';
 import { codexSurfaceTools } from './codex_surface_tools.ts';
 import { renderCodexPlainResult } from './render_codex_plain_result.ts';
@@ -26,6 +27,41 @@ export const codexCliOptions: ToolCliOptions<CodexDb> = {
 	},
 	closeContext: (db) => db.close(),
 	commands: {
+		batch: {
+			path: 'belief show',
+			aliases: ['show', 'get'],
+			run(db, ids, quiet, compact) {
+				const results = ids.map((beliefId) => inspectCodexItemToolHandler(db, { beliefId }));
+				const beliefs = results.map((r, i) =>
+					r.ok
+						? r.data
+						: {
+								id: ids[i],
+								error:
+									r.outcome === 'error' ? r.error : { code: 'invalid_input', message: r.summary },
+							},
+				);
+				const failures = beliefs.flatMap((b) => ('error' in b ? [b.error] : []));
+				const ok = failures.length === 0;
+				return {
+					code: ok ? 0 : failures.every((e) => e.code === 'not_found') ? 3 : 1,
+					diagnostic: failures.map((e) => `${e.message}\n`).join(''),
+					data: {
+						ok,
+						outcome: ok ? 'success' : 'error',
+						summary: `Found ${ids.length - failures.length} of ${ids.length} beliefs.`,
+						entities: results.flatMap((r) => r.entities),
+						data: { beliefs },
+					},
+					text: results
+						.filter((r) => r.ok)
+						.map((r) =>
+							renderCodexPlainResult(r, { name: 'inspect_codex_item' }, {}, quiet, compact),
+						)
+						.join(quiet ? '' : '\n'),
+				};
+			},
+		},
 		alias: (db, args) => {
 			if (args[0] === 'list') {
 				const aliases = listQueryAliases(db);

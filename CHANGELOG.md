@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `show` and `get` alias `belief show`. All three accept multiple ids and retain found beliefs when an id is missing.
+- Search help identifies the JSON result list.
+
+### Fixed
+
+- Unknown-command hints go to stderr. JSON stdout contains one error object.
+- Belief import suggests the explicit file syntax for bare paths and reports indexed rollback reasons. Source errors and import help list the accepted values.
+
 ## [0.6.6] - 2026-11-17
 
 ### Fixed

@@ -1,3 +1,4 @@
+import { existsSync, statSync } from 'node:fs';
 import type { ToolCliOptions } from './cli.ts';
 import {
 	type CliArgument,
@@ -42,6 +43,9 @@ export async function runCliCommand<T>(
 	const stdin = options.stdin ?? process.stdin;
 	const args = [...argv];
 	const tree = cliCommands(options.tools);
+	const batch = options.commands?.batch;
+	const canonical = tree.find((command) => command.path === batch?.path);
+	if (canonical && batch) tree.push(...batch.aliases.map((path) => ({ ...canonical, path })));
 	let json = argv.includes('--json') || argv.includes('-j'),
 		quiet = argv.includes('--quiet') || argv.includes('-q'),
 		compact = false,
@@ -104,6 +108,7 @@ export async function runCliCommand<T>(
 		const entry = [...tree]
 			.sort((a, b) => b.path.split(' ').length - a.path.split(' ').length)
 			.find((command) => command.path.split(' ').every((part, i) => args[i] === part));
+		const isBatch = canonical && entry?.tool === canonical.tool;
 		const specFor = (command: (typeof tree)[number]): CliSpec => {
 			const argument = (name: string, schema: JsonSchema): CliArgument => ({
 				name,
@@ -133,9 +138,10 @@ export async function runCliCommand<T>(
 				command: `${options.bin} ${command.path}`,
 				description: command.fixed.action
 					? `${String(command.fixed.action)[0]?.toUpperCase()}${String(command.fixed.action).slice(1)} a belief.`
-					: `${command.tool.description}${command.path === 'search' ? ' Leading query tokens matching the entity before a claim colon rank first, including with --prefix; --fts ranking is unchanged.' : ''}`,
+					: `${command.tool.description}${command.path === 'search' ? ' JSON hits are in data.results (top-level fields include ok, summary and data). Leading query tokens matching the entity before a claim colon rank first, including with --prefix; --fts ranking is unchanged.' : ''}${isBatch ? ' Exit 3 if any id is missing. Results retain request order.' : ''}`,
 				positionals: command.positionals.map((name) => ({
 					...argument(name, properties[name] ?? {}),
+					...(isBatch ? { variadic: true } : {}),
 					...(properties[name]?.type === 'array'
 						? {
 								type: (properties[name]?.items?.type as CliArgument['type']) ?? 'string',
@@ -226,6 +232,7 @@ export async function runCliCommand<T>(
 			else throw new CliUsageError('Expected completion shell: bash, zsh or fish');
 			return 0;
 		}
+		if (!entry && !quiet) stderr.write(`See ${options.bin} --help for commands.\n`);
 		if (!entry) throw new CliUsageError(`Unknown command: ${args.join(' ')}`);
 		const rest = args.slice(entry.path.split(' ').length);
 		let base: unknown = {};
@@ -265,7 +272,11 @@ export async function runCliCommand<T>(
 					throw new CliUsageError('Expected stdin JSON object');
 			}
 		}
-		const input = { ...(base as object), ...parseCliArgs(rest, spec), ...entry.fixed };
+		const parsed = parseCliArgs(rest, spec);
+		const field = entry.positionals[0] ?? '';
+		const ids = isBatch ? parsed[field] : undefined;
+		if (Array.isArray(ids)) parsed[field] = ids[0];
+		const input = { ...(base as object), ...parsed, ...entry.fixed };
 		const errors = validateInput(entry.tool.inputSchema, input);
 		if (errors.length) {
 			const missing = errors
@@ -277,6 +288,16 @@ export async function runCliCommand<T>(
 		}
 		const context = await options.openContext(db === undefined ? {} : { db });
 		try {
+			if (batch && Array.isArray(ids) && ids.length > 1) {
+				const result = batch.run(context, ids, quiet, compact);
+				if (result.diagnostic) stderr.write(result.diagnostic);
+				stdout.write(
+					json && !quiet
+						? `${JSON.stringify(result.data, null, compact ? undefined : 2)}\n`
+						: result.text,
+				);
+				return result.code;
+			}
 			if (entry.tool.name === 'retire_belief') stderr.write(`${entry.tool.description}\n`);
 			const result = await entry.tool.handler(context, input);
 			const record = result as {
@@ -297,6 +318,15 @@ export async function runCliCommand<T>(
 							: record.ok === false
 								? 1
 								: 0;
+			if (
+				code === 2 &&
+				entry.tool.cli?.fileArgs?.includes(field) &&
+				typeof parsed[field] === 'string'
+			) {
+				const path = parsed[field] as string;
+				if (rest.includes(path) && existsSync(path) && statSync(path).isFile() && record.error)
+					record.error.message += ` Did you mean @${path}?`;
+			}
 			if (code) {
 				const missing = record.clarification?.missing.map(
 					(name) => `--${name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,

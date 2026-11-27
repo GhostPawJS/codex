@@ -472,13 +472,21 @@ Bad usage:
 ghostpaw-codex search <query> [--limit N --min-score N --category C --source S]
 ghostpaw-codex review <flags|status|log|trends> [--limit N --now N]
 ghostpaw-codex belief add <claim> --source S --category C [--certainty N --provenance P]
-ghostpaw-codex belief show <beliefId>
+ghostpaw-codex belief show <beliefId> [<beliefId>...]
+ghostpaw-codex show <beliefId> [<beliefId>...]
 ghostpaw-codex belief retire <beliefId>
 ghostpaw-codex belief confirm|correct|forget|defer <beliefId> [flags]
 ghostpaw-codex belief merge <beliefIds...> [flags]
 ghostpaw-codex proximity dismiss <beliefA> <beliefB>
 ghostpaw-codex mcp|skill|tools|describe|call|completions|version|help
 ```
+
+`show` and `get` are aliases for `belief show`. With several ids, JSON
+returns ordered `data.beliefs` entries containing `{detail, lineage}` or
+`{id, error}`. Missing ids produce exit 3 and keep the other results.
+Search hits are in `data.results`. Use `belief import @path` for files.
+Valid sources are explicit, observed, distilled and inferred. Import failures
+report indexed rollback reasons.
 
 Global flags can appear anywhere: `--db <path>`, `--json`, `--quiet`,
 `--compact`, `--help`/`-h`, `--version`/`-V`/`-v`, `--no-color`.

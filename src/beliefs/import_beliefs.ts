@@ -11,6 +11,8 @@ export interface ImportBeliefsResult {
 }
 
 /** One transaction per batch. Dry-run ids are provisional and are never persisted. */
+export const IMPORT_ROLLED_BACK = 'Batch rolled back because another item failed.';
+
 export function importBeliefs(
 	db: CodexDb,
 	inputs: readonly RememberBeliefInput[],
@@ -56,7 +58,7 @@ export function importBeliefs(
 		if (result.items.some((item) => item.error))
 			result.items = result.items.map((item) => ({
 				index: item.index,
-				error: item.error ?? 'Batch rolled back because another item failed.',
+				error: item.error ?? IMPORT_ROLLED_BACK,
 			}));
 	}
 	return result;
